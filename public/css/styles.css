@@ -229,12 +229,14 @@ a {
 
 input,
 select,
+textarea,
 button {
   font: inherit;
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -284,6 +286,12 @@ select:focus {
 
 .button--primary:hover {
   background: var(--primary-strong);
+}
+
+.button--small {
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 0.9rem;
 }
 
 .button--ghost {
@@ -345,6 +353,10 @@ select:focus {
   grid-template-columns: 1.1fr 1fr auto;
   gap: 16px;
   align-items: end;
+}
+
+.filter-bar--wide {
+  grid-template-columns: 1.1fr 1fr 1fr auto;
 }
 
 .filter-bar__actions,
@@ -442,6 +454,11 @@ select:focus {
   padding: 24px;
 }
 
+.stack {
+  display: grid;
+  gap: 18px;
+}
+
 .availability-grid {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -522,6 +539,34 @@ select:focus {
   text-transform: uppercase;
 }
 
+.table-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination {
+  margin-top: 18px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.pagination__status {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.form__grid--triple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form__group--wide {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 960px) {
   .topbar__content,
   .auth-panel,
@@ -530,6 +575,7 @@ select:focus {
   .availability-grid,
   .form--inline,
   .filter-bar,
+  .filter-bar--wide,
   .space-grid {
     grid-template-columns: 1fr;
   }

@@ -1,0 +1,48 @@
+<%- include("../../partials/head", { title }) %>
+<%- include("../../partials/header") %>
+<%- include("../../partials/flash", { flash, error: null, errors: [] }) %>
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">W15 · Opcional</span>
+      <h1>Listado de usuarios</h1>
+      <p>Vista paginada de usuarios del sistema, incluyendo el administrador y los usuarios estandar.</p>
+    </div>
+  </section>
+
+  <section class="surface">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>DNI</th>
+          <th>Nombre</th>
+          <th>Apellidos</th>
+          <th>Rol</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach((user) => { %>
+          <tr>
+            <td><%= user.dni %></td>
+            <td><%= user.firstName %></td>
+            <td><%= user.lastName %></td>
+            <td><span class="badge <%= user.role === 'admin' ? '' : 'badge--neutral' %>"><%= user.role %></span></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <% if (pagination.hasPrevious) { %>
+        <a class="button button--ghost button--small" href="<%= buildPageLink(pagination.page - 1) %>">Anterior</a>
+      <% } %>
+      <span class="pagination__status">Pagina <%= pagination.page %> de <%= pagination.totalPages %></span>
+      <% if (pagination.hasNext) { %>
+        <a class="button button--ghost button--small" href="<%= buildPageLink(pagination.page + 1) %>">Siguiente</a>
+      <% } %>
+    </div>
+  </section>
+</main>
+
+<%- include("../../partials/footer") %>

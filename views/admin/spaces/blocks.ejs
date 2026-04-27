@@ -1,0 +1,73 @@
+<%- include("../../partials/head", { title }) %>
+<%- include("../../partials/header") %>
+<%- include("../../partials/flash", { flash, error: null, errors }) %>
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">W7 · W8</span>
+      <h1>Bloqueos de <%= space.name %></h1>
+      <p>Crea bloqueos de mantenimiento y cancela bloqueos activos conservando el historico.</p>
+    </div>
+    <a class="button button--ghost" href="/admin/spaces">Volver a espacios</a>
+  </section>
+
+  <section class="surface">
+    <h2>Nuevo bloqueo</h2>
+    <form class="form" method="post" action="/admin/spaces/<%= space._id %>/blocks">
+      <div class="form__grid">
+        <div class="form__group">
+          <label for="startAt">Inicio</label>
+          <input id="startAt" name="startAt" type="datetime-local" value="<%= formData.startAt || '' %>" />
+        </div>
+        <div class="form__group">
+          <label for="endAt">Fin</label>
+          <input id="endAt" name="endAt" type="datetime-local" value="<%= formData.endAt || '' %>" />
+        </div>
+        <div class="form__group form__group--wide">
+          <label for="reason">Motivo</label>
+          <textarea id="reason" name="reason" rows="4"><%= formData.reason || '' %></textarea>
+        </div>
+      </div>
+      <button class="button button--primary" type="submit">Crear bloqueo</button>
+    </form>
+  </section>
+
+  <section class="surface">
+    <h2>Historico de bloqueos</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Motivo</th>
+          <th>Estado</th>
+          <th>Creado por</th>
+          <th>Accion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% blocks.forEach((block) => { %>
+          <tr>
+            <td><%= formatDateTime(block.startAt) %></td>
+            <td><%= formatDateTime(block.endAt) %></td>
+            <td><%= block.reason %></td>
+            <td><span class="badge <%= block.status === 'ACTIVO' ? '' : 'badge--neutral' %>"><%= block.status %></span></td>
+            <td><%= block.createdBy.firstName %> <%= block.createdBy.lastName %></td>
+            <td>
+              <% if (block.status === 'ACTIVO') { %>
+                <form action="/admin/blocks/<%= block._id %>/cancel" method="post">
+                  <button class="button button--ghost button--small" type="submit">Cancelar</button>
+                </form>
+              <% } else { %>
+                <span class="muted">Sin accion</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<%- include("../../partials/footer") %>

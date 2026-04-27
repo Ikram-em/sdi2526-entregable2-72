@@ -16,11 +16,14 @@
 
       <% if (currentUser && currentUser.role === 'standard') { %>
         <a class="nav__link <%= currentPath === '/spaces' ? 'is-active' : '' %>" href="/spaces">Espacios</a>
+        <a class="nav__link <%= currentPath.startsWith('/reservations') ? 'is-active' : '' %>" href="/reservations/mine">Mis reservas</a>
         <a class="nav__link <%= currentPath === '/account/password' ? 'is-active' : '' %>" href="/account/password">Contrasena</a>
       <% } %>
 
       <% if (currentUser && currentUser.role === 'admin') { %>
-        <a class="nav__link <%= currentPath === '/admin/reservations' ? 'is-active' : '' %>" href="/admin/reservations">Reservas</a>
+        <a class="nav__link <%= currentPath.startsWith('/admin/reservations') ? 'is-active' : '' %>" href="/admin/reservations">Reservas</a>
+        <a class="nav__link <%= currentPath.startsWith('/admin/spaces') || currentPath.startsWith('/admin/blocks') ? 'is-active' : '' %>" href="/admin/spaces">Espacios</a>
+        <a class="nav__link <%= currentPath.startsWith('/admin/users') ? 'is-active' : '' %>" href="/admin/users">Usuarios</a>
       <% } %>
     </nav>
 
