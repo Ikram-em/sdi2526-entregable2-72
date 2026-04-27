@@ -1,0 +1,64 @@
+<%- include("../partials/head", { title }) %>
+<%- include("../partials/header") %>
+<%- include("../partials/flash", { flash, error: null, errors }) %>
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">W12 · Disponibilidad</span>
+      <h1><%= space.name %></h1>
+      <p>Consulta un rango de fechas para ver reservas activas y bloqueos de mantenimiento que afectan al espacio.</p>
+    </div>
+    <a class="button button--ghost" href="/spaces/<%= space.id %>">Volver al detalle</a>
+  </section>
+
+  <section class="surface">
+    <form class="form form--inline" method="get" action="/spaces/<%= space.id %>/availability" data-validate="availability" novalidate>
+      <div class="form__group">
+        <label for="from">Inicio</label>
+        <input id="from" name="from" type="datetime-local" value="<%= range.from %>" />
+        <small class="field-error" data-error-for="from"></small>
+      </div>
+
+      <div class="form__group">
+        <label for="to">Fin</label>
+        <input id="to" name="to" type="datetime-local" value="<%= range.to %>" />
+        <small class="field-error" data-error-for="to"></small>
+      </div>
+
+      <button class="button button--primary" type="submit">Consultar</button>
+    </form>
+  </section>
+
+  <section class="availability-grid">
+    <article class="surface availability-summary">
+      <h2>Datos del espacio</h2>
+      <dl class="summary-list">
+        <div><dt>Tipo</dt><dd><%= space.type %></dd></div>
+        <div><dt>Ubicacion</dt><dd><%= space.location %></dd></div>
+        <div><dt>Capacidad</dt><dd><%= space.capacity %> plazas</dd></div>
+      </dl>
+    </article>
+
+    <article class="surface">
+      <h2>Franjas ocupadas</h2>
+      <% if (!range.from && !range.to) { %>
+        <p class="muted">Selecciona un rango para cargar la disponibilidad.</p>
+      <% } else if (!items.length && !errors.length) { %>
+        <p class="availability-free">No hay reservas ni bloqueos activos en el rango consultado.</p>
+      <% } %>
+
+      <div class="timeline">
+        <% items.forEach((item) => { %>
+          <div class="timeline__item <%= item.type === 'Bloqueo' ? 'timeline__item--block' : '' %>">
+            <span class="timeline__type"><%= item.type %></span>
+            <strong><%= item.label %></strong>
+            <span><%= item.start.replace('T', ' ') %> - <%= item.end.replace('T', ' ') %></span>
+          </div>
+        <% }) %>
+      </div>
+    </article>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>

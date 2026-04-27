@@ -1,0 +1,46 @@
+<%- include("../partials/head", { title }) %>
+<%- include("../partials/header") %>
+<%- include("../partials/flash", { flash, error: null, errors: [] }) %>
+
+<main class="shell page">
+  <section class="detail-hero">
+    <div class="detail-hero__content">
+      <span class="eyebrow">W11 · Ficha de espacio</span>
+      <h1><%= space.name %></h1>
+      <p><%= space.description %></p>
+      <div class="detail-hero__actions">
+        <a class="button button--ghost" href="/spaces">Volver al listado</a>
+        <a class="button button--primary" href="/spaces/<%= space.id %>/availability">Consultar disponibilidad</a>
+      </div>
+    </div>
+    <div class="surface metrics-card">
+      <div class="metric">
+        <span class="metric__label">Tipo</span>
+        <strong><%= space.type %></strong>
+      </div>
+      <div class="metric">
+        <span class="metric__label">Ubicacion</span>
+        <strong><%= space.location %></strong>
+      </div>
+      <div class="metric">
+        <span class="metric__label">Capacidad</span>
+        <strong><%= space.capacity %> personas</strong>
+      </div>
+      <div class="metric">
+        <span class="metric__label">Estado</span>
+        <strong>Activo</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="surface">
+    <h2>Equipamiento</h2>
+    <div class="amenity-list">
+      <% space.amenities.forEach((item) => { %>
+        <span class="chip"><%= item %></span>
+      <% }) %>
+    </div>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>

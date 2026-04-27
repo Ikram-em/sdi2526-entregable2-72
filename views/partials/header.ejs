@@ -1,0 +1,39 @@
+<header class="topbar">
+  <div class="shell topbar__content">
+    <a href="<%= currentUser ? (currentUser.role === 'admin' ? '/admin/reservations' : '/spaces') : '/login' %>" class="brand">
+      <span class="brand__badge">SDI</span>
+      <span class="brand__text">
+        <strong>Gestion de espacios</strong>
+        <small>Parte 1 · Cliente web jQuery</small>
+      </span>
+    </a>
+
+    <nav class="nav">
+      <% if (!currentUser) { %>
+        <a class="nav__link <%= currentPath === '/login' ? 'is-active' : '' %>" href="/login">Login</a>
+        <a class="nav__link <%= currentPath === '/register' ? 'is-active' : '' %>" href="/register">Registro</a>
+      <% } %>
+
+      <% if (currentUser && currentUser.role === 'standard') { %>
+        <a class="nav__link <%= currentPath === '/spaces' ? 'is-active' : '' %>" href="/spaces">Espacios</a>
+        <a class="nav__link <%= currentPath === '/account/password' ? 'is-active' : '' %>" href="/account/password">Contrasena</a>
+      <% } %>
+
+      <% if (currentUser && currentUser.role === 'admin') { %>
+        <a class="nav__link <%= currentPath === '/admin/reservations' ? 'is-active' : '' %>" href="/admin/reservations">Reservas</a>
+      <% } %>
+    </nav>
+
+    <div class="session-box">
+      <% if (currentUser) { %>
+        <div class="session-box__meta">
+          <span class="session-box__name"><%= currentUser.fullName %></span>
+          <small><%= currentUser.role === 'admin' ? 'Administrador' : 'Usuario estandar' %></small>
+        </div>
+        <form action="/logout" method="post">
+          <button class="button button--ghost" type="submit">Cerrar sesion</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+</header>

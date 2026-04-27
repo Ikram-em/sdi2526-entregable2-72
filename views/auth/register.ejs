@@ -1,0 +1,60 @@
+<%- include("../partials/head", { title }) %>
+<%- include("../partials/header") %>
+<%- include("../partials/flash", { flash, error: null, errors }) %>
+
+<main class="shell page page--auth">
+  <section class="auth-panel">
+    <div class="auth-panel__intro">
+      <span class="eyebrow">W1 · Registro</span>
+      <h1>Crear usuario estandar</h1>
+      <p>La pantalla valida DNI, campos obligatorios, duplicados y politica de contrasena antes de enviar el formulario.</p>
+    </div>
+
+    <form class="surface form" action="/register" method="post" data-validate="register" novalidate>
+      <div class="form__grid">
+        <div class="form__group">
+          <label for="dni">DNI</label>
+          <input id="dni" name="dni" type="text" maxlength="9" value="<%= formData?.dni || '' %>" placeholder="12345678Z" />
+          <small class="field-error" data-error-for="dni"></small>
+        </div>
+
+        <div class="form__group">
+          <label for="firstName">Nombre</label>
+          <input id="firstName" name="firstName" type="text" value="<%= formData?.firstName || '' %>" placeholder="Nombre" />
+          <small class="field-error" data-error-for="firstName"></small>
+        </div>
+
+        <div class="form__group">
+          <label for="lastName">Apellidos</label>
+          <input id="lastName" name="lastName" type="text" value="<%= formData?.lastName || '' %>" placeholder="Apellidos" />
+          <small class="field-error" data-error-for="lastName"></small>
+        </div>
+
+        <div class="form__group">
+          <label for="password">Contrasena</label>
+          <input id="password" name="password" type="password" placeholder="12-20 caracteres" />
+          <small class="field-error" data-error-for="password"></small>
+        </div>
+
+        <div class="form__group">
+          <label for="confirmPassword">Confirmar contrasena</label>
+          <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Repite la contrasena" />
+          <small class="field-error" data-error-for="confirmPassword"></small>
+        </div>
+      </div>
+
+      <div class="rules-box">
+        <strong>Politica de contrasena</strong>
+        <ul>
+          <li>Entre 12 y 20 caracteres.</li>
+          <li>Al menos una mayuscula, una minuscula, un numero y un simbolo.</li>
+          <li>Sin espacios.</li>
+        </ul>
+      </div>
+
+      <button class="button button--primary button--block" type="submit">Registrarme</button>
+    </form>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>

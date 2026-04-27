@@ -1,0 +1,40 @@
+<%- include("partials/head", { title }) %>
+<%- include("partials/header") %>
+<%- include("partials/flash", { flash, error: null, errors: [] }) %>
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">W9 · Vista puente</span>
+      <h1>Listado global de reservas</h1>
+      <p>Esta pantalla queda montada solo como destino visual del login de administrador, para no mezclar tu parte con la logica completa de administracion.</p>
+    </div>
+  </section>
+
+  <section class="surface">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Espacio</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reservations.forEach((reservation) => { %>
+          <tr>
+            <td><%= reservation.userName %></td>
+            <td><%= reservation.spaceName %></td>
+            <td><%= reservation.start.replace('T', ' ') %></td>
+            <td><%= reservation.end.replace('T', ' ') %></td>
+            <td><span class="badge badge--neutral"><%= reservation.status %></span></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<%- include("partials/footer") %>
