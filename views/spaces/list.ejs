@@ -1,0 +1,65 @@
+<%- include("../partials/head", { title }) %>
+<%- include("../partials/header") %>
+<%- include("../partials/flash", { flash, error: null, errors: [] }) %>
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">W10 · Espacios activos</span>
+      <h1>Listado de espacios disponibles</h1>
+      <p>Consulta nombre, tipo, ubicacion y capacidad; aplica filtrado por tipo o aforo minimo.</p>
+    </div>
+  </section>
+
+  <section class="surface surface--filter">
+    <form class="filter-bar" method="get" action="/spaces" data-validate="space-filter" novalidate>
+      <div class="form__group">
+        <label for="type">Tipo</label>
+        <select id="type" name="type">
+          <option value="">Todos</option>
+          <% types.forEach((type) => { %>
+            <option value="<%= type %>" <%= filters.type === type ? 'selected' : '' %>><%= type %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="form__group">
+        <label for="minCapacity">Capacidad minima</label>
+        <input id="minCapacity" name="minCapacity" type="number" min="1" step="1" value="<%= filters.minCapacity %>" placeholder="Ej. 10" />
+        <small class="field-error" data-error-for="minCapacity"></small>
+      </div>
+
+      <div class="filter-bar__actions">
+        <button class="button button--primary" type="submit">Filtrar</button>
+        <a class="button button--ghost" href="/spaces">Limpiar</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="space-grid">
+    <% if (!spaces.length) { %>
+      <article class="surface empty-state">
+        <h2>No hay espacios para los filtros actuales</h2>
+        <p>Ajusta el tipo o la capacidad minima para ampliar los resultados.</p>
+      </article>
+    <% } %>
+
+    <% spaces.forEach((space) => { %>
+      <article class="surface space-card">
+        <div class="space-card__top">
+          <span class="badge"><%= space.type %></span>
+          <span class="capacity"><%= space.capacity %> plazas</span>
+        </div>
+        <h2><%= space.name %></h2>
+        <p><%= space.location %></p>
+        <p class="space-card__description"><%= space.description %></p>
+        <div class="space-card__actions">
+          <a class="button button--primary" href="/spaces/<%= space.id %>">Ver detalle</a>
+          <a class="button button--ghost" href="/spaces/<%= space.id %>/availability">Disponibilidad</a>
+        </div>
+      </article>
+    <% }) %>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>
