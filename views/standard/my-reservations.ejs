@@ -1,0 +1,65 @@
+<%- include("../partials/head", { title }) %>
+<%- include("../partials/header") %>
+<%- include("../partials/flash", { flash, error: null, errors: [] }) %>
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">W13 · Seguridad</span>
+      <h1>Mis reservas</h1>
+      <p>Vista del usuario estandar para consultar y cancelar solo sus propias reservas.</p>
+    </div>
+  </section>
+
+  <section class="surface surface--filter">
+    <form class="filter-bar" action="/reservations/mine" method="get">
+      <div class="form__group">
+        <label for="status">Estado</label>
+        <select id="status" name="status">
+          <option value="">Todos</option>
+          <option value="ACTIVA" <%= statusFilter === 'ACTIVA' ? 'selected' : '' %>>ACTIVA</option>
+          <option value="CANCELADA" <%= statusFilter === 'CANCELADA' ? 'selected' : '' %>>CANCELADA</option>
+        </select>
+      </div>
+      <div class="filter-bar__actions">
+        <button class="button button--primary" type="submit">Filtrar</button>
+        <a class="button button--ghost" href="/reservations/mine">Limpiar</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="surface">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Espacio</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Estado</th>
+          <th>Accion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reservations.forEach((reservation) => { %>
+          <tr>
+            <td><%= reservation.space.name %></td>
+            <td><%= formatDateTime(reservation.startAt) %></td>
+            <td><%= formatDateTime(reservation.endAt) %></td>
+            <td><span class="badge <%= reservation.status === 'ACTIVA' ? '' : 'badge--neutral' %>"><%= reservation.status %></span></td>
+            <td>
+              <% if (reservation.status === 'ACTIVA') { %>
+                <form action="/reservations/<%= reservation._id %>/cancel" method="post">
+                  <button class="button button--ghost button--small" type="submit">Cancelar</button>
+                </form>
+              <% } else { %>
+                <span class="muted">Sin accion</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>

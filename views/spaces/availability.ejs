@@ -53,7 +53,7 @@
           <div class="timeline__item <%= item.type === 'Bloqueo' ? 'timeline__item--block' : '' %>">
             <span class="timeline__type"><%= item.type %></span>
             <strong><%= item.label %></strong>
-            <span><%= item.start.replace('T', ' ') %> - <%= item.end.replace('T', ' ') %></span>
+            <span><%= formatDateTime(item.startAt) %> - <%= formatDateTime(item.endAt) %></span>
           </div>
         <% }) %>
       </div>

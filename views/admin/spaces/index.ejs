@@ -1,0 +1,94 @@
+<%- include("../../partials/head", { title }) %>
+<%- include("../../partials/header") %>
+<%- include("../../partials/flash", { flash, error: null, errors }) %>
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">W4 · W5 · W6 · W7 · W8</span>
+      <h1>Gestion de espacios</h1>
+      <p>Alta, edicion, activacion, desactivacion y mantenimiento de espacios desde servidor con control de rol administrador.</p>
+    </div>
+  </section>
+
+  <section class="surface">
+    <h2>Registrar nuevo espacio</h2>
+    <form class="form" method="post" action="/admin/spaces">
+      <div class="form__grid form__grid--triple">
+        <div class="form__group">
+          <label for="name">Nombre</label>
+          <input id="name" name="name" type="text" value="<%= formData.name || '' %>" />
+        </div>
+        <div class="form__group">
+          <label for="type">Tipo</label>
+          <select id="type" name="type">
+            <option value="">Selecciona</option>
+            <option value="Sala de reuniones" <%= formData.type === 'Sala de reuniones' ? 'selected' : '' %>>Sala de reuniones</option>
+            <option value="Aula" <%= formData.type === 'Aula' ? 'selected' : '' %>>Aula</option>
+            <option value="Coworking" <%= formData.type === 'Coworking' ? 'selected' : '' %>>Coworking</option>
+          </select>
+        </div>
+        <div class="form__group">
+          <label for="capacity">Capacidad</label>
+          <input id="capacity" name="capacity" type="number" min="1" step="1" value="<%= formData.capacity || '' %>" />
+        </div>
+        <div class="form__group">
+          <label for="location">Ubicacion</label>
+          <input id="location" name="location" type="text" value="<%= formData.location || '' %>" />
+        </div>
+        <div class="form__group form__group--wide">
+          <label for="amenitiesText">Equipamiento</label>
+          <input id="amenitiesText" name="amenitiesText" type="text" value="<%= formData.amenitiesText || '' %>" placeholder="Pizarra, Pantalla, Wifi" />
+        </div>
+        <div class="form__group form__group--wide">
+          <label for="description">Descripcion</label>
+          <textarea id="description" name="description" rows="4"><%= formData.description || '' %></textarea>
+        </div>
+      </div>
+
+      <button class="button button--primary" type="submit">Registrar espacio</button>
+    </form>
+  </section>
+
+  <section class="surface">
+    <h2>Espacios del sistema</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Ubicacion</th>
+          <th>Capacidad</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% spaces.forEach((space) => { %>
+          <tr>
+            <td><%= space.name %></td>
+            <td><%= space.type %></td>
+            <td><%= space.location %></td>
+            <td><%= space.capacity %></td>
+            <td>
+              <span class="badge <%= space.active ? '' : 'badge--neutral' %>">
+                <%= space.active ? 'Activo' : 'Desactivado' %>
+              </span>
+            </td>
+            <td>
+              <div class="table-actions">
+                <a class="button button--ghost button--small" href="/admin/spaces/<%= space._id %>/edit">Editar</a>
+                <a class="button button--ghost button--small" href="/admin/spaces/<%= space._id %>/blocks">Bloqueos</a>
+                <form action="/admin/spaces/<%= space._id %>/toggle" method="post">
+                  <button class="button button--primary button--small" type="submit"><%= space.active ? 'Desactivar' : 'Activar' %></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<%- include("../../partials/footer") %>
