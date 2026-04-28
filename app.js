@@ -4,6 +4,7 @@ const express = require("express");
 const path = require("path");
 const session = require("express-session");
 const { MongoStore } = require("connect-mongo");
+const apiRoutes = require("./src/routes/api");
 const webRoutes = require("./src/routes/web");
 const { connectDatabase, defaultUri } = require("./src/config/database");
 const { seedDatabase } = require("./src/services/seedService");
@@ -20,6 +21,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 app.use(express.urlencoded({ extended: true }));
+app.use("/api", express.json());
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "sdi2526-session-secret",
@@ -32,6 +34,19 @@ app.use(
   })
 );
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/api", apiRoutes);
+app.use("/api", (err, req, res, next) => {
+  if (err instanceof SyntaxError && "body" in err) {
+    return res.status(400).json({
+      error: {
+        code: "INVALID_JSON",
+        message: "El cuerpo de la peticion debe ser JSON valido."
+      }
+    });
+  }
+
+  return next(err);
+});
 
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
