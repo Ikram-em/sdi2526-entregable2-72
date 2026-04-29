@@ -279,3 +279,143 @@ export async function cancelReservationWithApi(reservationId, options = {}) {
     message: "Reserva cancelada correctamente."
   };
 }
+
+export function addFrequency(date, frequency) {
+  const nextDate = new Date(date);
+
+  if (frequency === "DAILY") {
+    nextDate.setDate(nextDate.getDate() + 1);
+  } else if (frequency === "WEEKLY") {
+    nextDate.setDate(nextDate.getDate() + 7);
+  } else if (frequency === "MONTHLY") {
+    nextDate.setMonth(nextDate.getMonth() + 1);
+  } else if (frequency === "YEARLY") {
+    nextDate.setFullYear(nextDate.getFullYear() + 1);
+  }
+
+  return nextDate;
+}
+
+export function calculateRecurrenceCount(baseStartDateTime, endDate, frequency) {
+  const start = new Date(baseStartDateTime);
+  const end = new Date(endDate);
+  const normalizedFrequency = String(frequency || "").trim().toUpperCase();
+  const validFrequencies = new Set(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]);
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(endDate || ""))) {
+    end.setHours(23, 59, 59, 999);
+  }
+
+  if (
+    Number.isNaN(start.valueOf()) ||
+    Number.isNaN(end.valueOf()) ||
+    !validFrequencies.has(normalizedFrequency) ||
+    end <= start
+  ) {
+    return 0;
+  }
+
+  let count = 0;
+  let cursor = start;
+
+  while (true) {
+    cursor = addFrequency(cursor, normalizedFrequency);
+
+    if (cursor > end) {
+      return count;
+    }
+
+    count += 1;
+  }
+}
+
+export function validateRecurrenceForm(values, baseReservation) {
+  const frequency = String(values?.frequency || "").trim().toUpperCase();
+  const endDate = String(values?.endDate || "").trim();
+  const errors = {};
+
+  if (!baseReservation?.id) {
+    errors.baseReservationId = "Selecciona una reserva base.";
+  }
+
+  if (!frequency) {
+    errors.frequency = "Selecciona una frecuencia.";
+  } else if (!["DAILY", "WEEKLY", "MONTHLY", "YEARLY"].includes(frequency)) {
+    errors.frequency = "La frecuencia indicada no es válida.";
+  }
+
+  if (!endDate) {
+    errors.endDate = "La fecha fin de recurrencia es obligatoria.";
+  }
+
+  const count = calculateRecurrenceCount(baseReservation?.startDateTime, endDate, frequency);
+  if (!errors.endDate && count < 1) {
+    errors.endDate = "La fecha fin debe permitir al menos una recurrencia.";
+  }
+
+  return {
+    count,
+    errors,
+    isValid: Object.keys(errors).length === 0,
+    values: {
+      frequency,
+      endDate
+    }
+  };
+}
+
+export async function createRecurrenceWithApi(baseReservation, values, options = {}) {
+  const validation = validateRecurrenceForm(values, baseReservation);
+
+  if (!validation.isValid) {
+    return {
+      ok: false,
+      status: 400,
+      errors: validation.errors,
+      message: "Revisa los datos de la recurrencia."
+    };
+  }
+
+  const token = options.token || "";
+  if (!token) {
+    return {
+      ok: false,
+      status: 401,
+      errors: {},
+      message: "Debes iniciar sesión para crear recurrencias."
+    };
+  }
+
+  const fetchImpl = options.fetchImpl || fetch;
+  const endpoint = options.endpoint || `/api/reservations/${baseReservation.id}/recurrence`;
+  const response = await fetchImpl(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      frequency: validation.values.frequency,
+      count: validation.count
+    })
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      status: response.status,
+      errors: payload.error?.details || {},
+      message: payload.error?.message || "No se han podido crear las reservas recurrentes."
+    };
+  }
+
+  return {
+    ok: true,
+    status: response.status,
+    createdReservations: payload.createdReservations || [],
+    frequency: payload.frequency || validation.values.frequency,
+    message: "Reservas recurrentes creadas correctamente."
+  };
+}

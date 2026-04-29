@@ -3,6 +3,7 @@ import { loginWithApi } from "./services/loginApi.js";
 import {
   cancelReservationWithApi,
   createReservationWithApi,
+  createRecurrenceWithApi,
   editReservationWithApi,
   fetchOwnReservations,
   fetchSpaces,
@@ -60,9 +61,8 @@ function LoginForm({ onLogin }) {
   return (
     <section className="react-login">
       <div className="react-login__intro">
-        <span className="eyebrow">C1 · React</span>
         <h1>Autenticación del usuario</h1>
-        <p>Cliente React preparado para consumir la API REST de reservas.</p>
+        <p>Accede con tu DNI y contraseña para gestionar tus reservas.</p>
       </div>
 
       <form className="surface form react-login__form" onSubmit={handleSubmit} noValidate>
@@ -203,7 +203,6 @@ function ReservationForm({
   return (
     <section className="surface react-panel">
       <div className="react-panel__header">
-        <span className="eyebrow">{isEditing ? "C5 · Editar reserva" : "C2 · Nueva reserva"}</span>
         <h2>{isEditing ? "Editar reserva propia" : "Registrar una nueva reserva"}</h2>
       </div>
 
@@ -308,12 +307,28 @@ function ReservationsList({
   session
 }) {
   const [reservationStatusFilter, setReservationStatusFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
   const [cancelStatusById, setCancelStatusById] = useState({});
   const [message, setMessage] = useState("");
   const visibleReservations = filterReservationsByStatus(
     reservations,
     reservationStatusFilter
   );
+  const totalPages = Math.max(1, Math.ceil(visibleReservations.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedReservations = visibleReservations.slice(
+    (safeCurrentPage - 1) * pageSize,
+    safeCurrentPage * pageSize
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [reservationStatusFilter]);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
 
   async function handleCancelReservation(reservationId) {
     setMessage("");
@@ -347,7 +362,6 @@ function ReservationsList({
     <section className="surface react-reservations">
       <div className="react-reservations__header">
         <div>
-          <span className="eyebrow">C3 · Mis reservas</span>
           <h2>Listado de reservas propias</h2>
         </div>
 
@@ -371,61 +385,206 @@ function ReservationsList({
       ) : visibleReservations.length === 0 ? (
         <p className="muted">No hay reservas para el filtro seleccionado.</p>
       ) : (
-        <table className="table react-reservations__table">
-          <thead>
-            <tr>
-              <th>Espacio</th>
-              <th>Inicio</th>
-              <th>Fin</th>
-              <th>Estado</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visibleReservations.map((reservation) => (
-              <tr key={reservation.id}>
-                <td>{reservation.spaceName}</td>
-                <td>{new Date(reservation.startDateTime).toLocaleString("es-ES")}</td>
-                <td>{new Date(reservation.endDateTime).toLocaleString("es-ES")}</td>
-                <td>
-                  <span
-                    className={`badge ${
-                      reservation.status === "CANCELADA" ? "badge--neutral" : ""
-                    }`}
-                  >
-                    {reservation.status}
-                  </span>
-                </td>
-                <td>
-                  {reservation.status === "ACTIVA" ? (
-                    <div className="table-actions">
-                      <button
-                        className="button button--ghost button--small"
-                        type="button"
-                        onClick={() => onEditReservation(reservation)}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className="button button--ghost button--small"
-                        type="button"
-                        disabled={cancelStatusById[reservation.id] === "loading"}
-                        onClick={() => handleCancelReservation(reservation.id)}
-                      >
-                        {cancelStatusById[reservation.id] === "loading" ? "Cancelando..." : "Cancelar"}
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="muted">Sin acción</span>
-                  )}
-                </td>
+        <>
+          <table className="table react-reservations__table">
+            <thead>
+              <tr>
+                <th>Espacio</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Estado</th>
+                <th>Acción</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paginatedReservations.map((reservation) => (
+                <tr key={reservation.id}>
+                  <td>{reservation.spaceName}</td>
+                  <td>{new Date(reservation.startDateTime).toLocaleString("es-ES")}</td>
+                  <td>{new Date(reservation.endDateTime).toLocaleString("es-ES")}</td>
+                  <td>
+                    <span
+                      className={`badge ${
+                        reservation.status === "CANCELADA" ? "badge--neutral" : ""
+                      }`}
+                    >
+                      {reservation.status}
+                    </span>
+                  </td>
+                  <td>
+                    {reservation.status === "ACTIVA" ? (
+                      <div className="table-actions">
+                        <button
+                          className="button button--ghost button--small"
+                          type="button"
+                          onClick={() => onEditReservation(reservation)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="button button--ghost button--small"
+                          type="button"
+                          disabled={cancelStatusById[reservation.id] === "loading"}
+                          onClick={() => handleCancelReservation(reservation.id)}
+                        >
+                          {cancelStatusById[reservation.id] === "loading" ? "Cancelando..." : "Cancelar"}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="muted">Sin acción</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="pagination react-reservations__pagination">
+            <button
+              className="button button--ghost button--small"
+              type="button"
+              disabled={safeCurrentPage === 1}
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            >
+              Anterior
+            </button>
+            <span className="pagination__status">
+              Página {safeCurrentPage} de {totalPages}
+            </span>
+            <button
+              className="button button--ghost button--small"
+              type="button"
+              disabled={safeCurrentPage === totalPages}
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+            >
+              Siguiente
+            </button>
+          </div>
+        </>
       )}
 
       {message ? <p className="react-reservations__message">{message}</p> : null}
+    </section>
+  );
+}
+
+function RecurrenceForm({ onRecurrenceCreated, reservations, session }) {
+  const activeReservations = reservations.filter((reservation) => reservation.status === "ACTIVA");
+  const [baseReservationId, setBaseReservationId] = useState("");
+  const [frequency, setFrequency] = useState("WEEKLY");
+  const [endDate, setEndDate] = useState("");
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("idle");
+  const selectedBaseReservation = activeReservations.find(
+    (reservation) => reservation.id === baseReservationId
+  );
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setStatus("loading");
+    setErrors({});
+    setMessage("");
+
+    const result = await createRecurrenceWithApi(
+      selectedBaseReservation,
+      {
+        frequency,
+        endDate
+      },
+      {
+        token: session.token
+      }
+    );
+
+    if (!result.ok) {
+      setStatus("error");
+      setErrors(result.errors || {});
+      setMessage(result.message);
+      return;
+    }
+
+    setStatus("success");
+    setMessage(result.message);
+    onRecurrenceCreated(result.createdReservations);
+    setBaseReservationId("");
+    setFrequency("WEEKLY");
+    setEndDate("");
+  }
+
+  return (
+    <section className="surface react-panel">
+      <div className="react-panel__header">
+        <h2>Crear reservas recurrentes</h2>
+      </div>
+
+      <form className="form react-reservation-form" onSubmit={handleSubmit} noValidate>
+        <div className="form__grid">
+          <div className="form__group form__group--wide">
+            <label htmlFor="baseReservationId">Reserva base</label>
+            <select
+              id="baseReservationId"
+              name="baseReservationId"
+              value={baseReservationId}
+              onChange={(event) => setBaseReservationId(event.target.value)}
+              className={errors.baseReservationId ? "is-invalid" : ""}
+            >
+              <option value="">Selecciona una reserva activa</option>
+              {activeReservations.map((reservation) => (
+                <option key={reservation.id} value={reservation.id}>
+                  {reservation.spaceName} · {new Date(reservation.startDateTime).toLocaleString("es-ES")}
+                </option>
+              ))}
+            </select>
+            <small className="field-error">{errors.baseReservationId || ""}</small>
+          </div>
+
+          <div className="form__group">
+            <label htmlFor="frequency">Frecuencia</label>
+            <select
+              id="frequency"
+              name="frequency"
+              value={frequency}
+              onChange={(event) => setFrequency(event.target.value)}
+              className={errors.frequency ? "is-invalid" : ""}
+            >
+              <option value="DAILY">Diaria</option>
+              <option value="WEEKLY">Semanal</option>
+              <option value="MONTHLY">Mensual</option>
+              <option value="YEARLY">Anual</option>
+            </select>
+            <small className="field-error">{errors.frequency || ""}</small>
+          </div>
+
+          <div className="form__group">
+            <label htmlFor="endDate">Fecha fin</label>
+            <input
+              id="endDate"
+              name="endDate"
+              type="date"
+              value={endDate}
+              onChange={(event) => setEndDate(event.target.value)}
+              className={errors.endDate ? "is-invalid" : ""}
+            />
+            <small className="field-error">{errors.endDate || ""}</small>
+          </div>
+        </div>
+
+        <button className="button button--primary" type="submit" disabled={status === "loading"}>
+          {status === "loading" ? "Creando..." : "Crear recurrencias"}
+        </button>
+
+        {message ? (
+          <p
+            className={`react-login__message ${
+              status === "success" ? "is-success" : "is-error"
+            }`}
+            role="status"
+          >
+            {message}
+          </p>
+        ) : null}
+      </form>
     </section>
   );
 }
@@ -490,6 +649,11 @@ function AuthenticatedApp({ session, onLogout }) {
     setReservations((current) => replaceReservation(current, reservation));
   }
 
+  function handleRecurrenceCreated(createdReservations) {
+    setReservations((current) => [...createdReservations, ...current]);
+    setActiveView("reservations");
+  }
+
   function handleEditReservation(reservation) {
     setEditingReservation(reservation);
     setActiveView("edit");
@@ -504,13 +668,14 @@ function AuthenticatedApp({ session, onLogout }) {
     <section className="react-dashboard">
       <header className="react-dashboard__header">
         <div>
-          <span className="eyebrow">Cliente React</span>
           <h1>
             {activeView === "edit"
               ? "Editar reserva"
               : activeView === "new"
                 ? "Registrar una nueva reserva"
-                : "Mis reservas"}
+                : activeView === "recurrence"
+                  ? "Reservas recurrentes"
+                  : "Mis reservas"}
           </h1>
           <p>{session.user.name}</p>
         </div>
@@ -534,6 +699,16 @@ function AuthenticatedApp({ session, onLogout }) {
         >
           Nueva reserva
         </button>
+        <button
+          className={`button ${activeView === "recurrence" ? "button--primary" : "button--ghost"}`}
+          type="button"
+          onClick={() => {
+            setEditingReservation(null);
+            setActiveView("recurrence");
+          }}
+        >
+          Recurrentes
+        </button>
       </nav>
 
       {message ? <p className="react-dashboard__message">{message}</p> : null}
@@ -549,6 +724,12 @@ function AuthenticatedApp({ session, onLogout }) {
           spaces={spaces}
           spacesStatus={spacesStatus}
           onReservationSaved={handleReservationSaved}
+        />
+      ) : activeView === "recurrence" ? (
+        <RecurrenceForm
+          onRecurrenceCreated={handleRecurrenceCreated}
+          reservations={reservations}
+          session={session}
         />
       ) : (
         <ReservationsList

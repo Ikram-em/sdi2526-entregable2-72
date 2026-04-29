@@ -390,3 +390,102 @@ test("prueba58_editarReservaReactSolapada", async () => {
   );
   assert.deepEqual(updatedReservations, originalReservations);
 });
+
+test("prueba59_crearReservaRecurrenteSemanalReact", async () => {
+  const { createRecurrenceWithApi } = await import("../client/src/services/reservationApi.js");
+  const fetchCalls = [];
+  const baseReservation = {
+    id: "reservation-1",
+    startDateTime: "2026-05-01T10:00:00.000Z",
+    endDateTime: "2026-05-01T11:00:00.000Z",
+    status: "ACTIVA"
+  };
+  const fetchImpl = async (url, options) => {
+    fetchCalls.push({ url, options });
+    return {
+      ok: true,
+      status: 201,
+      async json() {
+        return {
+          baseReservationId: "reservation-1",
+          frequency: "WEEKLY",
+          createdReservations: [
+            { id: "reservation-2", status: "ACTIVA", startDateTime: "2026-05-08T10:00:00.000Z" },
+            { id: "reservation-3", status: "ACTIVA", startDateTime: "2026-05-15T10:00:00.000Z" },
+            { id: "reservation-4", status: "ACTIVA", startDateTime: "2026-05-22T10:00:00.000Z" }
+          ]
+        };
+      }
+    };
+  };
+
+  const result = await createRecurrenceWithApi(
+    baseReservation,
+    {
+      frequency: "WEEKLY",
+      endDate: "2026-05-22"
+    },
+    {
+      fetchImpl,
+      token: "token-de-prueba"
+    }
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.status, 201);
+  assert.equal(result.createdReservations.length, 3);
+  assert.equal(fetchCalls.length, 1);
+  assert.equal(fetchCalls[0].url, "/api/reservations/reservation-1/recurrence");
+  assert.equal(fetchCalls[0].options.method, "POST");
+  assert.equal(fetchCalls[0].options.headers.Authorization, "Bearer token-de-prueba");
+  assert.deepEqual(JSON.parse(fetchCalls[0].options.body), {
+    frequency: "WEEKLY",
+    count: 3
+  });
+});
+
+test("prueba60_crearReservaRecurrenteConSolapeReact", async () => {
+  const { createRecurrenceWithApi } = await import("../client/src/services/reservationApi.js");
+  const baseReservation = {
+    id: "reservation-1",
+    startDateTime: "2026-05-01T10:00:00.000Z",
+    endDateTime: "2026-05-01T11:00:00.000Z",
+    status: "ACTIVA"
+  };
+  const currentReservations = [{ id: "reservation-1", status: "ACTIVA" }];
+  const fetchImpl = async () => ({
+    ok: false,
+    status: 409,
+    async json() {
+      return {
+        error: {
+          code: "RECURRENCE_OVERLAP",
+          message: "La recurrencia solicitada genera al menos un solape o incumple las reglas de reserva."
+        }
+      };
+    }
+  });
+
+  const result = await createRecurrenceWithApi(
+    baseReservation,
+    {
+      frequency: "WEEKLY",
+      endDate: "2026-05-22"
+    },
+    {
+      fetchImpl,
+      token: "token-de-prueba"
+    }
+  );
+  const updatedReservations = result.ok
+    ? [...result.createdReservations, ...currentReservations]
+    : currentReservations;
+
+  assert.equal(result.ok, false);
+  assert.equal(result.status, 409);
+  assert.equal(
+    result.message,
+    "La recurrencia solicitada genera al menos un solape o incumple las reglas de reserva."
+  );
+  assert.deepEqual(updatedReservations, currentReservations);
+});
