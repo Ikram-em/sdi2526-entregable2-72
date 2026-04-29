@@ -1,4 +1,4 @@
-package es.uniovi.sdi2526.entrega2;
+package com.uniovi.sdi2425entrega2test.n;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,8 +26,6 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 abstract class SeleniumTestBase {
-  protected static final String ADMIN_DNI = "12345678Z";
-  protected static final String ADMIN_PASSWORD = "@Dm1n1str@D0r";
   protected static final String STANDARD_DNI = "10000001S";
   protected static final String STANDARD_PASSWORD = "Us3r@1-PASSW";
   protected static final String SECOND_STANDARD_DNI = "10000002Q";
@@ -87,28 +85,6 @@ abstract class SeleniumTestBase {
     driver.get(baseUrl + path);
   }
 
-  protected void loginAsAdmin() {
-    login(ADMIN_DNI, ADMIN_PASSWORD);
-    waitForPath("/admin/reservations");
-  }
-
-  protected void loginAsStandard() {
-    login(STANDARD_DNI, STANDARD_PASSWORD);
-    waitForPath("/spaces");
-  }
-
-  protected void login(String dni, String password) {
-    open("/login");
-    type(By.id("dni"), dni);
-    type(By.id("password"), password);
-    clickButton("Entrar");
-  }
-
-  protected void logout() {
-    clickButton("Cerrar");
-    wait.until(ExpectedConditions.urlContains("/login"));
-  }
-
   protected void type(By locator, String value) {
     WebElement input = wait.until(ExpectedConditions.elementToBeClickable(locator));
     input.clear();
@@ -124,11 +100,11 @@ abstract class SeleniumTestBase {
     String formatted = value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
     ((JavascriptExecutor) driver).executeScript(
         "const input = arguments[0];" +
-        "const value = arguments[1];" +
-        "const setter = Object.getOwnPropertyDescriptor(input.constructor.prototype, 'value').set;" +
-        "setter.call(input, value);" +
-        "input.dispatchEvent(new Event('input', { bubbles: true }));" +
-        "input.dispatchEvent(new Event('change', { bubbles: true }));",
+            "const value = arguments[1];" +
+            "const setter = Object.getOwnPropertyDescriptor(input.constructor.prototype, 'value').set;" +
+            "setter.call(input, value);" +
+            "input.dispatchEvent(new Event('input', { bubbles: true }));" +
+            "input.dispatchEvent(new Event('change', { bubbles: true }));",
         input,
         formatted);
   }
@@ -136,7 +112,7 @@ abstract class SeleniumTestBase {
   protected void clickButton(String textFragment) {
     click(By.xpath(
         "//button[contains(normalize-space(.),'" + textFragment + "')]" +
-        " | //a[contains(normalize-space(.),'" + textFragment + "')]"));
+            " | //a[contains(normalize-space(.),'" + textFragment + "')]"));
   }
 
   protected void click(By locator) {
@@ -145,17 +121,9 @@ abstract class SeleniumTestBase {
     element.click();
   }
 
-  protected void waitForPath(String path) {
-    wait.until(ExpectedConditions.urlContains(path));
-  }
-
-  protected void assertCurrentPathContains(String path) {
-    assertTrue(driver.getCurrentUrl().contains(path), "URL actual: " + driver.getCurrentUrl());
-  }
-
   protected void assertPageContains(String text) {
     wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
-    assertTrue(driver.getPageSource().contains(text), "No se encontro el texto: " + text);
+    assertTrue(driver.getPageSource().contains(text), "No se encontró el texto: " + text);
   }
 
   protected boolean pageContains(String text) {
@@ -171,32 +139,6 @@ abstract class SeleniumTestBase {
     }
   }
 
-  protected boolean isFieldValid(By locator) {
-    WebElement field = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-    return Boolean.TRUE.equals(((JavascriptExecutor) driver).executeScript(
-        "return arguments[0].validity.valid;",
-        field));
-  }
-
-  protected WebElement rowContaining(String text) {
-    return wait.until(ExpectedConditions.presenceOfElementLocated(
-        By.xpath("//tr[.//*[contains(normalize-space(.),'" + text + "')] or contains(normalize-space(.),'" + text + "')]")));
-  }
-
-  protected WebElement cardContaining(String text) {
-    return wait.until(ExpectedConditions.presenceOfElementLocated(
-        By.xpath("//article[.//*[contains(normalize-space(.),'" + text + "')] or contains(normalize-space(.),'" + text + "')]")));
-  }
-
-  protected void clickInRow(String rowText, String actionText) {
-    WebElement row = rowContaining(rowText);
-    WebElement action = row.findElement(By.xpath(
-        ".//button[contains(normalize-space(.),'" + actionText + "')]" +
-        " | .//a[contains(normalize-space(.),'" + actionText + "')]"));
-    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", action);
-    action.click();
-  }
-
   protected int tableRowCount() {
     try {
       wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
@@ -204,19 +146,5 @@ abstract class SeleniumTestBase {
     } catch (TimeoutException error) {
       return 0;
     }
-  }
-
-  protected String uniqueSuffix() {
-    return String.valueOf(System.nanoTime());
-  }
-
-  protected String uniqueDni() {
-    int number = 70000000 + Math.floorMod((int) System.nanoTime(), 999999);
-    return dniFromNumber(number);
-  }
-
-  private String dniFromNumber(int number) {
-    String letters = "TRWAGMYFPDXBNJZSQVHLCKE";
-    return String.format("%08d%s", number, letters.charAt(number % letters.length()));
   }
 }

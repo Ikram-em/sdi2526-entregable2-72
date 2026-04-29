@@ -1,4 +1,4 @@
-package es.uniovi.sdi2526.entrega2;
+package com.uniovi.sdi2425entrega2test.n;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,7 +53,7 @@ class ReactSeleniumTests extends SeleniumTestBase {
   @DisplayName("Prueba 52 - Registrar una reserva válida desde React")
   void prueba52_registrarReservaValida() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
-    createReactReservation(futureStart(420, 9), "Reserva valida Selenium React");
+    createReactReservation(futureStart(420, 9), "Reserva válida Selenium React");
 
     assertPageContains("Listado de reservas propias");
     assertTrue(tableRowCount() > 0);
@@ -68,7 +68,7 @@ class ReactSeleniumTests extends SeleniumTestBase {
     LocalDateTime start = futureStart(421, 12);
     setDateTime(By.id("startDateTime"), start);
     setDateTime(By.id("endDateTime"), start.minusHours(1));
-    type(By.id("purpose"), "Reserva invalida Selenium React");
+    type(By.id("purpose"), "Reserva inválida Selenium React");
     clickButton("Registrar reserva");
 
     assertPageContains("Revisa los datos");
@@ -129,14 +129,14 @@ class ReactSeleniumTests extends SeleniumTestBase {
     clickFirstButtonInActiveReservation("Editar");
     setDateTime(By.id("startDateTime"), firstStart);
     setDateTime(By.id("endDateTime"), firstStart.plusHours(1));
-    type(By.id("purpose"), "Edicion solapada Selenium React");
+    type(By.id("purpose"), "Edición solapada Selenium React");
     clickButton("Actualizar reserva");
 
     assertPageContains("solap");
   }
 
   @Test
-  @DisplayName("Prueba 59 - Crear una reserva recurrente semanal valida en React")
+  @DisplayName("Prueba 59 - Crear una reserva recurrente semanal válida en React")
   void prueba59_crearReservaRecurrenteSemanalValida() {
     loginReact(SECOND_STANDARD_DNI, SECOND_STANDARD_PASSWORD);
     LocalDateTime baseStart = futureStart(427, 10);
@@ -230,19 +230,18 @@ class ReactSeleniumTests extends SeleniumTestBase {
     String formatted = value.format(DateTimeFormatter.ISO_LOCAL_DATE);
     ((JavascriptExecutor) driver).executeScript(
         "const input = arguments[0];" +
-        "const value = arguments[1];" +
-        "const setter = Object.getOwnPropertyDescriptor(input.constructor.prototype, 'value').set;" +
-        "setter.call(input, value);" +
-        "input.dispatchEvent(new Event('input', { bubbles: true }));" +
-        "input.dispatchEvent(new Event('change', { bubbles: true }));",
+            "const value = arguments[1];" +
+            "const setter = Object.getOwnPropertyDescriptor(input.constructor.prototype, 'value').set;" +
+            "setter.call(input, value);" +
+            "input.dispatchEvent(new Event('input', { bubbles: true }));" +
+            "input.dispatchEvent(new Event('change', { bubbles: true }));",
         input,
         formatted);
   }
 
   private LocalDateTime futureStart(int dayOffset, int hour) {
-    int extraOffset = Math.floorMod((int) System.nanoTime(), 30);
     return LocalDateTime.now()
-        .plusDays(dayOffset + extraOffset)
+        .plusDays(dayOffset)
         .withHour(hour)
         .withMinute(0)
         .withSecond(0)
