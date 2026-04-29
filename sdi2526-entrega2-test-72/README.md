@@ -1,34 +1,29 @@
-# sdi2526-entrega2-test-72
+# sdi2526-entrega2-test-n
 
-Proyecto de pruebas funcionales Selenium + JUnit 5 para la practica de reservas de espacios.
+Proyecto de pruebas Selenium + JUnit 5 basado en la plantilla proporcionada por el profesorado.
 
-## Requisitos
+## Pruebas implementadas
 
-- Java 17 o superior.
-- Maven o importacion directa del `pom.xml` en IntelliJ IDEA.
-- Chrome, Edge o Firefox instalado.
-- Aplicacion Node.js arrancada en `http://localhost:3000`.
-- MongoDB local arrancado. La aplicacion debe iniciarse con `RESET_DB_ON_START=true` para regenerar los datos de prueba.
+La clase `ReactSeleniumTests` contiene las pruebas de React de la `Prueba49` a la `Prueba60`.
 
-## Ejecucion
+La clase `Sdi2425Entrega2TestApplicationTests` se mantiene como plantilla original, pero queda desactivada para que no fallen las pruebas placeholder.
 
-Desde IntelliJ IDEA:
+## Ejecución
 
-1. Importar esta carpeta como proyecto Maven.
-2. Arrancar la aplicacion Node.js principal con `npm start`.
-3. Ejecutar la clase `ReactSeleniumTests`.
-
-Desde terminal con Maven:
+1. Arrancar la aplicación principal con la base reiniciada:
 
 ```bash
-mvn test
+RESET_DB_ON_START=true npm start
 ```
 
-Opciones:
+2. Ejecutar las pruebas desde esta carpeta:
 
 ```bash
-mvn test -DbaseUrl=http://localhost:3000
-mvn test -Dselenium.browser=edge
-mvn test -Dselenium.headless=false
+mvn test -DbaseUrl=http://localhost:3000 -Dtest=ReactSeleniumTests
 ```
 
+Opcionalmente se puede cambiar de navegador:
+
+```bash
+mvn test -DbaseUrl=http://localhost:3000 -Dtest=ReactSeleniumTests -Dselenium.browser=edge
+```
