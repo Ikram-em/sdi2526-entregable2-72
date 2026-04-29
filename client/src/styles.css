@@ -76,8 +76,59 @@ body {
   font-weight: 700;
 }
 
+.react-dashboard__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 24px;
+}
+
+.react-dashboard__message {
+  margin: 0 0 18px;
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.react-panel {
+  width: 100%;
+}
+
+.react-panel__header {
+  margin-bottom: 18px;
+}
+
+.react-panel__header h2 {
+  margin: 8px 0 0;
+  font-size: 24px;
+}
+
 .react-reservation-form {
   width: 100%;
+}
+
+.react-reservations {
+  margin-top: 24px;
+}
+
+.react-reservations__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.react-reservations__header h2 {
+  margin: 8px 0 0;
+  font-size: 24px;
+}
+
+.react-reservations__filter {
+  min-width: 220px;
+}
+
+.react-reservations__table {
+  margin-top: 10px;
 }
 
 @media (max-width: 760px) {
@@ -90,6 +141,11 @@ body {
   }
 
   .react-dashboard__header {
+    flex-direction: column;
+  }
+
+  .react-reservations__header {
+    align-items: stretch;
     flex-direction: column;
   }
 

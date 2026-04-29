@@ -120,3 +120,49 @@ export async function createReservationWithApi(values, options = {}) {
     message: "Reserva registrada correctamente."
   };
 }
+
+export function filterReservationsByStatus(reservations, status) {
+  const selectedStatus = String(status || "").trim();
+
+  if (!selectedStatus) {
+    return reservations;
+  }
+
+  return reservations.filter((reservation) => reservation.status === selectedStatus);
+}
+
+export async function fetchOwnReservations(options = {}) {
+  const token = options.token || "";
+  if (!token) {
+    return {
+      ok: false,
+      status: 401,
+      reservations: [],
+      message: "Debes iniciar sesión para consultar tus reservas."
+    };
+  }
+
+  const fetchImpl = options.fetchImpl || fetch;
+  const endpoint = options.endpoint || "/api/reservations/me";
+  const response = await fetchImpl(endpoint, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      status: response.status,
+      reservations: [],
+      message: payload.error?.message || "No se han podido cargar tus reservas."
+    };
+  }
+
+  return {
+    ok: true,
+    status: response.status,
+    reservations: payload.reservations || []
+  };
+}

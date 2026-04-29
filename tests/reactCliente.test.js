@@ -173,3 +173,64 @@ test("prueba53_registrarReservaReactInicioPosteriorFin", async () => {
     endDateTime: "La fecha/hora de fin debe ser posterior al inicio."
   });
 });
+
+test("prueba54_consultarListadoReservasPropiasReact", async () => {
+  const { fetchOwnReservations } = await import("../client/src/services/reservationApi.js");
+  const fetchCalls = [];
+  const fetchImpl = async (url, options) => {
+    fetchCalls.push({ url, options });
+    return {
+      ok: true,
+      status: 200,
+      async json() {
+        return {
+          reservations: [
+            {
+              id: "reservation-1",
+              spaceName: "Sala Naranco",
+              startDateTime: "2026-05-05T10:00:00.000Z",
+              endDateTime: "2026-05-05T11:00:00.000Z",
+              status: "ACTIVA"
+            },
+            {
+              id: "reservation-2",
+              spaceName: "Aula Covadonga",
+              startDateTime: "2026-05-06T12:00:00.000Z",
+              endDateTime: "2026-05-06T13:00:00.000Z",
+              status: "CANCELADA"
+            }
+          ]
+        };
+      }
+    };
+  };
+
+  const result = await fetchOwnReservations({
+    fetchImpl,
+    token: "token-de-prueba"
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.status, 200);
+  assert.equal(result.reservations.length, 2);
+  assert.equal(fetchCalls.length, 1);
+  assert.equal(fetchCalls[0].url, "/api/reservations/me");
+  assert.equal(fetchCalls[0].options.headers.Authorization, "Bearer token-de-prueba");
+});
+
+test("prueba55_filtrarReservasPropiasPorEstadoCancelada", async () => {
+  const { filterReservationsByStatus } = await import("../client/src/services/reservationApi.js");
+  const reservations = [
+    { id: "reservation-1", status: "ACTIVA", spaceName: "Sala Naranco" },
+    { id: "reservation-2", status: "CANCELADA", spaceName: "Aula Covadonga" },
+    { id: "reservation-3", status: "CANCELADA", spaceName: "Cowork Costa Verde" }
+  ];
+
+  const filtered = filterReservationsByStatus(reservations, "CANCELADA");
+
+  assert.equal(filtered.length, 2);
+  assert.deepEqual(
+    filtered.map((reservation) => reservation.id),
+    ["reservation-2", "reservation-3"]
+  );
+});

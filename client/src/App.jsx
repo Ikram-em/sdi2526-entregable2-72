@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { loginWithApi } from "./services/loginApi.js";
-import { createReservationWithApi, fetchSpaces } from "./services/reservationApi.js";
+import {
+  createReservationWithApi,
+  fetchOwnReservations,
+  fetchSpaces,
+  filterReservationsByStatus
+} from "./services/reservationApi.js";
 
 function readStoredSession() {
   try {
@@ -103,8 +108,7 @@ function LoginForm({ onLogin }) {
   );
 }
 
-function ReservationForm({ session, onLogout }) {
-  const [spaces, setSpaces] = useState([]);
+function ReservationForm({ session, spaces, spacesStatus, onReservationCreated }) {
   const [formData, setFormData] = useState({
     spaceId: "",
     startDateTime: "",
@@ -114,35 +118,6 @@ function ReservationForm({ session, onLogout }) {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("idle");
-  const [spacesStatus, setSpacesStatus] = useState("loading");
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadSpaces() {
-      setSpacesStatus("loading");
-      const result = await fetchSpaces();
-
-      if (!active) {
-        return;
-      }
-
-      if (!result.ok) {
-        setSpacesStatus("error");
-        setMessage(result.message);
-        return;
-      }
-
-      setSpaces(result.spaces);
-      setSpacesStatus("ready");
-    }
-
-    loadSpaces();
-
-    return () => {
-      active = false;
-    };
-  }, []);
 
   function updateField(field, value) {
     setFormData((current) => ({
@@ -170,6 +145,7 @@ function ReservationForm({ session, onLogout }) {
 
     setStatus("success");
     setMessage(result.message);
+    onReservationCreated(result.reservation);
     setFormData({
       spaceId: "",
       startDateTime: "",
@@ -179,19 +155,13 @@ function ReservationForm({ session, onLogout }) {
   }
 
   return (
-    <section className="react-dashboard">
-      <header className="react-dashboard__header">
-        <div>
-          <span className="eyebrow">C2 · Nueva reserva</span>
-          <h1>Registrar una nueva reserva</h1>
-          <p>{session.user.name}</p>
-        </div>
-        <button className="button button--ghost" type="button" onClick={onLogout}>
-          Cerrar sesión
-        </button>
-      </header>
+    <section className="surface react-panel">
+      <div className="react-panel__header">
+        <span className="eyebrow">C2 · Nueva reserva</span>
+        <h2>Registrar una nueva reserva</h2>
+      </div>
 
-      <form className="surface form react-reservation-form" onSubmit={handleSubmit} noValidate>
+      <form className="form react-reservation-form" onSubmit={handleSubmit} noValidate>
         <div className="form__grid">
           <div className="form__group">
             <label htmlFor="spaceId">Espacio</label>
@@ -277,6 +247,175 @@ function ReservationForm({ session, onLogout }) {
   );
 }
 
+function ReservationsList({ reservations, reservationsStatus }) {
+  const [reservationStatusFilter, setReservationStatusFilter] = useState("");
+  const visibleReservations = filterReservationsByStatus(
+    reservations,
+    reservationStatusFilter
+  );
+
+  return (
+    <section className="surface react-reservations">
+      <div className="react-reservations__header">
+        <div>
+          <span className="eyebrow">C3 · Mis reservas</span>
+          <h2>Listado de reservas propias</h2>
+        </div>
+
+        <div className="form__group react-reservations__filter">
+          <label htmlFor="reservationStatus">Estado</label>
+          <select
+            id="reservationStatus"
+            name="reservationStatus"
+            value={reservationStatusFilter}
+            onChange={(event) => setReservationStatusFilter(event.target.value)}
+          >
+            <option value="">Todos</option>
+            <option value="ACTIVA">ACTIVA</option>
+            <option value="CANCELADA">CANCELADA</option>
+          </select>
+        </div>
+      </div>
+
+      {reservationsStatus === "loading" ? (
+        <p className="muted">Cargando reservas...</p>
+      ) : visibleReservations.length === 0 ? (
+        <p className="muted">No hay reservas para el filtro seleccionado.</p>
+      ) : (
+        <table className="table react-reservations__table">
+          <thead>
+            <tr>
+              <th>Espacio</th>
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleReservations.map((reservation) => (
+              <tr key={reservation.id}>
+                <td>{reservation.spaceName}</td>
+                <td>{new Date(reservation.startDateTime).toLocaleString("es-ES")}</td>
+                <td>{new Date(reservation.endDateTime).toLocaleString("es-ES")}</td>
+                <td>
+                  <span
+                    className={`badge ${
+                      reservation.status === "CANCELADA" ? "badge--neutral" : ""
+                    }`}
+                  >
+                    {reservation.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
+function AuthenticatedApp({ session, onLogout }) {
+  const [activeView, setActiveView] = useState("reservations");
+  const [spaces, setSpaces] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [message, setMessage] = useState("");
+  const [spacesStatus, setSpacesStatus] = useState("loading");
+  const [reservationsStatus, setReservationsStatus] = useState("loading");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadInitialData() {
+      setSpacesStatus("loading");
+      setReservationsStatus("loading");
+      const [spacesResult, reservationsResult] = await Promise.all([
+        fetchSpaces(),
+        fetchOwnReservations({ token: session.token })
+      ]);
+
+      if (!active) {
+        return;
+      }
+
+      if (!spacesResult.ok) {
+        setSpacesStatus("error");
+        setMessage(spacesResult.message);
+      } else {
+        setSpaces(spacesResult.spaces);
+        setSpacesStatus("ready");
+      }
+
+      if (!reservationsResult.ok) {
+        setReservationsStatus("error");
+        setMessage(reservationsResult.message);
+      } else {
+        setReservations(reservationsResult.reservations);
+        setReservationsStatus("ready");
+      }
+    }
+
+    loadInitialData();
+
+    return () => {
+      active = false;
+    };
+  }, [session.token]);
+
+  function handleReservationCreated(reservation) {
+    setReservations((current) => [reservation, ...current]);
+    setActiveView("reservations");
+  }
+
+  return (
+    <section className="react-dashboard">
+      <header className="react-dashboard__header">
+        <div>
+          <span className="eyebrow">Cliente React</span>
+          <h1>{activeView === "new" ? "Registrar una nueva reserva" : "Mis reservas"}</h1>
+          <p>{session.user.name}</p>
+        </div>
+        <button className="button button--ghost" type="button" onClick={onLogout}>
+          Cerrar sesión
+        </button>
+      </header>
+
+      <nav className="react-dashboard__nav" aria-label="Navegación del cliente React">
+        <button
+          className={`button ${activeView === "reservations" ? "button--primary" : "button--ghost"}`}
+          type="button"
+          onClick={() => setActiveView("reservations")}
+        >
+          Mis reservas
+        </button>
+        <button
+          className={`button ${activeView === "new" ? "button--primary" : "button--ghost"}`}
+          type="button"
+          onClick={() => setActiveView("new")}
+        >
+          Nueva reserva
+        </button>
+      </nav>
+
+      {message ? <p className="react-dashboard__message">{message}</p> : null}
+
+      {activeView === "new" ? (
+        <ReservationForm
+          session={session}
+          spaces={spaces}
+          spacesStatus={spacesStatus}
+          onReservationCreated={handleReservationCreated}
+        />
+      ) : (
+        <ReservationsList
+          reservations={reservations}
+          reservationsStatus={reservationsStatus}
+        />
+      )}
+    </section>
+  );
+}
+
 export function App() {
   const [session, setSession] = useState(readStoredSession);
 
@@ -289,7 +428,7 @@ export function App() {
   return (
     <main className="react-page">
       {session ? (
-        <ReservationForm session={session} onLogout={handleLogout} />
+        <AuthenticatedApp session={session} onLogout={handleLogout} />
       ) : (
         <LoginForm onLogin={setSession} />
       )}
