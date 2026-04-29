@@ -3,11 +3,19 @@ import { loginWithApi } from "./services/loginApi.js";
 import {
   cancelReservationWithApi,
   createReservationWithApi,
+  editReservationWithApi,
   fetchOwnReservations,
   fetchSpaces,
   filterReservationsByStatus,
   replaceReservation
 } from "./services/reservationApi.js";
+
+const emptyReservationForm = {
+  spaceId: "",
+  startDateTime: "",
+  endDateTime: "",
+  purpose: ""
+};
 
 function readStoredSession() {
   try {
@@ -110,16 +118,53 @@ function LoginForm({ onLogin }) {
   );
 }
 
-function ReservationForm({ session, spaces, spacesStatus, onReservationCreated }) {
-  const [formData, setFormData] = useState({
-    spaceId: "",
-    startDateTime: "",
-    endDateTime: "",
-    purpose: ""
-  });
+function toDateTimeLocalValue(value) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) {
+    return "";
+  }
+
+  const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localTime.toISOString().slice(0, 16);
+}
+
+function buildReservationForm(reservation) {
+  if (!reservation) {
+    return emptyReservationForm;
+  }
+
+  return {
+    spaceId: reservation.spaceId || "",
+    startDateTime: toDateTimeLocalValue(reservation.startDateTime),
+    endDateTime: toDateTimeLocalValue(reservation.endDateTime),
+    purpose: reservation.purpose || ""
+  };
+}
+
+function ReservationForm({
+  initialReservation = null,
+  onCancelEdit,
+  onReservationSaved,
+  session,
+  spaces,
+  spacesStatus
+}) {
+  const [formData, setFormData] = useState(() => buildReservationForm(initialReservation));
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("idle");
+  const isEditing = Boolean(initialReservation);
+
+  useEffect(() => {
+    setFormData(buildReservationForm(initialReservation));
+    setErrors({});
+    setMessage("");
+    setStatus("idle");
+  }, [initialReservation]);
 
   function updateField(field, value) {
     setFormData((current) => ({
@@ -134,9 +179,13 @@ function ReservationForm({ session, spaces, spacesStatus, onReservationCreated }
     setMessage("");
     setErrors({});
 
-    const result = await createReservationWithApi(formData, {
-      token: session.token
-    });
+    const result = isEditing
+      ? await editReservationWithApi(initialReservation.id, formData, {
+          token: session.token
+        })
+      : await createReservationWithApi(formData, {
+          token: session.token
+        });
 
     if (!result.ok) {
       setStatus("error");
@@ -147,20 +196,15 @@ function ReservationForm({ session, spaces, spacesStatus, onReservationCreated }
 
     setStatus("success");
     setMessage(result.message);
-    onReservationCreated(result.reservation);
-    setFormData({
-      spaceId: "",
-      startDateTime: "",
-      endDateTime: "",
-      purpose: ""
-    });
+    onReservationSaved(result.reservation, isEditing ? "edit" : "create");
+    setFormData(emptyReservationForm);
   }
 
   return (
     <section className="surface react-panel">
       <div className="react-panel__header">
-        <span className="eyebrow">C2 · Nueva reserva</span>
-        <h2>Registrar una nueva reserva</h2>
+        <span className="eyebrow">{isEditing ? "C5 · Editar reserva" : "C2 · Nueva reserva"}</span>
+        <h2>{isEditing ? "Editar reserva propia" : "Registrar una nueva reserva"}</h2>
       </div>
 
       <form className="form react-reservation-form" onSubmit={handleSubmit} noValidate>
@@ -231,8 +275,15 @@ function ReservationForm({ session, spaces, spacesStatus, onReservationCreated }
           type="submit"
           disabled={status === "loading" || spacesStatus === "loading"}
         >
-          {status === "loading" ? "Registrando..." : "Registrar reserva"}
+          {status === "loading"
+            ? isEditing ? "Actualizando..." : "Registrando..."
+            : isEditing ? "Actualizar reserva" : "Registrar reserva"}
         </button>
+        {isEditing ? (
+          <button className="button button--ghost" type="button" onClick={onCancelEdit}>
+            Cancelar edición
+          </button>
+        ) : null}
 
         {message ? (
           <p
@@ -249,7 +300,13 @@ function ReservationForm({ session, spaces, spacesStatus, onReservationCreated }
   );
 }
 
-function ReservationsList({ session, reservations, reservationsStatus, onReservationCancelled }) {
+function ReservationsList({
+  onEditReservation,
+  onReservationCancelled,
+  reservations,
+  reservationsStatus,
+  session
+}) {
   const [reservationStatusFilter, setReservationStatusFilter] = useState("");
   const [cancelStatusById, setCancelStatusById] = useState({});
   const [message, setMessage] = useState("");
@@ -341,14 +398,23 @@ function ReservationsList({ session, reservations, reservationsStatus, onReserva
                 </td>
                 <td>
                   {reservation.status === "ACTIVA" ? (
-                    <button
-                      className="button button--ghost button--small"
-                      type="button"
-                      disabled={cancelStatusById[reservation.id] === "loading"}
-                      onClick={() => handleCancelReservation(reservation.id)}
-                    >
-                      {cancelStatusById[reservation.id] === "loading" ? "Cancelando..." : "Cancelar"}
-                    </button>
+                    <div className="table-actions">
+                      <button
+                        className="button button--ghost button--small"
+                        type="button"
+                        onClick={() => onEditReservation(reservation)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="button button--ghost button--small"
+                        type="button"
+                        disabled={cancelStatusById[reservation.id] === "loading"}
+                        onClick={() => handleCancelReservation(reservation.id)}
+                      >
+                        {cancelStatusById[reservation.id] === "loading" ? "Cancelando..." : "Cancelar"}
+                      </button>
+                    </div>
                   ) : (
                     <span className="muted">Sin acción</span>
                   )}
@@ -366,6 +432,7 @@ function ReservationsList({ session, reservations, reservationsStatus, onReserva
 
 function AuthenticatedApp({ session, onLogout }) {
   const [activeView, setActiveView] = useState("reservations");
+  const [editingReservation, setEditingReservation] = useState(null);
   const [spaces, setSpaces] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [message, setMessage] = useState("");
@@ -411,8 +478,11 @@ function AuthenticatedApp({ session, onLogout }) {
     };
   }, [session.token]);
 
-  function handleReservationCreated(reservation) {
-    setReservations((current) => [reservation, ...current]);
+  function handleReservationSaved(reservation, mode) {
+    setReservations((current) =>
+      mode === "edit" ? replaceReservation(current, reservation) : [reservation, ...current]
+    );
+    setEditingReservation(null);
     setActiveView("reservations");
   }
 
@@ -420,12 +490,28 @@ function AuthenticatedApp({ session, onLogout }) {
     setReservations((current) => replaceReservation(current, reservation));
   }
 
+  function handleEditReservation(reservation) {
+    setEditingReservation(reservation);
+    setActiveView("edit");
+  }
+
+  function showNewReservationForm() {
+    setEditingReservation(null);
+    setActiveView("new");
+  }
+
   return (
     <section className="react-dashboard">
       <header className="react-dashboard__header">
         <div>
           <span className="eyebrow">Cliente React</span>
-          <h1>{activeView === "new" ? "Registrar una nueva reserva" : "Mis reservas"}</h1>
+          <h1>
+            {activeView === "edit"
+              ? "Editar reserva"
+              : activeView === "new"
+                ? "Registrar una nueva reserva"
+                : "Mis reservas"}
+          </h1>
           <p>{session.user.name}</p>
         </div>
         <button className="button button--ghost" type="button" onClick={onLogout}>
@@ -442,9 +528,9 @@ function AuthenticatedApp({ session, onLogout }) {
           Mis reservas
         </button>
         <button
-          className={`button ${activeView === "new" ? "button--primary" : "button--ghost"}`}
+          className={`button ${activeView === "new" || activeView === "edit" ? "button--primary" : "button--ghost"}`}
           type="button"
-          onClick={() => setActiveView("new")}
+          onClick={showNewReservationForm}
         >
           Nueva reserva
         </button>
@@ -452,15 +538,21 @@ function AuthenticatedApp({ session, onLogout }) {
 
       {message ? <p className="react-dashboard__message">{message}</p> : null}
 
-      {activeView === "new" ? (
+      {activeView === "new" || activeView === "edit" ? (
         <ReservationForm
+          initialReservation={activeView === "edit" ? editingReservation : null}
+          onCancelEdit={() => {
+            setEditingReservation(null);
+            setActiveView("reservations");
+          }}
           session={session}
           spaces={spaces}
           spacesStatus={spacesStatus}
-          onReservationCreated={handleReservationCreated}
+          onReservationSaved={handleReservationSaved}
         />
       ) : (
         <ReservationsList
+          onEditReservation={handleEditReservation}
           session={session}
           reservations={reservations}
           reservationsStatus={reservationsStatus}

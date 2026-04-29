@@ -279,3 +279,114 @@ test("prueba56_cancelarReservaPropiaReact", async () => {
   assert.equal(updatedReservations[0].status, "CANCELADA");
   assert.equal(updatedReservations[1].status, "ACTIVA");
 });
+
+test("prueba57_editarReservaReactDatosValidos", async () => {
+  const { editReservationWithApi, replaceReservation } = await import("../client/src/services/reservationApi.js");
+  const fetchCalls = [];
+  const fetchImpl = async (url, options) => {
+    fetchCalls.push({ url, options });
+    return {
+      ok: true,
+      status: 200,
+      async json() {
+        return {
+          reservation: {
+            id: "reservation-1",
+            spaceId: "space-2",
+            spaceName: "Aula Covadonga",
+            startDateTime: "2026-05-07T10:00:00.000Z",
+            endDateTime: "2026-05-07T11:30:00.000Z",
+            purpose: "Sesión modificada",
+            status: "ACTIVA"
+          }
+        };
+      }
+    };
+  };
+
+  const result = await editReservationWithApi(
+    "reservation-1",
+    {
+      spaceId: "space-2",
+      startDateTime: "2026-05-07T10:00",
+      endDateTime: "2026-05-07T11:30",
+      purpose: " Sesión modificada "
+    },
+    {
+      fetchImpl,
+      token: "token-de-prueba"
+    }
+  );
+  const updatedReservations = replaceReservation(
+    [
+      { id: "reservation-1", status: "ACTIVA", spaceName: "Sala Naranco" },
+      { id: "reservation-2", status: "ACTIVA", spaceName: "Cowork Costa Verde" }
+    ],
+    result.reservation
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.status, 200);
+  assert.equal(result.message, "Reserva actualizada correctamente.");
+  assert.equal(fetchCalls.length, 1);
+  assert.equal(fetchCalls[0].url, "/api/reservations/reservation-1");
+  assert.equal(fetchCalls[0].options.method, "PUT");
+  assert.equal(fetchCalls[0].options.headers.Authorization, "Bearer token-de-prueba");
+  assert.deepEqual(JSON.parse(fetchCalls[0].options.body), {
+    spaceId: "space-2",
+    startDateTime: "2026-05-07T10:00",
+    endDateTime: "2026-05-07T11:30",
+    purpose: "Sesión modificada"
+  });
+  assert.equal(updatedReservations[0].spaceName, "Aula Covadonga");
+  assert.equal(updatedReservations[1].spaceName, "Cowork Costa Verde");
+});
+
+test("prueba58_editarReservaReactSolapada", async () => {
+  const { editReservationWithApi, replaceReservation } = await import("../client/src/services/reservationApi.js");
+  const originalReservations = [
+    {
+      id: "reservation-1",
+      status: "ACTIVA",
+      spaceName: "Sala Naranco",
+      startDateTime: "2026-05-07T09:00:00.000Z"
+    }
+  ];
+  const fetchImpl = async () => ({
+    ok: false,
+    status: 409,
+    async json() {
+      return {
+        error: {
+          code: "RESERVATION_OVERLAP",
+          message: "La reserva solicitada se solapa con otra reserva activa del mismo espacio."
+        }
+      };
+    }
+  });
+
+  const result = await editReservationWithApi(
+    "reservation-1",
+    {
+      spaceId: "space-1",
+      startDateTime: "2026-05-07T10:00",
+      endDateTime: "2026-05-07T11:00",
+      purpose: "Solape"
+    },
+    {
+      fetchImpl,
+      token: "token-de-prueba"
+    }
+  );
+  const updatedReservations = result.ok
+    ? replaceReservation(originalReservations, result.reservation)
+    : originalReservations;
+
+  assert.equal(result.ok, false);
+  assert.equal(result.status, 409);
+  assert.equal(
+    result.message,
+    "La reserva solicitada se solapa con otra reserva activa del mismo espacio."
+  );
+  assert.deepEqual(updatedReservations, originalReservations);
+});
