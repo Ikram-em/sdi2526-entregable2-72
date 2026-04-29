@@ -1,5 +1,6 @@
 node_modules/
 client/dist/
+sdi2526-entrega2-test-72/target/
 .idea/
 .DS_Store
 .env
