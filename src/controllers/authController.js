@@ -27,15 +27,15 @@ async function register(req, res) {
   }
 
   if (formData.dni && !isValidDni(formData.dni)) {
-    errors.push("El DNI introducido no es valido.");
+    errors.push("El DNI introducido no es válido.");
   }
 
   if (!isValidPassword(password)) {
-    errors.push("La contrasena debe tener entre 12 y 20 caracteres, incluir mayuscula, minuscula, digito, simbolo y no contener espacios.");
+    errors.push("La contraseña debe tener entre 12 y 20 caracteres, incluir mayúscula, minúscula, dígito, símbolo y no contener espacios.");
   }
 
   if (password !== confirmPassword) {
-    errors.push("La contrasena y su confirmacion no coinciden.");
+    errors.push("La contraseña y su confirmación no coinciden.");
   }
 
   const existingUser = formData.dni ? await User.findOne({ dni: formData.dni }) : null;
@@ -69,12 +69,12 @@ async function showLogin(req, res) {
   if (req.query.loggedOut === "1") {
     res.locals.flash = {
       type: "success",
-      message: "Has cerrado sesion correctamente."
+      message: "Has cerrado sesión correctamente."
     };
   }
 
   res.render("auth/login", {
-    title: "Inicio de sesion",
+    title: "Inicio de sesión",
     formData: {},
     error: null
   });
@@ -87,8 +87,8 @@ async function login(req, res) {
 
   if (!dni || !password) {
     return res.status(400).render("auth/login", {
-      title: "Inicio de sesion",
-      error: "Debes indicar DNI y contrasena.",
+      title: "Inicio de sesión",
+      error: "Debes indicar DNI y contraseña.",
       formData: { dni }
     });
   }
@@ -96,8 +96,8 @@ async function login(req, res) {
   const user = await User.findOne({ dni });
   if (!user) {
     return res.status(401).render("auth/login", {
-      title: "Inicio de sesion",
-      error: "No existe ningun usuario registrado con ese DNI.",
+      title: "Inicio de sesión",
+      error: "No existe ningún usuario registrado con ese DNI.",
       formData: { dni }
     });
   }
@@ -105,8 +105,8 @@ async function login(req, res) {
   const isValid = await bcrypt.compare(password, user.passwordHash);
   if (!isValid) {
     return res.status(401).render("auth/login", {
-      title: "Inicio de sesion",
-      error: "La contrasena no es correcta.",
+      title: "Inicio de sesión",
+      error: "La contraseña no es correcta.",
       formData: { dni }
     });
   }
@@ -124,7 +124,7 @@ async function logout(req, res) {
 
 async function showChangePassword(req, res) {
   res.render("auth/change-password", {
-    title: "Cambiar contrasena",
+    title: "Cambiar contraseña",
     errors: []
   });
 }
@@ -142,27 +142,27 @@ async function changePassword(req, res) {
   }
 
   if (user && !(await bcrypt.compare(currentPassword, user.passwordHash))) {
-    errors.push("La contrasena actual no es correcta.");
+    errors.push("La contraseña actual no es correcta.");
   }
 
   if (!isValidPassword(newPassword)) {
-    errors.push("La nueva contrasena no cumple la politica de seguridad.");
+    errors.push("La nueva contraseña no cumple la política de seguridad.");
   }
 
   if (newPassword !== confirmPassword) {
-    errors.push("La nueva contrasena y su confirmacion no coinciden.");
+    errors.push("La nueva contraseña y su confirmación no coinciden.");
   }
 
   if (errors.length > 0) {
     return res.status(400).render("auth/change-password", {
-      title: "Cambiar contrasena",
+      title: "Cambiar contraseña",
       errors
     });
   }
 
   user.passwordHash = await bcrypt.hash(newPassword, 10);
   await user.save();
-  setFlash(req, "success", "Contrasena actualizada correctamente.");
+  setFlash(req, "success", "Contraseña actualizada correctamente.");
   return res.redirect("/spaces");
 }
 

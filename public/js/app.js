@@ -43,17 +43,17 @@
     });
 
     if (data.dni && !validateDni(data.dni)) {
-      setError($form, "dni", "DNI no valido.");
+      setError($form, "dni", "DNI no válido.");
       valid = false;
     }
 
     if (data.password && !validatePassword(data.password)) {
-      setError($form, "password", "No cumple la politica de seguridad.");
+      setError($form, "password", "No cumple la política de seguridad.");
       valid = false;
     }
 
     if (data.password !== data.confirmPassword) {
-      setError($form, "confirmPassword", "Las contrasenas no coinciden.");
+      setError($form, "confirmPassword", "Las contraseñas no coinciden.");
       valid = false;
     }
 
@@ -69,12 +69,12 @@
       setError($form, "dni", "Introduce tu DNI.");
       valid = false;
     } else if (!validateDni(data.dni)) {
-      setError($form, "dni", "Formato de DNI no valido.");
+      setError($form, "dni", "Formato de DNI no válido.");
       valid = false;
     }
 
     if (!String(data.password || "").trim()) {
-      setError($form, "password", "Introduce tu contrasena.");
+      setError($form, "password", "Introduce tu contraseña.");
       valid = false;
     }
 
@@ -117,12 +117,12 @@
     });
 
     if (data.newPassword && !validatePassword(data.newPassword)) {
-      setError($form, "newPassword", "No cumple la politica de seguridad.");
+      setError($form, "newPassword", "No cumple la política de seguridad.");
       valid = false;
     }
 
     if (data.newPassword !== data.confirmPassword) {
-      setError($form, "confirmPassword", "Las contrasenas no coinciden.");
+      setError($form, "confirmPassword", "Las contraseñas no coinciden.");
       valid = false;
     }
 
@@ -134,7 +134,7 @@
     clearErrors($form);
 
     if (value && Number.parseInt(value, 10) < 1) {
-      setError($form, "minCapacity", "La capacidad minima debe ser mayor o igual que 1.");
+      setError($form, "minCapacity", "La capacidad mínima debe ser mayor o igual que 1.");
       return false;
     }
 

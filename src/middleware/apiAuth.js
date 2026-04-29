@@ -21,12 +21,12 @@ async function requireApiAuth(req, res, next) {
 
   const userId = getUserIdByToken(token);
   if (!userId) {
-    return sendError(res, 401, "INVALID_TOKEN", "El token de autenticacion no es valido.");
+    return sendError(res, 401, "INVALID_TOKEN", "El token de autenticación no es válido.");
   }
 
   const user = await User.findById(userId);
   if (!user) {
-    return sendError(res, 401, "INVALID_TOKEN", "El token de autenticacion no es valido.");
+    return sendError(res, 401, "INVALID_TOKEN", "El token de autenticación no es válido.");
   }
 
   req.apiUser = user;
@@ -43,7 +43,7 @@ function requireApiStandard(req, res, next) {
       res,
       403,
       "FORBIDDEN",
-      "Solo los usuarios estandar pueden realizar esta operacion."
+      "Solo los usuarios estándar pueden realizar esta operación."
     );
   }
 

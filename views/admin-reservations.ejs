@@ -68,7 +68,7 @@
       <% if (pagination.hasPrevious) { %>
         <a class="button button--ghost button--small" href="<%= buildPageLink(pagination.page - 1) %>">Anterior</a>
       <% } %>
-      <span class="pagination__status">Pagina <%= pagination.page %> de <%= pagination.totalPages %></span>
+      <span class="pagination__status">Página <%= pagination.page %> de <%= pagination.totalPages %></span>
       <% if (pagination.hasNext) { %>
         <a class="button button--ghost button--small" href="<%= buildPageLink(pagination.page + 1) %>">Siguiente</a>
       <% } %>

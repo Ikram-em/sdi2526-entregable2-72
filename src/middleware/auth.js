@@ -21,7 +21,7 @@ function requireGuest(req, res, next) {
 
 function requireAuth(req, res, next) {
   if (!req.session.user) {
-    setFlash(req, "error", "Debes iniciar sesion para acceder a esta zona.");
+    setFlash(req, "error", "Debes iniciar sesión para acceder a esta zona.");
     return res.redirect("/login");
   }
 
@@ -30,12 +30,12 @@ function requireAuth(req, res, next) {
 
 function requireStandard(req, res, next) {
   if (!req.session.user) {
-    setFlash(req, "error", "Debes iniciar sesion para acceder a esta zona.");
+    setFlash(req, "error", "Debes iniciar sesión para acceder a esta zona.");
     return res.redirect("/login");
   }
 
   if (req.session.user.role !== "standard") {
-    setFlash(req, "error", "Acceso denegado. Esta vista es solo para usuarios estandar.");
+    setFlash(req, "error", "Acceso denegado. Esta vista es solo para usuarios estándar.");
     return res.redirect("/admin/reservations");
   }
 
@@ -44,12 +44,12 @@ function requireStandard(req, res, next) {
 
 function requireAdmin(req, res, next) {
   if (!req.session.user) {
-    setFlash(req, "error", "Debes iniciar sesion para acceder a esta zona.");
+    setFlash(req, "error", "Debes iniciar sesión para acceder a esta zona.");
     return res.redirect("/login");
   }
 
   if (req.session.user.role !== "admin") {
-    setFlash(req, "error", "Acceso denegado. No puedes acceder a recursos de administracion.");
+    setFlash(req, "error", "Acceso denegado. No puedes acceder a recursos de administración.");
     return res.redirect("/spaces");
   }
 

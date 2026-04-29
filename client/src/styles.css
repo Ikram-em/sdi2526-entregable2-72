@@ -1,0 +1,63 @@
+@import url("../../public/css/styles.css");
+
+body {
+  min-height: 100vh;
+}
+
+.react-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+}
+
+.react-login {
+  width: min(960px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: 32px;
+  align-items: center;
+}
+
+.react-login__intro h1 {
+  margin: 10px 0 12px;
+  font-size: 42px;
+  line-height: 1.1;
+}
+
+.react-login__intro p {
+  max-width: 560px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.react-login__form {
+  width: 100%;
+}
+
+.react-login__message {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.react-login__message.is-success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.react-login__message.is-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+@media (max-width: 760px) {
+  .react-login {
+    grid-template-columns: 1fr;
+  }
+
+  .react-login__intro h1 {
+    font-size: 32px;
+  }
+}

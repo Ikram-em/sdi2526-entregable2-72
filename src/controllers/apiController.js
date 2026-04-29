@@ -74,13 +74,13 @@ function validateReservationInput(body) {
   if (!body.startDateTime) {
     details.startDateTime = "La fecha/hora de inicio es obligatoria.";
   } else if (!startAt) {
-    details.startDateTime = "La fecha/hora de inicio no es valida.";
+    details.startDateTime = "La fecha/hora de inicio no es válida.";
   }
 
   if (!body.endDateTime) {
     details.endDateTime = "La fecha/hora de fin es obligatoria.";
   } else if (!endAt) {
-    details.endDateTime = "La fecha/hora de fin no es valida.";
+    details.endDateTime = "La fecha/hora de fin no es válida.";
   }
 
   return {
@@ -202,21 +202,21 @@ async function login(req, res) {
   }
 
   if (!password) {
-    details.password = "La contrasena es obligatoria.";
+    details.password = "La contraseña es obligatoria.";
   }
 
   if (Object.keys(details).length > 0) {
-    return sendError(res, 400, "VALIDATION_ERROR", "Revisa los datos de autenticacion.", details);
+    return sendError(res, 400, "VALIDATION_ERROR", "Revisa los datos de autenticación.", details);
   }
 
   const user = await User.findOne({ dni });
   if (!user) {
-    return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesion no correcto.");
+    return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesión no correcto.");
   }
 
   const isValid = await bcrypt.compare(password, user.passwordHash);
   if (!isValid) {
-    return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesion no correcto.");
+    return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesión no correcto.");
   }
 
   const token = issueToken(user._id);
@@ -388,7 +388,7 @@ async function createRecurrence(req, res) {
       res,
       400,
       "INVALID_FREQUENCY",
-      "La frecuencia indicada no es valida."
+      "La frecuencia indicada no es válida."
     );
   }
 
@@ -397,7 +397,7 @@ async function createRecurrence(req, res) {
       res,
       400,
       "INVALID_COUNT",
-      "El numero de recurrencias debe ser un entero mayor que cero."
+      "El número de recurrencias debe ser un entero mayor que cero."
     );
   }
 

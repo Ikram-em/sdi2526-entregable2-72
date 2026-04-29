@@ -7,7 +7,7 @@
     <div>
       <span class="eyebrow">W10 · Espacios activos</span>
       <h1>Listado de espacios disponibles</h1>
-      <p>Consulta nombre, tipo, ubicacion y capacidad; aplica filtrado por tipo o aforo minimo.</p>
+      <p>Consulta nombre, tipo, ubicación y capacidad; aplica filtrado por tipo o aforo mínimo.</p>
     </div>
   </section>
 
@@ -24,7 +24,7 @@
       </div>
 
       <div class="form__group">
-        <label for="minCapacity">Capacidad minima</label>
+        <label for="minCapacity">Capacidad mínima</label>
         <input id="minCapacity" name="minCapacity" type="number" min="1" step="1" value="<%= filters.minCapacity %>" placeholder="Ej. 10" />
         <small class="field-error" data-error-for="minCapacity"></small>
       </div>
@@ -40,7 +40,7 @@
     <% if (!spaces.length) { %>
       <article class="surface empty-state">
         <h2>No hay espacios para los filtros actuales</h2>
-        <p>Ajusta el tipo o la capacidad minima para ampliar los resultados.</p>
+        <p>Ajusta el tipo o la capacidad mínima para ampliar los resultados.</p>
       </article>
     <% } %>
 

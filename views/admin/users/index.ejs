@@ -7,7 +7,7 @@
     <div>
       <span class="eyebrow">W15 · Opcional</span>
       <h1>Listado de usuarios</h1>
-      <p>Vista paginada de usuarios del sistema, incluyendo el administrador y los usuarios estandar.</p>
+      <p>Vista paginada de usuarios del sistema, incluyendo el administrador y los usuarios estándar.</p>
     </div>
   </section>
 
@@ -37,7 +37,7 @@
       <% if (pagination.hasPrevious) { %>
         <a class="button button--ghost button--small" href="<%= buildPageLink(pagination.page - 1) %>">Anterior</a>
       <% } %>
-      <span class="pagination__status">Pagina <%= pagination.page %> de <%= pagination.totalPages %></span>
+      <span class="pagination__status">Página <%= pagination.page %> de <%= pagination.totalPages %></span>
       <% if (pagination.hasNext) { %>
         <a class="button button--ghost button--small" href="<%= buildPageLink(pagination.page + 1) %>">Siguiente</a>
       <% } %>
