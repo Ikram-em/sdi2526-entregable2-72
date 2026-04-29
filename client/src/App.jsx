@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { loginWithApi } from "./services/loginApi.js";
 import {
+  cancelReservationWithApi,
   createReservationWithApi,
   fetchOwnReservations,
   fetchSpaces,
-  filterReservationsByStatus
+  filterReservationsByStatus,
+  replaceReservation
 } from "./services/reservationApi.js";
 
 function readStoredSession() {
@@ -247,12 +249,42 @@ function ReservationForm({ session, spaces, spacesStatus, onReservationCreated }
   );
 }
 
-function ReservationsList({ reservations, reservationsStatus }) {
+function ReservationsList({ session, reservations, reservationsStatus, onReservationCancelled }) {
   const [reservationStatusFilter, setReservationStatusFilter] = useState("");
+  const [cancelStatusById, setCancelStatusById] = useState({});
+  const [message, setMessage] = useState("");
   const visibleReservations = filterReservationsByStatus(
     reservations,
     reservationStatusFilter
   );
+
+  async function handleCancelReservation(reservationId) {
+    setMessage("");
+    setCancelStatusById((current) => ({
+      ...current,
+      [reservationId]: "loading"
+    }));
+
+    const result = await cancelReservationWithApi(reservationId, {
+      token: session.token
+    });
+
+    if (!result.ok) {
+      setCancelStatusById((current) => ({
+        ...current,
+        [reservationId]: "error"
+      }));
+      setMessage(result.message);
+      return;
+    }
+
+    setCancelStatusById((current) => ({
+      ...current,
+      [reservationId]: "done"
+    }));
+    setMessage(result.message);
+    onReservationCancelled(result.reservation);
+  }
 
   return (
     <section className="surface react-reservations">
@@ -289,6 +321,7 @@ function ReservationsList({ reservations, reservationsStatus }) {
               <th>Inicio</th>
               <th>Fin</th>
               <th>Estado</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody>
@@ -306,11 +339,27 @@ function ReservationsList({ reservations, reservationsStatus }) {
                     {reservation.status}
                   </span>
                 </td>
+                <td>
+                  {reservation.status === "ACTIVA" ? (
+                    <button
+                      className="button button--ghost button--small"
+                      type="button"
+                      disabled={cancelStatusById[reservation.id] === "loading"}
+                      onClick={() => handleCancelReservation(reservation.id)}
+                    >
+                      {cancelStatusById[reservation.id] === "loading" ? "Cancelando..." : "Cancelar"}
+                    </button>
+                  ) : (
+                    <span className="muted">Sin acción</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
+
+      {message ? <p className="react-reservations__message">{message}</p> : null}
     </section>
   );
 }
@@ -367,6 +416,10 @@ function AuthenticatedApp({ session, onLogout }) {
     setActiveView("reservations");
   }
 
+  function handleReservationCancelled(reservation) {
+    setReservations((current) => replaceReservation(current, reservation));
+  }
+
   return (
     <section className="react-dashboard">
       <header className="react-dashboard__header">
@@ -408,8 +461,10 @@ function AuthenticatedApp({ session, onLogout }) {
         />
       ) : (
         <ReservationsList
+          session={session}
           reservations={reservations}
           reservationsStatus={reservationsStatus}
+          onReservationCancelled={handleReservationCancelled}
         />
       )}
     </section>

@@ -131,6 +131,12 @@ body {
   margin-top: 10px;
 }
 
+.react-reservations__message {
+  margin: 16px 0 0;
+  color: var(--success);
+  font-weight: 700;
+}
+
 @media (max-width: 760px) {
   .react-login {
     grid-template-columns: 1fr;

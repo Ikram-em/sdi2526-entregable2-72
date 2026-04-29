@@ -234,3 +234,48 @@ test("prueba55_filtrarReservasPropiasPorEstadoCancelada", async () => {
     ["reservation-2", "reservation-3"]
   );
 });
+
+test("prueba56_cancelarReservaPropiaReact", async () => {
+  const { cancelReservationWithApi, replaceReservation } = await import("../client/src/services/reservationApi.js");
+  const fetchCalls = [];
+  const fetchImpl = async (url, options) => {
+    fetchCalls.push({ url, options });
+    return {
+      ok: true,
+      status: 200,
+      async json() {
+        return {
+          reservation: {
+            id: "reservation-1",
+            spaceName: "Sala Naranco",
+            startDateTime: "2026-05-05T10:00:00.000Z",
+            endDateTime: "2026-05-05T11:00:00.000Z",
+            status: "CANCELADA"
+          }
+        };
+      }
+    };
+  };
+
+  const result = await cancelReservationWithApi("reservation-1", {
+    fetchImpl,
+    token: "token-de-prueba"
+  });
+  const updatedReservations = replaceReservation(
+    [
+      { id: "reservation-1", status: "ACTIVA", spaceName: "Sala Naranco" },
+      { id: "reservation-2", status: "ACTIVA", spaceName: "Aula Covadonga" }
+    ],
+    result.reservation
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.status, 200);
+  assert.equal(result.message, "Reserva cancelada correctamente.");
+  assert.equal(fetchCalls.length, 1);
+  assert.equal(fetchCalls[0].url, "/api/reservations/reservation-1/cancel");
+  assert.equal(fetchCalls[0].options.method, "PATCH");
+  assert.equal(fetchCalls[0].options.headers.Authorization, "Bearer token-de-prueba");
+  assert.equal(updatedReservations[0].status, "CANCELADA");
+  assert.equal(updatedReservations[1].status, "ACTIVA");
+});

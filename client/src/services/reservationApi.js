@@ -166,3 +166,54 @@ export async function fetchOwnReservations(options = {}) {
     reservations: payload.reservations || []
   };
 }
+
+export function replaceReservation(reservations, updatedReservation) {
+  return reservations.map((reservation) =>
+    reservation.id === updatedReservation.id ? updatedReservation : reservation
+  );
+}
+
+export async function cancelReservationWithApi(reservationId, options = {}) {
+  const token = options.token || "";
+  if (!token) {
+    return {
+      ok: false,
+      status: 401,
+      message: "Debes iniciar sesión para cancelar reservas."
+    };
+  }
+
+  const id = String(reservationId || "").trim();
+  if (!id) {
+    return {
+      ok: false,
+      status: 400,
+      message: "La reserva es obligatoria."
+    };
+  }
+
+  const fetchImpl = options.fetchImpl || fetch;
+  const endpoint = options.endpoint || `/api/reservations/${id}/cancel`;
+  const response = await fetchImpl(endpoint, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      status: response.status,
+      message: payload.error?.message || "No se ha podido cancelar la reserva."
+    };
+  }
+
+  return {
+    ok: true,
+    status: response.status,
+    reservation: payload.reservation,
+    message: "Reserva cancelada correctamente."
+  };
+}
