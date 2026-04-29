@@ -83,7 +83,7 @@ async function showAvailability(req, res) {
     if (!range.from || !range.to) {
       errors = ["Debes indicar inicio y fin del rango."];
     } else if (Number.isNaN(fromDate.valueOf()) || Number.isNaN(toDate.valueOf())) {
-      errors = ["El rango introducido no es valido."];
+      errors = ["El rango introducido no es válido."];
     } else if (fromDate >= toDate) {
       errors = ["La fecha y hora inicial debe ser anterior a la final."];
     } else {

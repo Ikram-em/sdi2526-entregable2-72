@@ -3,7 +3,7 @@
     <a href="<%= currentUser ? (currentUser.role === 'admin' ? '/admin/reservations' : '/spaces') : '/login' %>" class="brand">
       <span class="brand__badge">SDI</span>
       <span class="brand__text">
-        <strong>Gestion de espacios</strong>
+        <strong>Gestión de espacios</strong>
         <small>Parte 1 · Cliente web jQuery</small>
       </span>
     </a>
@@ -17,7 +17,7 @@
       <% if (currentUser && currentUser.role === 'standard') { %>
         <a class="nav__link <%= currentPath === '/spaces' ? 'is-active' : '' %>" href="/spaces">Espacios</a>
         <a class="nav__link <%= currentPath.startsWith('/reservations') ? 'is-active' : '' %>" href="/reservations/mine">Mis reservas</a>
-        <a class="nav__link <%= currentPath === '/account/password' ? 'is-active' : '' %>" href="/account/password">Contrasena</a>
+        <a class="nav__link <%= currentPath === '/account/password' ? 'is-active' : '' %>" href="/account/password">Contraseña</a>
       <% } %>
 
       <% if (currentUser && currentUser.role === 'admin') { %>
@@ -31,10 +31,10 @@
       <% if (currentUser) { %>
         <div class="session-box__meta">
           <span class="session-box__name"><%= currentUser.fullName %></span>
-          <small><%= currentUser.role === 'admin' ? 'Administrador' : 'Usuario estandar' %></small>
+          <small><%= currentUser.role === 'admin' ? 'Administrador' : 'Usuario estándar' %></small>
         </div>
         <form action="/logout" method="post">
-          <button class="button button--ghost" type="submit">Cerrar sesion</button>
+          <button class="button button--ghost" type="submit">Cerrar sesión</button>
         </form>
       <% } %>
     </div>

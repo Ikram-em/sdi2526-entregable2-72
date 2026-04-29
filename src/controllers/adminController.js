@@ -43,11 +43,11 @@ function validateSpaceForm(formData) {
   }
 
   if (!formData.location) {
-    errors.push("La ubicacion del espacio es obligatoria.");
+    errors.push("La ubicación del espacio es obligatoria.");
   }
 
   if (!Number.isInteger(formData.capacity) || formData.capacity < 1) {
-    errors.push("La capacidad debe ser un numero entero mayor o igual que 1.");
+    errors.push("La capacidad debe ser un número entero mayor o igual que 1.");
   }
 
   return errors;
@@ -67,7 +67,7 @@ async function showSpaceManagement(req, res) {
   const spaces = await Space.find().sort({ active: -1, name: 1 }).lean();
 
   return res.render("admin/spaces/index", {
-    title: "Gestion de espacios",
+    title: "Gestión de espacios",
     spaces,
     errors: [],
     formData: {}
@@ -86,7 +86,7 @@ async function createSpace(req, res) {
   if (errors.length > 0) {
     const spaces = await Space.find().sort({ active: -1, name: 1 }).lean();
     return res.status(400).render("admin/spaces/index", {
-      title: "Gestion de espacios",
+      title: "Gestión de espacios",
       spaces,
       errors,
       formData
@@ -270,7 +270,7 @@ async function createBlock(req, res) {
   }
 
   if (Number.isNaN(startAt.valueOf()) || Number.isNaN(endAt.valueOf())) {
-    errors.push("El rango de bloqueo no es valido.");
+    errors.push("El rango de bloqueo no es válido.");
   } else if (startAt >= endAt) {
     errors.push("El inicio del bloqueo debe ser anterior al fin.");
   }

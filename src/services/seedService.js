@@ -70,7 +70,7 @@ function buildSpaces() {
       location: "Edificio A, Planta 1",
       capacity: 8,
       active: true,
-      description: "Sala pensada para reuniones cortas con equipo hibrido.",
+      description: "Sala pensada para reuniones cortas con equipo híbrido.",
       amenities: ["Pantalla 4K", "Videoconferencia", "Pizarra"]
     },
     {
@@ -79,7 +79,7 @@ function buildSpaces() {
       location: "Edificio B, Planta 2",
       capacity: 24,
       active: true,
-      description: "Aula con proyector, audio y distribucion flexible.",
+      description: "Aula con proyector, audio y distribución flexible.",
       amenities: ["Proyector", "Audio", "Mesas moviles"]
     },
     {
@@ -88,7 +88,7 @@ function buildSpaces() {
       location: "Edificio C, Zona abierta",
       capacity: 12,
       active: true,
-      description: "Zona silenciosa para trabajo individual o pequenos equipos.",
+      description: "Zona silenciosa para trabajo individual o pequeños equipos.",
       amenities: ["Taquillas", "Wifi 6", "Impresora"]
     },
     {
@@ -169,7 +169,7 @@ function buildBlocks(adminUser, spaces) {
       createdBy: adminUser._id,
       startAt: secondBlock.start,
       endAt: secondBlock.end,
-      reason: "Revision electrica programada",
+      reason: "Revisión eléctrica programada",
       status: "ACTIVO"
     },
     {
@@ -177,7 +177,7 @@ function buildBlocks(adminUser, spaces) {
       createdBy: adminUser._id,
       startAt: cancelledBlock.start,
       endAt: cancelledBlock.end,
-      reason: "Bloqueo historico cancelado",
+      reason: "Bloqueo histórico cancelado",
       status: "CANCELADO"
     }
   ];

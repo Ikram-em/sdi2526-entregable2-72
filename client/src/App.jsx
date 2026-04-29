@@ -1,0 +1,765 @@
+import { useEffect, useState } from "react";
+import { loginWithApi } from "./services/loginApi.js";
+import {
+  cancelReservationWithApi,
+  createReservationWithApi,
+  createRecurrenceWithApi,
+  editReservationWithApi,
+  fetchOwnReservations,
+  fetchSpaces,
+  filterReservationsByStatus,
+  replaceReservation
+} from "./services/reservationApi.js";
+
+const emptyReservationForm = {
+  spaceId: "",
+  startDateTime: "",
+  endDateTime: "",
+  purpose: ""
+};
+
+function readStoredSession() {
+  try {
+    const token = window.localStorage.getItem("apiToken");
+    const user = JSON.parse(window.localStorage.getItem("apiUser") || "null");
+    return token && user ? { token, user } : null;
+  } catch {
+    return null;
+  }
+}
+
+function LoginForm({ onLogin }) {
+  const [dni, setDni] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("idle");
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setStatus("loading");
+    setMessage("");
+    setErrors({});
+
+    const result = await loginWithApi(
+      { dni, password },
+      { storage: window.localStorage }
+    );
+
+    if (!result.ok) {
+      setStatus("error");
+      setErrors(result.errors || {});
+      setMessage(result.message);
+      return;
+    }
+
+    setStatus("success");
+    setMessage(`Sesión iniciada correctamente como ${result.user.name}.`);
+    onLogin({ token: result.token, user: result.user });
+  }
+
+  return (
+    <section className="react-login">
+      <div className="react-login__intro">
+        <h1>Autenticación del usuario</h1>
+        <p>Accede con tu DNI y contraseña para gestionar tus reservas.</p>
+      </div>
+
+      <form className="surface form react-login__form" onSubmit={handleSubmit} noValidate>
+        <div className="form__group">
+          <label htmlFor="react-dni">DNI</label>
+          <input
+            id="react-dni"
+            name="dni"
+            type="text"
+            maxLength="9"
+            value={dni}
+            onChange={(event) => setDni(event.target.value)}
+            placeholder="10000001S"
+            className={errors.dni ? "is-invalid" : ""}
+          />
+          <small className="field-error">{errors.dni || ""}</small>
+        </div>
+
+        <div className="form__group">
+          <label htmlFor="react-password">Contraseña</label>
+          <input
+            id="react-password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Tu contraseña"
+            className={errors.password ? "is-invalid" : ""}
+          />
+          <small className="field-error">{errors.password || ""}</small>
+        </div>
+
+        <button
+          className="button button--primary button--block"
+          type="submit"
+          disabled={status === "loading"}
+        >
+          {status === "loading" ? "Autenticando..." : "Entrar"}
+        </button>
+
+        {message ? (
+          <p
+            className={`react-login__message ${
+              status === "success" ? "is-success" : "is-error"
+            }`}
+            role="status"
+          >
+            {message}
+          </p>
+        ) : null}
+      </form>
+    </section>
+  );
+}
+
+function toDateTimeLocalValue(value) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) {
+    return "";
+  }
+
+  const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localTime.toISOString().slice(0, 16);
+}
+
+function buildReservationForm(reservation) {
+  if (!reservation) {
+    return emptyReservationForm;
+  }
+
+  return {
+    spaceId: reservation.spaceId || "",
+    startDateTime: toDateTimeLocalValue(reservation.startDateTime),
+    endDateTime: toDateTimeLocalValue(reservation.endDateTime),
+    purpose: reservation.purpose || ""
+  };
+}
+
+function ReservationForm({
+  initialReservation = null,
+  onCancelEdit,
+  onReservationSaved,
+  session,
+  spaces,
+  spacesStatus
+}) {
+  const [formData, setFormData] = useState(() => buildReservationForm(initialReservation));
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("idle");
+  const isEditing = Boolean(initialReservation);
+
+  useEffect(() => {
+    setFormData(buildReservationForm(initialReservation));
+    setErrors({});
+    setMessage("");
+    setStatus("idle");
+  }, [initialReservation]);
+
+  function updateField(field, value) {
+    setFormData((current) => ({
+      ...current,
+      [field]: value
+    }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setStatus("loading");
+    setMessage("");
+    setErrors({});
+
+    const result = isEditing
+      ? await editReservationWithApi(initialReservation.id, formData, {
+          token: session.token
+        })
+      : await createReservationWithApi(formData, {
+          token: session.token
+        });
+
+    if (!result.ok) {
+      setStatus("error");
+      setErrors(result.errors || {});
+      setMessage(result.message);
+      return;
+    }
+
+    setStatus("success");
+    setMessage(result.message);
+    onReservationSaved(result.reservation, isEditing ? "edit" : "create");
+    setFormData(emptyReservationForm);
+  }
+
+  return (
+    <section className="surface react-panel">
+      <div className="react-panel__header">
+        <h2>{isEditing ? "Editar reserva propia" : "Registrar una nueva reserva"}</h2>
+      </div>
+
+      <form className="form react-reservation-form" onSubmit={handleSubmit} noValidate>
+        <div className="form__grid">
+          <div className="form__group">
+            <label htmlFor="spaceId">Espacio</label>
+            <select
+              id="spaceId"
+              name="spaceId"
+              value={formData.spaceId}
+              onChange={(event) => updateField("spaceId", event.target.value)}
+              disabled={spacesStatus === "loading"}
+              className={errors.spaceId ? "is-invalid" : ""}
+            >
+              <option value="">
+                {spacesStatus === "loading" ? "Cargando espacios..." : "Selecciona un espacio"}
+              </option>
+              {spaces.map((space) => (
+                <option key={space.id} value={space.id}>
+                  {space.name}
+                </option>
+              ))}
+            </select>
+            <small className="field-error">{errors.spaceId || ""}</small>
+          </div>
+
+          <div className="form__group">
+            <label htmlFor="startDateTime">Inicio</label>
+            <input
+              id="startDateTime"
+              name="startDateTime"
+              type="datetime-local"
+              value={formData.startDateTime}
+              onChange={(event) => updateField("startDateTime", event.target.value)}
+              className={errors.startDateTime ? "is-invalid" : ""}
+            />
+            <small className="field-error">{errors.startDateTime || ""}</small>
+          </div>
+
+          <div className="form__group">
+            <label htmlFor="endDateTime">Fin</label>
+            <input
+              id="endDateTime"
+              name="endDateTime"
+              type="datetime-local"
+              value={formData.endDateTime}
+              onChange={(event) => updateField("endDateTime", event.target.value)}
+              className={errors.endDateTime ? "is-invalid" : ""}
+            />
+            <small className="field-error">{errors.endDateTime || ""}</small>
+          </div>
+
+          <div className="form__group form__group--wide">
+            <label htmlFor="purpose">Motivo</label>
+            <textarea
+              id="purpose"
+              name="purpose"
+              rows="4"
+              value={formData.purpose}
+              onChange={(event) => updateField("purpose", event.target.value)}
+              placeholder="Motivo opcional"
+            />
+          </div>
+        </div>
+
+        <button
+          className="button button--primary"
+          type="submit"
+          disabled={status === "loading" || spacesStatus === "loading"}
+        >
+          {status === "loading"
+            ? isEditing ? "Actualizando..." : "Registrando..."
+            : isEditing ? "Actualizar reserva" : "Registrar reserva"}
+        </button>
+        {isEditing ? (
+          <button className="button button--ghost" type="button" onClick={onCancelEdit}>
+            Cancelar edición
+          </button>
+        ) : null}
+
+        {message ? (
+          <p
+            className={`react-login__message ${
+              status === "success" ? "is-success" : "is-error"
+            }`}
+            role="status"
+          >
+            {message}
+          </p>
+        ) : null}
+      </form>
+    </section>
+  );
+}
+
+function ReservationsList({
+  onEditReservation,
+  onReservationCancelled,
+  reservations,
+  reservationsStatus,
+  session
+}) {
+  const [reservationStatusFilter, setReservationStatusFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
+  const [cancelStatusById, setCancelStatusById] = useState({});
+  const [message, setMessage] = useState("");
+  const visibleReservations = filterReservationsByStatus(
+    reservations,
+    reservationStatusFilter
+  );
+  const totalPages = Math.max(1, Math.ceil(visibleReservations.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedReservations = visibleReservations.slice(
+    (safeCurrentPage - 1) * pageSize,
+    safeCurrentPage * pageSize
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [reservationStatusFilter]);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
+
+  async function handleCancelReservation(reservationId) {
+    setMessage("");
+    setCancelStatusById((current) => ({
+      ...current,
+      [reservationId]: "loading"
+    }));
+
+    const result = await cancelReservationWithApi(reservationId, {
+      token: session.token
+    });
+
+    if (!result.ok) {
+      setCancelStatusById((current) => ({
+        ...current,
+        [reservationId]: "error"
+      }));
+      setMessage(result.message);
+      return;
+    }
+
+    setCancelStatusById((current) => ({
+      ...current,
+      [reservationId]: "done"
+    }));
+    setMessage(result.message);
+    onReservationCancelled(result.reservation);
+  }
+
+  return (
+    <section className="surface react-reservations">
+      <div className="react-reservations__header">
+        <div>
+          <h2>Listado de reservas propias</h2>
+        </div>
+
+        <div className="form__group react-reservations__filter">
+          <label htmlFor="reservationStatus">Estado</label>
+          <select
+            id="reservationStatus"
+            name="reservationStatus"
+            value={reservationStatusFilter}
+            onChange={(event) => setReservationStatusFilter(event.target.value)}
+          >
+            <option value="">Todos</option>
+            <option value="ACTIVA">ACTIVA</option>
+            <option value="CANCELADA">CANCELADA</option>
+          </select>
+        </div>
+      </div>
+
+      {reservationsStatus === "loading" ? (
+        <p className="muted">Cargando reservas...</p>
+      ) : visibleReservations.length === 0 ? (
+        <p className="muted">No hay reservas para el filtro seleccionado.</p>
+      ) : (
+        <>
+          <table className="table react-reservations__table">
+            <thead>
+              <tr>
+                <th>Espacio</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedReservations.map((reservation) => (
+                <tr key={reservation.id}>
+                  <td>{reservation.spaceName}</td>
+                  <td>{new Date(reservation.startDateTime).toLocaleString("es-ES")}</td>
+                  <td>{new Date(reservation.endDateTime).toLocaleString("es-ES")}</td>
+                  <td>
+                    <span
+                      className={`badge ${
+                        reservation.status === "CANCELADA" ? "badge--neutral" : ""
+                      }`}
+                    >
+                      {reservation.status}
+                    </span>
+                  </td>
+                  <td>
+                    {reservation.status === "ACTIVA" ? (
+                      <div className="table-actions">
+                        <button
+                          className="button button--ghost button--small"
+                          type="button"
+                          onClick={() => onEditReservation(reservation)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="button button--ghost button--small"
+                          type="button"
+                          disabled={cancelStatusById[reservation.id] === "loading"}
+                          onClick={() => handleCancelReservation(reservation.id)}
+                        >
+                          {cancelStatusById[reservation.id] === "loading" ? "Cancelando..." : "Cancelar"}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="muted">Sin acción</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="pagination react-reservations__pagination">
+            <button
+              className="button button--ghost button--small"
+              type="button"
+              disabled={safeCurrentPage === 1}
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            >
+              Anterior
+            </button>
+            <span className="pagination__status">
+              Página {safeCurrentPage} de {totalPages}
+            </span>
+            <button
+              className="button button--ghost button--small"
+              type="button"
+              disabled={safeCurrentPage === totalPages}
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+            >
+              Siguiente
+            </button>
+          </div>
+        </>
+      )}
+
+      {message ? <p className="react-reservations__message">{message}</p> : null}
+    </section>
+  );
+}
+
+function RecurrenceForm({ onRecurrenceCreated, reservations, session }) {
+  const activeReservations = reservations.filter((reservation) => reservation.status === "ACTIVA");
+  const [baseReservationId, setBaseReservationId] = useState("");
+  const [frequency, setFrequency] = useState("WEEKLY");
+  const [endDate, setEndDate] = useState("");
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("idle");
+  const selectedBaseReservation = activeReservations.find(
+    (reservation) => reservation.id === baseReservationId
+  );
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setStatus("loading");
+    setErrors({});
+    setMessage("");
+
+    const result = await createRecurrenceWithApi(
+      selectedBaseReservation,
+      {
+        frequency,
+        endDate
+      },
+      {
+        token: session.token
+      }
+    );
+
+    if (!result.ok) {
+      setStatus("error");
+      setErrors(result.errors || {});
+      setMessage(result.message);
+      return;
+    }
+
+    setStatus("success");
+    setMessage(result.message);
+    onRecurrenceCreated(result.createdReservations);
+    setBaseReservationId("");
+    setFrequency("WEEKLY");
+    setEndDate("");
+  }
+
+  return (
+    <section className="surface react-panel">
+      <div className="react-panel__header">
+        <h2>Crear reservas recurrentes</h2>
+      </div>
+
+      <form className="form react-reservation-form" onSubmit={handleSubmit} noValidate>
+        <div className="form__grid">
+          <div className="form__group form__group--wide">
+            <label htmlFor="baseReservationId">Reserva base</label>
+            <select
+              id="baseReservationId"
+              name="baseReservationId"
+              value={baseReservationId}
+              onChange={(event) => setBaseReservationId(event.target.value)}
+              className={errors.baseReservationId ? "is-invalid" : ""}
+            >
+              <option value="">Selecciona una reserva activa</option>
+              {activeReservations.map((reservation) => (
+                <option key={reservation.id} value={reservation.id}>
+                  {reservation.spaceName} · {new Date(reservation.startDateTime).toLocaleString("es-ES")}
+                </option>
+              ))}
+            </select>
+            <small className="field-error">{errors.baseReservationId || ""}</small>
+          </div>
+
+          <div className="form__group">
+            <label htmlFor="frequency">Frecuencia</label>
+            <select
+              id="frequency"
+              name="frequency"
+              value={frequency}
+              onChange={(event) => setFrequency(event.target.value)}
+              className={errors.frequency ? "is-invalid" : ""}
+            >
+              <option value="DAILY">Diaria</option>
+              <option value="WEEKLY">Semanal</option>
+              <option value="MONTHLY">Mensual</option>
+              <option value="YEARLY">Anual</option>
+            </select>
+            <small className="field-error">{errors.frequency || ""}</small>
+          </div>
+
+          <div className="form__group">
+            <label htmlFor="endDate">Fecha fin</label>
+            <input
+              id="endDate"
+              name="endDate"
+              type="date"
+              value={endDate}
+              onChange={(event) => setEndDate(event.target.value)}
+              className={errors.endDate ? "is-invalid" : ""}
+            />
+            <small className="field-error">{errors.endDate || ""}</small>
+          </div>
+        </div>
+
+        <button className="button button--primary" type="submit" disabled={status === "loading"}>
+          {status === "loading" ? "Creando..." : "Crear recurrencias"}
+        </button>
+
+        {message ? (
+          <p
+            className={`react-login__message ${
+              status === "success" ? "is-success" : "is-error"
+            }`}
+            role="status"
+          >
+            {message}
+          </p>
+        ) : null}
+      </form>
+    </section>
+  );
+}
+
+function AuthenticatedApp({ session, onLogout }) {
+  const [activeView, setActiveView] = useState("reservations");
+  const [editingReservation, setEditingReservation] = useState(null);
+  const [spaces, setSpaces] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [message, setMessage] = useState("");
+  const [spacesStatus, setSpacesStatus] = useState("loading");
+  const [reservationsStatus, setReservationsStatus] = useState("loading");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadInitialData() {
+      setSpacesStatus("loading");
+      setReservationsStatus("loading");
+      const [spacesResult, reservationsResult] = await Promise.all([
+        fetchSpaces(),
+        fetchOwnReservations({ token: session.token })
+      ]);
+
+      if (!active) {
+        return;
+      }
+
+      if (!spacesResult.ok) {
+        setSpacesStatus("error");
+        setMessage(spacesResult.message);
+      } else {
+        setSpaces(spacesResult.spaces);
+        setSpacesStatus("ready");
+      }
+
+      if (!reservationsResult.ok) {
+        setReservationsStatus("error");
+        setMessage(reservationsResult.message);
+      } else {
+        setReservations(reservationsResult.reservations);
+        setReservationsStatus("ready");
+      }
+    }
+
+    loadInitialData();
+
+    return () => {
+      active = false;
+    };
+  }, [session.token]);
+
+  function handleReservationSaved(reservation, mode) {
+    setReservations((current) =>
+      mode === "edit" ? replaceReservation(current, reservation) : [reservation, ...current]
+    );
+    setEditingReservation(null);
+    setActiveView("reservations");
+  }
+
+  function handleReservationCancelled(reservation) {
+    setReservations((current) => replaceReservation(current, reservation));
+  }
+
+  function handleRecurrenceCreated(createdReservations) {
+    setReservations((current) => [...createdReservations, ...current]);
+    setActiveView("reservations");
+  }
+
+  function handleEditReservation(reservation) {
+    setEditingReservation(reservation);
+    setActiveView("edit");
+  }
+
+  function showNewReservationForm() {
+    setEditingReservation(null);
+    setActiveView("new");
+  }
+
+  return (
+    <section className="react-dashboard">
+      <header className="react-dashboard__header">
+        <div>
+          <h1>
+            {activeView === "edit"
+              ? "Editar reserva"
+              : activeView === "new"
+                ? "Registrar una nueva reserva"
+                : activeView === "recurrence"
+                  ? "Reservas recurrentes"
+                  : "Mis reservas"}
+          </h1>
+          <p>{session.user.name}</p>
+        </div>
+        <button className="button button--ghost" type="button" onClick={onLogout}>
+          Cerrar sesión
+        </button>
+      </header>
+
+      <nav className="react-dashboard__nav" aria-label="Navegación del cliente React">
+        <button
+          className={`button ${activeView === "reservations" ? "button--primary" : "button--ghost"}`}
+          type="button"
+          onClick={() => setActiveView("reservations")}
+        >
+          Mis reservas
+        </button>
+        <button
+          className={`button ${activeView === "new" || activeView === "edit" ? "button--primary" : "button--ghost"}`}
+          type="button"
+          onClick={showNewReservationForm}
+        >
+          Nueva reserva
+        </button>
+        <button
+          className={`button ${activeView === "recurrence" ? "button--primary" : "button--ghost"}`}
+          type="button"
+          onClick={() => {
+            setEditingReservation(null);
+            setActiveView("recurrence");
+          }}
+        >
+          Recurrentes
+        </button>
+      </nav>
+
+      {message ? <p className="react-dashboard__message">{message}</p> : null}
+
+      {activeView === "new" || activeView === "edit" ? (
+        <ReservationForm
+          initialReservation={activeView === "edit" ? editingReservation : null}
+          onCancelEdit={() => {
+            setEditingReservation(null);
+            setActiveView("reservations");
+          }}
+          session={session}
+          spaces={spaces}
+          spacesStatus={spacesStatus}
+          onReservationSaved={handleReservationSaved}
+        />
+      ) : activeView === "recurrence" ? (
+        <RecurrenceForm
+          onRecurrenceCreated={handleRecurrenceCreated}
+          reservations={reservations}
+          session={session}
+        />
+      ) : (
+        <ReservationsList
+          onEditReservation={handleEditReservation}
+          session={session}
+          reservations={reservations}
+          reservationsStatus={reservationsStatus}
+          onReservationCancelled={handleReservationCancelled}
+        />
+      )}
+    </section>
+  );
+}
+
+export function App() {
+  const [session, setSession] = useState(readStoredSession);
+
+  function handleLogout() {
+    window.localStorage.removeItem("apiToken");
+    window.localStorage.removeItem("apiUser");
+    setSession(null);
+  }
+
+  return (
+    <main className="react-page">
+      {session ? (
+        <AuthenticatedApp session={session} onLogout={handleLogout} />
+      ) : (
+        <LoginForm onLogin={setSession} />
+      )}
+    </main>
+  );
+}

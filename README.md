@@ -1,6 +1,6 @@
 # sdi2526-entregable2-72
 
-Aplicacion web de gestion de reservas de espacios para SDI 2025/2026.
+Aplicación web de gestión de reservas de espacios para SDI 2025/2026.
 
 ## Requisitos locales
 
@@ -9,7 +9,7 @@ Aplicacion web de gestion de reservas de espacios para SDI 2025/2026.
 
 ## Arranque
 
-1. Copia `.env.example` a `.env` si quieres cambiar configuracion.
+1. Copia `.env.example` a `.env` si quieres cambiar configuración.
 2. Arranca MongoDB local.
 3. Ejecuta:
 
@@ -18,4 +18,4 @@ npm install
 npm start
 ```
 
-Por defecto la aplicacion usa `RESET_DB_ON_START=true`, asi que regenera datos de prueba en cada arranque para que las pruebas sean repetibles.
+Por defecto la aplicación usa `RESET_DB_ON_START=true`, así que regenera datos de prueba en cada arranque para que las pruebas sean repetibles.
