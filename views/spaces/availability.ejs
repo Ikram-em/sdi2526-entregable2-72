@@ -9,11 +9,11 @@
       <h1><%= space.name %></h1>
       <p>Consulta un rango de fechas para ver reservas activas y bloqueos de mantenimiento que afectan al espacio.</p>
     </div>
-    <a class="button button--ghost" href="/spaces/<%= space.id %>">Volver al detalle</a>
+    <a class="button button--ghost" href="/spaces/<%= space._id %>">Volver al detalle</a>
   </section>
 
   <section class="surface">
-    <form class="form form--inline" method="get" action="/spaces/<%= space.id %>/availability" data-validate="availability" novalidate>
+    <form class="form form--inline" method="get" action="/spaces/<%= space._id %>/availability" data-validate="availability" novalidate>
       <div class="form__group">
         <label for="from">Inicio</label>
         <input id="from" name="from" type="datetime-local" value="<%= range.from %>" />
