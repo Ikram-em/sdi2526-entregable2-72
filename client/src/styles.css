@@ -52,6 +52,34 @@ body {
   color: var(--danger);
 }
 
+.react-dashboard {
+  width: min(960px, 100%);
+}
+
+.react-dashboard__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.react-dashboard__header h1 {
+  margin: 10px 0 8px;
+  font-size: 36px;
+  line-height: 1.15;
+}
+
+.react-dashboard__header p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.react-reservation-form {
+  width: 100%;
+}
+
 @media (max-width: 760px) {
   .react-login {
     grid-template-columns: 1fr;
@@ -59,5 +87,13 @@ body {
 
   .react-login__intro h1 {
     font-size: 32px;
+  }
+
+  .react-dashboard__header {
+    flex-direction: column;
+  }
+
+  .react-dashboard__header h1 {
+    font-size: 30px;
   }
 }
