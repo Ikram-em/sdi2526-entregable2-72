@@ -5,14 +5,14 @@
 <main class="shell page">
   <section class="section-header">
     <div>
-      <span class="eyebrow">W10 · Espacios activos</span>
-      <h1>Listado de espacios disponibles</h1>
-      <p>Consulta nombre, tipo, ubicación y capacidad; aplica filtrado por tipo o aforo mínimo.</p>
+      <span class="eyebrow">Espacios disponibles</span>
+      <h1>Encuentra un espacio</h1>
+      <p>Filtra por tipo o capacidad y reserva en segundos.</p>
     </div>
   </section>
 
-  <section class="surface surface--filter">
-    <form class="filter-bar" method="get" action="/spaces" data-validate="space-filter" novalidate>
+  <section class="surface surface--filter surface--filter-hero">
+    <form class="filter-bar filter-bar--spaces" method="get" action="/spaces" data-validate="space-filter" novalidate>
       <div class="form__group">
         <label for="type">Tipo</label>
         <select id="type" name="type">
@@ -21,6 +21,7 @@
             <option value="<%= type %>" <%= filters.type === type ? 'selected' : '' %>><%= type %></option>
           <% }) %>
         </select>
+        <small class="field-error" data-error-for="type"></small>
       </div>
 
       <div class="form__group">
@@ -30,10 +31,18 @@
       </div>
 
       <div class="filter-bar__actions">
-        <button class="button button--primary" type="submit">Filtrar</button>
-        <a class="button button--ghost" href="/spaces">Limpiar</a>
+        <button class="button button--primary" type="submit">Buscar</button>
+        <a class="text-link text-link--subtle" href="/spaces">Limpiar</a>
       </div>
     </form>
+
+    <% if (types.length) { %>
+      <div class="quick-filters" aria-label="Filtros rápidos por tipo">
+        <% types.forEach((type) => { %>
+          <a class="quick-filters__chip <%= filters.type === type ? 'is-active' : '' %>" href="/spaces?<%= new URLSearchParams({ type }).toString() %>"><%= type %></a>
+        <% }) %>
+      </div>
+    <% } %>
   </section>
 
   <section class="space-grid">
@@ -45,17 +54,40 @@
     <% } %>
 
     <% spaces.forEach((space) => { %>
+      <% const compactLocation = String(space.location || "").replace(/,\s*/g, " · "); %>
+      <% const amenitiesPreview = (space.amenities || []).slice(0, 3).join(" · "); %>
       <article class="surface space-card">
         <div class="space-card__top">
           <span class="badge"><%= space.type %></span>
           <span class="capacity"><%= space.capacity %> plazas</span>
         </div>
         <h2><%= space.name %></h2>
-        <p><%= space.location %></p>
-        <p class="space-card__description"><%= space.description %></p>
+        <div class="space-card__meta">
+          <span class="space-card__meta-item">
+            <span class="icon icon--muted" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </span>
+            <span><%= compactLocation %></span>
+          </span>
+          <span class="space-card__meta-item">
+            <span class="icon icon--muted" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="8.5" cy="7" r="4"></circle>
+                <path d="M20 8v6"></path>
+                <path d="M23 11h-6"></path>
+              </svg>
+            </span>
+            <span><%= space.capacity %> plazas</span>
+          </span>
+        </div>
+        <p class="space-card__description"><%= amenitiesPreview || space.description %></p>
         <div class="space-card__actions">
-          <a class="button button--primary" href="/spaces/<%= space._id %>">Ver detalle</a>
-          <a class="button button--ghost" href="/spaces/<%= space._id %>/availability">Disponibilidad</a>
+          <a class="button button--primary" href="/spaces/<%= space._id %>/availability">Ver disponibilidad</a>
+          <a class="button button--ghost" href="/spaces/<%= space._id %>">Detalles</a>
         </div>
       </article>
     <% }) %>

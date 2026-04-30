@@ -4,35 +4,59 @@
       <span class="brand__badge">SDI</span>
       <span class="brand__text">
         <strong>Gestión de espacios</strong>
-        <small>Parte 1 · Cliente web jQuery</small>
+        <small>Reservas internas</small>
       </span>
     </a>
 
-    <nav class="nav">
+    <nav class="nav <%= currentUser ? 'nav--authenticated' : 'nav--guest' %>">
       <% if (!currentUser) { %>
-        <a class="nav__link <%= currentPath === '/login' ? 'is-active' : '' %>" href="/login">Login</a>
-        <a class="nav__link <%= currentPath === '/register' ? 'is-active' : '' %>" href="/register">Registro</a>
+        <div class="nav__group">
+          <a class="nav__link <%= currentPath === '/login' ? 'is-active' : '' %>" href="/login">Login</a>
+          <a class="nav__link <%= currentPath === '/register' ? 'is-active' : '' %>" href="/register">Registro</a>
+        </div>
       <% } %>
 
       <% if (currentUser && currentUser.role === 'standard') { %>
-        <a class="nav__link <%= currentPath === '/spaces' ? 'is-active' : '' %>" href="/spaces">Espacios</a>
-        <a class="nav__link <%= currentPath.startsWith('/reservations') ? 'is-active' : '' %>" href="/reservations/mine">Mis reservas</a>
-        <a class="nav__link <%= currentPath === '/account/password' ? 'is-active' : '' %>" href="/account/password">Contraseña</a>
+        <div class="nav__group">
+          <a class="nav__link <%= currentPath === '/spaces' ? 'is-active' : '' %>" href="/spaces">Espacios</a>
+          <a class="nav__link <%= currentPath.startsWith('/reservations') ? 'is-active' : '' %>" href="/reservations/mine">Mis reservas</a>
+        </div>
       <% } %>
 
       <% if (currentUser && currentUser.role === 'admin') { %>
-        <a class="nav__link <%= currentPath.startsWith('/admin/reservations') ? 'is-active' : '' %>" href="/admin/reservations">Reservas</a>
-        <a class="nav__link <%= currentPath.startsWith('/admin/spaces') || currentPath.startsWith('/admin/blocks') ? 'is-active' : '' %>" href="/admin/spaces">Espacios</a>
-        <a class="nav__link <%= currentPath.startsWith('/admin/users') ? 'is-active' : '' %>" href="/admin/users">Usuarios</a>
+        <div class="nav__group">
+          <a class="nav__link <%= currentPath.startsWith('/admin/reservations') ? 'is-active' : '' %>" href="/admin/reservations">Reservas</a>
+          <a class="nav__link <%= currentPath.startsWith('/admin/spaces') || currentPath.startsWith('/admin/blocks') ? 'is-active' : '' %>" href="/admin/spaces">Espacios</a>
+          <a class="nav__link <%= currentPath.startsWith('/admin/users') ? 'is-active' : '' %>" href="/admin/users">Usuarios</a>
+        </div>
       <% } %>
     </nav>
 
     <div class="session-box">
       <% if (currentUser) { %>
-        <div class="session-box__meta">
-          <span class="session-box__name"><%= currentUser.fullName %></span>
-          <small><%= currentUser.role === 'admin' ? 'Administrador' : 'Usuario estándar' %></small>
-        </div>
+        <details class="account-menu">
+          <summary class="account-menu__summary">
+            <span class="session-box__avatar">
+              <%= currentUser.fullName.split(' ').map((part) => part.charAt(0)).slice(0, 2).join('') %>
+            </span>
+            <span class="session-box__meta">
+              <span class="session-box__name"><%= currentUser.fullName %></span>
+              <small><%= currentUser.role === 'admin' ? 'Administrador' : 'Usuario estándar' %></small>
+            </span>
+            <span class="account-menu__chevron" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </span>
+          </summary>
+
+          <div class="account-menu__dropdown">
+            <a class="account-menu__item <%= currentPath === '/account/profile' ? 'is-active' : '' %>" href="/account/profile">Mi perfil</a>
+            <% if (currentUser.role === 'standard') { %>
+              <a class="account-menu__item <%= currentPath === '/account/password' ? 'is-active' : '' %>" href="/account/password">Cambiar contraseña</a>
+            <% } %>
+          </div>
+        </details>
         <form action="/logout" method="post">
           <button class="button button--ghost" type="submit">Cerrar sesión</button>
         </form>

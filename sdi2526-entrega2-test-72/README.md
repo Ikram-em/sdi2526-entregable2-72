@@ -4,9 +4,11 @@ Proyecto de pruebas Selenium + JUnit 5 basado en la plantilla proporcionada por 
 
 ## Pruebas implementadas
 
-La clase `ReactSeleniumTests` contiene las pruebas de React de la `Prueba49` a la `Prueba60`.
+- `WebFrontendSeleniumTests`: pruebas de la parte de Ikram en la web principal:
+  `Prueba1` a `Prueba10`, `Prueba26` a `Prueba29` y `Prueba32` a `Prueba33`.
+- `ReactSeleniumTests`: `Prueba49` a `Prueba60` del cliente React.
 
-La clase `Sdi2425Entrega2TestApplicationTests` se mantiene como plantilla original, pero queda desactivada para que no fallen las pruebas placeholder.
+La clase `Sdi2425Entrega2TestApplicationTests` se mantiene como plantilla original y queda desactivada.
 
 ## Ejecución
 
@@ -20,6 +22,12 @@ RESET_DB_ON_START=true npm start
 
 ```bash
 mvn test -DbaseUrl=http://localhost:3000 -Dtest=ReactSeleniumTests
+```
+
+Para la suite web:
+
+```bash
+mvn test -DbaseUrl=http://localhost:3000 -Dtest=WebFrontendSeleniumTests
 ```
 
 Opcionalmente se puede cambiar de navegador:

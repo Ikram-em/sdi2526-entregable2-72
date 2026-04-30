@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+const Reservation = require("../models/Reservation");
+const Space = require("../models/Space");
 const { buildSessionUser, setFlash } = require("../middleware/auth");
 const { isValidDni, isValidPassword, normalizeDni } = require("../utils/validation");
 
@@ -129,6 +131,35 @@ async function showChangePassword(req, res) {
   });
 }
 
+async function showProfile(req, res) {
+  const user = await User.findById(req.session.user.id).lean();
+
+  if (!user) {
+    setFlash(req, "error", "No se ha podido cargar tu perfil.");
+    return res.redirect("/login");
+  }
+
+  const metrics = user.role === "admin"
+    ? {
+        primaryLabel: "Reservas registradas",
+        primaryValue: await Reservation.countDocuments(),
+        secondaryLabel: "Espacios activos",
+        secondaryValue: await Space.countDocuments({ active: true })
+      }
+    : {
+        primaryLabel: "Reservas activas",
+        primaryValue: await Reservation.countDocuments({ user: user._id, status: "ACTIVA" }),
+        secondaryLabel: "Reservas totales",
+        secondaryValue: await Reservation.countDocuments({ user: user._id })
+      };
+
+  return res.render("auth/profile", {
+    title: "Mi perfil",
+    profile: user,
+    metrics
+  });
+}
+
 async function changePassword(req, res) {
   const body = req.body || {};
   const currentPassword = body.currentPassword || "";
@@ -172,6 +203,7 @@ module.exports = {
   logout,
   register,
   showChangePassword,
+  showProfile,
   showLogin,
   showRegister
 };

@@ -19,6 +19,7 @@ router.post("/register", requireGuest, authController.register);
 router.get("/login", requireGuest, authController.showLogin);
 router.post("/login", requireGuest, authController.login);
 router.post("/logout", requireAuth, authController.logout);
+router.get("/account/profile", requireAuth, authController.showProfile);
 
 router.get("/spaces", requireStandard, spaceController.listSpaces);
 router.get("/spaces/:spaceId", requireStandard, spaceController.showSpace);

@@ -1,3 +1,5 @@
+const User = require("../models/User");
+
 function setFlash(req, type, message) {
   req.session.flash = { type, message };
 }
@@ -9,6 +11,23 @@ function buildSessionUser(user) {
     fullName: `${user.firstName} ${user.lastName}`,
     role: user.role
   };
+}
+
+async function syncSessionUser(req, res, next) {
+  if (!req.session.user?.id) {
+    return next();
+  }
+
+  const user = await User.findById(req.session.user.id);
+
+  if (!user) {
+    delete req.session.user;
+    setFlash(req, "error", "Tu sesion ya no es valida. Inicia sesion de nuevo.");
+    return req.session.save(next);
+  }
+
+  req.session.user = buildSessionUser(user);
+  return next();
 }
 
 function requireGuest(req, res, next) {
@@ -62,5 +81,6 @@ module.exports = {
   requireAuth,
   requireGuest,
   requireStandard,
+  syncSessionUser,
   setFlash
 };
