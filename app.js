@@ -9,6 +9,7 @@ const apiRoutes = require("./src/routes/api");
 const webRoutes = require("./src/routes/web");
 const { connectDatabase, defaultUri } = require("./src/config/database");
 const { seedDatabase } = require("./src/services/seedService");
+const { syncSessionUser } = require("./src/middleware/auth");
 const {
   formatDateInput,
   formatDateTime,
@@ -56,6 +57,7 @@ app.use("/api", (err, req, res, next) => {
   return next(err);
 });
 
+app.use(syncSessionUser);
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   res.locals.currentPath = req.path;

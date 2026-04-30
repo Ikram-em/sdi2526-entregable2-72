@@ -5,31 +5,45 @@
 <main class="shell page page--auth">
   <section class="auth-panel auth-panel--wide">
     <div class="auth-panel__intro">
-      <span class="eyebrow">W2 · Inicio de sesión</span>
+      <span class="eyebrow">Acceso seguro</span>
       <h1>Accede a la gestión de reservas</h1>
-      <p>Introduce tu DNI y tu contraseña. El acceso de administrador redirige al listado global de reservas; el usuario estándar entra al listado de espacios activos.</p>
-      <div class="credential-card">
-        <strong>Credenciales admin de prueba</strong>
-        <span>DNI: 12345678Z</span>
-        <span>Password: @Dm1n1str@D0r</span>
+      <p>Inicia sesión con tu DNI y tu contraseña para consultar espacios, revisar disponibilidad y gestionar tus operaciones.</p>
+      <div class="feature-list">
+        <article class="feature-card">
+          <strong>Consulta rápida</strong>
+          <span>Accede al listado de espacios y revisa su disponibilidad en pocos pasos.</span>
+        </article>
+        <article class="feature-card">
+          <strong>Gestión clara</strong>
+          <span>Consulta tu actividad y mantén tus reservas organizadas desde una interfaz simple y directa.</span>
+        </article>
       </div>
     </div>
 
     <form class="surface form" action="/login" method="post" data-validate="login" novalidate>
       <div class="form__group">
         <label for="dni">DNI</label>
-        <input id="dni" name="dni" type="text" maxlength="9" value="<%= formData?.dni || '' %>" placeholder="12345678Z" />
+        <input id="dni" name="dni" type="text" maxlength="9" value="<%= formData?.dni || '' %>" placeholder="Ej. 12345678Z" autocomplete="username" />
         <small class="field-error" data-error-for="dni"></small>
       </div>
 
       <div class="form__group">
         <label for="password">Contraseña</label>
-        <input id="password" name="password" type="password" placeholder="Tu contraseña" />
+        <div class="input-shell">
+          <input id="password" name="password" type="password" placeholder="Introduce tu contraseña" autocomplete="current-password" />
+          <button class="password-toggle" type="button" data-password-toggle="password" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3.25" fill="none" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+            <span class="sr-only">Mostrar contraseña</span>
+          </button>
+        </div>
         <small class="field-error" data-error-for="password"></small>
       </div>
 
       <button class="button button--primary button--block" type="submit">Entrar</button>
-      <p class="form__hint">Si aún no tienes cuenta, completa el registro de usuario estándar.</p>
+      <p class="form__hint">Si todavía no tienes cuenta, completa el registro de usuario estándar.</p>
       <a class="text-link" href="/register">Ir al registro</a>
     </form>
   </section>

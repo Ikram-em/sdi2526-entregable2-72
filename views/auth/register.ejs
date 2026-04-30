@@ -5,46 +5,74 @@
 <main class="shell page page--auth">
   <section class="auth-panel">
     <div class="auth-panel__intro">
-      <span class="eyebrow">W1 · Registro</span>
+      <span class="eyebrow">Alta de usuario</span>
       <h1>Crear usuario estándar</h1>
-      <p>La pantalla válida DNI, campos obligatorios, duplicados y política de contraseña antes de enviar el formulario.</p>
+      <p>Completa tus datos personales y establece una contraseña robusta para activar tu acceso a la plataforma.</p>
+      <div class="feature-list">
+        <article class="feature-card">
+          <strong>Registro guiado</strong>
+          <span>Validación inmediata de DNI, campos obligatorios y confirmación de contraseña.</span>
+        </article>
+        <article class="feature-card">
+          <strong>Acceso seguro</strong>
+          <span>La contraseña debe cumplir una política clara para proteger el acceso a tu cuenta.</span>
+        </article>
+      </div>
     </div>
 
     <form class="surface form" action="/register" method="post" data-validate="register" novalidate>
       <div class="form__grid">
         <div class="form__group">
           <label for="dni">DNI</label>
-          <input id="dni" name="dni" type="text" maxlength="9" value="<%= formData?.dni || '' %>" placeholder="12345678Z" />
+          <input id="dni" name="dni" type="text" maxlength="9" value="<%= formData?.dni || '' %>" placeholder="Ej. 12345678Z" autocomplete="username" />
           <small class="field-error" data-error-for="dni"></small>
         </div>
 
         <div class="form__group">
           <label for="firstName">Nombre</label>
-          <input id="firstName" name="firstName" type="text" value="<%= formData?.firstName || '' %>" placeholder="Nombre" />
+          <input id="firstName" name="firstName" type="text" value="<%= formData?.firstName || '' %>" placeholder="Ej. Lucía" autocomplete="given-name" />
           <small class="field-error" data-error-for="firstName"></small>
         </div>
 
         <div class="form__group">
           <label for="lastName">Apellidos</label>
-          <input id="lastName" name="lastName" type="text" value="<%= formData?.lastName || '' %>" placeholder="Apellidos" />
+          <input id="lastName" name="lastName" type="text" value="<%= formData?.lastName || '' %>" placeholder="Ej. Fernández Suárez" autocomplete="family-name" />
           <small class="field-error" data-error-for="lastName"></small>
         </div>
 
         <div class="form__group">
           <label for="password">Contraseña</label>
-          <input id="password" name="password" type="password" placeholder="12-20 caracteres" />
+          <div class="input-shell">
+            <input id="password" name="password" type="password" placeholder="Entre 12 y 20 caracteres" autocomplete="new-password" />
+            <button class="password-toggle" type="button" data-password-toggle="password" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3.25" fill="none" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+              <span class="sr-only">Mostrar contraseña</span>
+            </button>
+          </div>
           <small class="field-error" data-error-for="password"></small>
         </div>
 
         <div class="form__group">
           <label for="confirmPassword">Confirmar contraseña</label>
-          <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Repite la contraseña" />
+          <div class="input-shell">
+            <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Vuelve a escribir la contraseña" autocomplete="new-password" />
+            <button class="password-toggle" type="button" data-password-toggle="confirmPassword" aria-label="Mostrar confirmación de contraseña" title="Mostrar confirmación de contraseña">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3.25" fill="none" stroke="currentColor" stroke-width="1.8"/>
+              </svg>
+              <span class="sr-only">Mostrar confirmación de contraseña</span>
+            </button>
+          </div>
           <small class="field-error" data-error-for="confirmPassword"></small>
         </div>
       </div>
 
       <div class="rules-box">
-        <strong>Politica de contraseña</strong>
+        <strong>Política de contraseña</strong>
         <ul>
           <li>Entre 12 y 20 caracteres.</li>
           <li>Al menos una mayúscula, una minúscula, un número y un símbolo.</li>

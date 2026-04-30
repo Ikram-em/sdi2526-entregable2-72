@@ -5,7 +5,7 @@
 <main class="shell page">
   <section class="section-header">
     <div>
-      <span class="eyebrow">W7 · W8</span>
+      <span class="eyebrow">Mantenimiento</span>
       <h1>Bloqueos de <%= space.name %></h1>
       <p>Crea bloqueos de mantenimiento y cancela bloqueos activos conservando el histórico.</p>
     </div>
@@ -29,12 +29,15 @@
           <textarea id="reason" name="reason" rows="4"><%= formData.reason || '' %></textarea>
         </div>
       </div>
-      <button class="button button--primary" type="submit">Crear bloqueo</button>
+      <div class="form__actions">
+        <button class="button button--primary" type="submit">Crear bloqueo</button>
+        <a class="button button--ghost" href="/admin/spaces">Cancelar</a>
+      </div>
     </form>
   </section>
 
   <section class="surface">
-    <h2>Historico de bloqueos</h2>
+    <h2>Histórico de bloqueos</h2>
     <table class="table">
       <thead>
         <tr>

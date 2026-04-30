@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Space = require("../models/Space");
@@ -184,7 +185,7 @@ function buildBlocks(adminUser, spaces) {
 }
 
 async function seedDatabase() {
-  const shouldReset = process.env.RESET_DB_ON_START !== "false";
+  const shouldReset = process.env.RESET_DB_ON_START === "true";
   const existingUsers = await User.countDocuments();
 
   if (!shouldReset && existingUsers > 0) {
@@ -192,6 +193,7 @@ async function seedDatabase() {
   }
 
   await Promise.all([
+    mongoose.connection.collection("sessions").deleteMany({}),
     Block.deleteMany({}),
     Reservation.deleteMany({}),
     Space.deleteMany({}),

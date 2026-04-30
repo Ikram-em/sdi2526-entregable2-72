@@ -18,4 +18,6 @@ npm install
 npm start
 ```
 
-Por defecto la aplicación usa `RESET_DB_ON_START=true`, así que regenera datos de prueba en cada arranque para que las pruebas sean repetibles.
+Por defecto la aplicación usa `RESET_DB_ON_START=false`, así que conserva usuarios, reservas y sesiones entre reinicios.
+
+Si necesitas regenerar los datos de prueba para una ejecución concreta, arranca con `RESET_DB_ON_START=true`.
