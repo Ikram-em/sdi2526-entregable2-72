@@ -3,12 +3,14 @@ package com.uniovi.sdi2425entrega2test.n;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -234,6 +236,376 @@ class WebFrontendSeleniumTests extends SeleniumTestBase {
     assertPageContains("Todos los campos son obligatorios.");
   }
 
+  @Test
+  @DisplayName("Prueba 11 - Registrar un nuevo espacio con datos válidos (administrador).")
+  void prueba11_registrarEspacioValidoAdmin() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    String spaceName = "Espacio Selenium " + System.nanoTime();
+    createSpace(spaceName, "Sala de reuniones", 6, "Edificio Test, Planta 1", "Wifi, Pizarra", "Espacio creado por Selenium.");
+
+    wait.until(ExpectedConditions.urlContains("/admin/spaces"));
+    assertPageContains("Espacio registrado correctamente.");
+    assertPageContains(spaceName);
+  }
+
+  @Test
+  @DisplayName("Prueba 12 - Registrar un nuevo espacio con datos inválidos (nombre vacío).")
+  void prueba12_registrarEspacioNombreVacio() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    type(By.id("name"), " ");
+    selectByVisibleText(By.id("type"), "Sala de reuniones");
+    type(By.id("capacity"), "5");
+    type(By.id("location"), "Edificio Test, Planta 2");
+    clickButton("Registrar espacio");
+
+    wait.until(ExpectedConditions.urlContains("/admin/spaces"));
+    assertPageContains("El nombre del espacio es obligatorio.");
+  }
+
+  @Test
+  @DisplayName("Prueba 13 - Registrar un nuevo espacio con datos inválidos (capacidad menor que 1).")
+  void prueba13_registrarEspacioCapacidadInvalida() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    type(By.id("name"), "Espacio Capacidad 0 " + System.nanoTime());
+    selectByVisibleText(By.id("type"), "Aula");
+    type(By.id("capacity"), "0");
+    type(By.id("location"), "Edificio Test, Planta 3");
+    clickButton("Registrar espacio");
+
+    wait.until(ExpectedConditions.urlContains("/admin/spaces"));
+    assertPageContains("La capacidad debe ser un número entero mayor o igual que 1.");
+  }
+
+  @Test
+  @DisplayName("Prueba 15 - Editar un espacio existente con datos válidos. Hay que confirmar que los datos se modifican.")
+  void prueba15_editarEspacioValido() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    String spaceName = "Espacio Editar " + System.nanoTime();
+    createSpace(spaceName, "Coworking", 8, "Ubicación inicial", "", "");
+    String spaceId = findSpaceIdByName(spaceName);
+
+    open("/admin/spaces/" + spaceId + "/edit");
+    type(By.id("location"), "Ubicación modificada");
+    type(By.id("capacity"), "9");
+    type(By.id("description"), "Descripción modificada");
+    clickButton("Guardar cambios");
+
+    wait.until(ExpectedConditions.urlContains("/admin/spaces"));
+    assertPageContains("Espacio actualizado correctamente.");
+    assertPageContains("Ubicación modificada");
+  }
+
+  @Test
+  @DisplayName("Prueba 16 - Editar un espacio existente con datos inválidos (capacidad menor que 1). Hay que confirmar que los datos NO se modifican y se devuelven los mensajes de errores correspondientes.")
+  void prueba16_editarEspacioCapacidadInvalidaNoModifica() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    String spaceName = "Espacio Editar Inv " + System.nanoTime();
+    createSpace(spaceName, "Aula", 10, "Ubicación estable", "", "Descripcion estable");
+    String spaceId = findSpaceIdByName(spaceName);
+
+    open("/admin/spaces/" + spaceId + "/edit");
+    type(By.id("capacity"), "0");
+    clickButton("Guardar cambios");
+
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/" + spaceId + "/edit"));
+    assertPageContains("La capacidad debe ser un número entero mayor o igual que 1.");
+
+    open("/admin/spaces");
+    assertPageContains(spaceName);
+    assertPageContains("Ubicación estable");
+  }
+
+  @Test
+  @DisplayName("Prueba 17 - Desactivar un espacio y verificar que no se puede reservar.")
+  void prueba17_desactivarEspacioNoReservable() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    String targetName = "Sala Naranco";
+    String spaceId = findSpaceIdByName(targetName);
+    boolean wasActive = isSpaceActiveByName(targetName);
+    if (!wasActive) {
+      toggleSpaceByName(targetName);
+      wait.until(ExpectedConditions.urlContains("/admin/spaces"));
+    }
+
+    toggleSpaceByName(targetName);
+    assertPageContains("Espacio desactivado correctamente.");
+
+    clickButton("Cerrar sesión");
+    wait.until(ExpectedConditions.urlContains("/login"));
+
+    loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
+    open("/spaces");
+    wait.until(ExpectedConditions.urlContains("/spaces"));
+    assertFalse(pageContains(targetName));
+
+    // Validación server-side: acceso directo por URL debe fallar.
+    open("/spaces/" + spaceId);
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+    assertPageContains("Espacio no encontrado");
+  }
+
+  @Test
+  @DisplayName("Prueba 18 - Activar un espacio y verificar que si se puede reservar.")
+  void prueba18_activarEspacioReservable() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    String targetName = "Sala Naranco";
+    String spaceId = findSpaceIdByName(targetName);
+    if (isSpaceActiveByName(targetName)) {
+      toggleSpaceByName(targetName);
+      wait.until(ExpectedConditions.urlContains("/admin/spaces"));
+    }
+
+    toggleSpaceByName(targetName);
+    assertPageContains("Espacio activado correctamente.");
+
+    clickButton("Cerrar sesión");
+    wait.until(ExpectedConditions.urlContains("/login"));
+
+    loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
+    open("/spaces");
+    wait.until(ExpectedConditions.urlContains("/spaces"));
+    assertPageContains(targetName);
+
+    open("/spaces/" + spaceId);
+    wait.until(ExpectedConditions.urlContains("/spaces/" + spaceId));
+    assertPageContains(targetName);
+  }
+
+  @Test
+  @DisplayName("Prueba 19 - Crear un bloqueo de mantenimiento válido.")
+  void prueba19_crearBloqueoValido() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    String spaceId = findSpaceIdByName("Aula Covadonga");
+    open("/admin/spaces/" + spaceId + "/blocks");
+
+    LocalDateTime start = seededDate(5, 10, 0);
+    LocalDateTime end = seededDate(5, 12, 0);
+    setDateTime(By.id("startAt"), start);
+    setDateTime(By.id("endAt"), end);
+    type(By.id("reason"), "Bloqueo Selenium válido");
+    clickButton("Crear bloqueo");
+
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/" + spaceId + "/blocks"));
+    assertPageContains("Bloqueo creado correctamente.");
+    assertPageContains("Bloqueo Selenium válido");
+  }
+
+  @Test
+  @DisplayName("Prueba 20 - Crear un bloqueo solapado con otro bloqueo (debe fallar).")
+  void prueba20_crearBloqueoSolapadoConBloqueoDebeFallar() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    String spaceId = findSpaceIdByName("Aula Covadonga");
+    open("/admin/spaces/" + spaceId + "/blocks");
+
+    LocalDateTime start = seededDate(6, 10, 0);
+    LocalDateTime end = seededDate(6, 12, 0);
+    setDateTime(By.id("startAt"), start);
+    setDateTime(By.id("endAt"), end);
+    type(By.id("reason"), "Bloqueo Selenium base");
+    clickButton("Crear bloqueo");
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/" + spaceId + "/blocks"));
+    assertPageContains("Bloqueo creado correctamente.");
+
+    // Intento solapado
+    setDateTime(By.id("startAt"), seededDate(6, 11, 0));
+    setDateTime(By.id("endAt"), seededDate(6, 13, 0));
+    type(By.id("reason"), "Bloqueo Selenium solapado");
+    clickButton("Crear bloqueo");
+
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/" + spaceId + "/blocks"));
+    assertPageContains("No se permite crear un bloqueo solapado con otro bloqueo activo del mismo espacio.");
+  }
+
+  @Test
+  @DisplayName("Prueba 21 - Crear un bloqueo solapado con una reserva activa (debe fallar).")
+  void prueba21_crearBloqueoSolapadoConReservaDebeFallar() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    String spaceId = findSpaceIdByName("Sala Naranco");
+    open("/admin/spaces/" + spaceId + "/blocks");
+
+    // Rango amplio para asegurar solape con alguna reserva activa sembrada.
+    setDateTime(By.id("startAt"), seededDate(1, 8, 0));
+    setDateTime(By.id("endAt"), seededDate(1, 20, 0));
+    type(By.id("reason"), "Bloqueo Selenium solape reserva");
+    clickButton("Crear bloqueo");
+
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/" + spaceId + "/blocks"));
+    assertPageContains("No se permite crear un bloqueo que se solape con una reserva activa del mismo espacio.");
+  }
+
+  @Test
+  @DisplayName("Prueba 22 - Cancelar un bloqueo de mantenimiento y verificar que deja de impedir reservas.")
+  void prueba22_cancelarBloqueo() {
+    loginAdmin();
+    open("/admin/spaces");
+
+    String spaceId = findSpaceIdByName("Sala Naranco");
+    open("/admin/spaces/" + spaceId + "/blocks");
+
+    String reason = "Bloqueo Selenium cancelable " + System.nanoTime();
+    setDateTime(By.id("startAt"), seededDate(4, 15, 0));
+    setDateTime(By.id("endAt"), seededDate(4, 16, 0));
+    type(By.id("reason"), reason);
+    clickButton("Crear bloqueo");
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/" + spaceId + "/blocks"));
+    assertPageContains("Bloqueo creado correctamente.");
+
+    cancelBlockByReason(reason);
+    assertPageContains("Bloqueo cancelado correctamente.");
+
+    clickButton("Cerrar sesión");
+    wait.until(ExpectedConditions.urlContains("/login"));
+
+    loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
+    open("/spaces/" + spaceId + "/availability");
+    setDateTime(By.id("from"), seededDate(4, 14, 0));
+    setDateTime(By.id("to"), seededDate(4, 17, 0));
+    clickButton("Consultar");
+
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".timeline")));
+    assertFalse(pageContains(reason));
+  }
+
+  @Test
+  @DisplayName("Prueba 23 - Consultar listado global de reservas. Probar con paginación.")
+  void prueba23_listadoGlobalReservasPaginacion() {
+    loginAdmin();
+    open("/admin/reservations");
+
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+    assertPageContains("Listado global de reservas");
+    assertPageContains("Página 1 de");
+    clickButton("Siguiente");
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+    assertPageContains("Página 2 de");
+  }
+
+  @Test
+  @DisplayName("Prueba 24 - Filtrar listado global de reservas por espacio (desplegable). Probar con paginación.")
+  void prueba24_filtrarListadoGlobalPorEspacio() {
+    loginAdmin();
+    open("/admin/reservations");
+
+    selectByVisibleText(By.id("space"), "Sala Naranco");
+    clickButton("Filtrar");
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+    assertPageContains("Sala Naranco");
+
+    if (isPresent(By.xpath("//a[contains(normalize-space(.),'Siguiente')]"))) {
+      clickButton("Siguiente");
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+      assertPageContains("Sala Naranco");
+    }
+  }
+
+  @Test
+  @DisplayName("Prueba 25 - Filtrar listado global de reservas por rango de fechas (calendario popup). Probar con Paginación.")
+  void prueba25_filtrarListadoGlobalPorRangoFechas() {
+    loginAdmin();
+    open("/admin/reservations");
+
+    type(By.id("from"), LocalDate.now().plusDays(1).toString());
+    type(By.id("to"), LocalDate.now().plusDays(30).toString());
+    clickButton("Filtrar");
+
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+    assertPageContains("Página 1 de");
+    if (isPresent(By.xpath("//a[contains(normalize-space(.),'Siguiente')]"))) {
+      clickButton("Siguiente");
+      wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+      assertPageContains("Página 2 de");
+    }
+  }
+
+  @Test
+  @DisplayName("Prueba 30 - Acceso denegado de usuario estándar a recursos de administración.")
+  void prueba30_accesoDenegadoStandardAdmin() {
+    loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
+    open("/admin/spaces");
+
+    wait.until(ExpectedConditions.urlContains("/spaces"));
+    assertPageContains("Acceso denegado. No puedes acceder a recursos de administración.");
+  }
+
+  @Test
+  @DisplayName("Prueba 31 - Intento de cancelar reserva ajena (debe fallar).")
+  void prueba31_cancelarReservaAjenaDebeFallar() {
+    loginAdmin();
+    open("/admin/reservations");
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+
+    String reservationId = pickFirstReservationIdNotOwnedBy(STANDARD_DNI);
+
+    clickButton("Cerrar sesión");
+    wait.until(ExpectedConditions.urlContains("/login"));
+
+    loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
+
+    submitPost("/reservations/" + reservationId + "/cancel");
+    wait.until(ExpectedConditions.urlContains("/reservations/mine"));
+    assertPageContains("No puedes cancelar una reserva ajena o inexistente.");
+
+    // Verificación backend: el estado de la reserva debe seguir siendo ACTIVA.
+    clickButton("Cerrar sesión");
+    wait.until(ExpectedConditions.urlContains("/login"));
+    loginAdmin();
+    open("/admin/reservations");
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+    assertTrue(isReservationStatus(reservationId, "ACTIVA"));
+  }
+
+  @Test
+  @DisplayName("Prueba 34 - Mostrar el listado de usuarios y comprobar que se muestran todos los que existen en el sistema, incluyendo el usuario actual y los usuarios administradores.")
+  void prueba34_listadoUsuariosConPaginacion() {
+    loginAdmin();
+    open("/admin/users");
+
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+    assertPageContains("Listado de usuarios");
+    assertPageContains("12345678Z");
+    assertPageContains("Admin");
+    assertPageContains("Sistema");
+
+    assertPageContains("Página 1 de");
+    clickButton("Siguiente");
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+    assertPageContains("Página 2 de");
+    clickButton("Siguiente");
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
+    assertPageContains("Página 3 de");
+  }
+
+  @Test
+  @DisplayName("Prueba 35 - El usuario administrador dispondrá de una acción para exportar a CSV el listado global de reservas (o el resultado de un filtro). El CSV deberá incluir, al menos: espacio, usuario, inicio, fin y estado.")
+  void prueba35_exportarReservasCsv() {
+    loginAdmin();
+    open("/admin/reservations");
+    clickButton("Exportar CSV");
+
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+    assertPageContains("\"espacio\",\"usuario\",\"inicio\",\"fin\",\"estado\"");
+  }
+
   private void loginAdmin() {
     open("/login");
     type(By.id("dni"), ADMIN_DNI);
@@ -273,6 +645,89 @@ class WebFrontendSeleniumTests extends SeleniumTestBase {
         .withMinute(minute)
         .withSecond(0)
         .withNano(0);
+  }
+
+  private void createSpace(
+      String name,
+      String typeLabel,
+      int capacity,
+      String location,
+      String amenitiesText,
+      String description) {
+    type(By.id("name"), name);
+    selectByVisibleText(By.id("type"), typeLabel);
+    type(By.id("capacity"), String.valueOf(capacity));
+    type(By.id("location"), location);
+    if (amenitiesText != null && !amenitiesText.isBlank()) {
+      type(By.id("amenitiesText"), amenitiesText);
+    }
+    if (description != null && !description.isBlank()) {
+      type(By.id("description"), description);
+    }
+    clickButton("Registrar espacio");
+  }
+
+  private String findSpaceIdByName(String spaceName) {
+    WebElement link = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(
+        "//tr[.//td[normalize-space(.)='" + spaceName + "']]//a[contains(@href,'/admin/spaces/') and contains(@href,'/edit')]")));
+    String href = link.getAttribute("href");
+    String marker = "/admin/spaces/";
+    int start = href.lastIndexOf(marker);
+    int end = href.lastIndexOf("/edit");
+    if (start < 0 || end < 0 || end <= start) {
+      throw new AssertionError("No se pudo extraer el id del espacio para " + spaceName);
+    }
+    return href.substring(start + marker.length(), end);
+  }
+
+  private boolean isSpaceActiveByName(String spaceName) {
+    WebElement badge = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(
+        "//tr[.//td[normalize-space(.)='" + spaceName + "']]//span[contains(@class,'badge')]")));
+    return badge.getText().trim().equalsIgnoreCase("Activo");
+  }
+
+  private void toggleSpaceByName(String spaceName) {
+    WebElement button = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(
+        "//tr[.//td[normalize-space(.)='" + spaceName + "']]//button[contains(normalize-space(.),'Activar') or contains(normalize-space(.),'Desactivar')]")));
+    button.click();
+    wait.until(ExpectedConditions.urlContains("/admin/spaces"));
+  }
+
+  private void cancelBlockByReason(String reason) {
+    WebElement button = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(
+        "//tr[.//td[normalize-space(.)='" + reason + "']]//button[contains(normalize-space(.),'Cancelar')]")));
+    button.click();
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/"));
+  }
+
+  private String pickFirstReservationIdNotOwnedBy(String excludedDni) {
+    WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(
+        "//tr[@data-reservation-id and .//td[2][normalize-space(.)!='" + excludedDni + "']][1]")));
+    String id = row.getAttribute("data-reservation-id");
+    if (id == null || id.isBlank()) {
+      throw new AssertionError("No se encontró data-reservation-id en la fila seleccionada.");
+    }
+    return id;
+  }
+
+  private boolean isReservationStatus(String reservationId, String expectedStatus) {
+    try {
+      WebElement cell = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(
+          "//tr[@data-reservation-id='" + reservationId + "']//td[6]")));
+      return cell.getText().trim().equalsIgnoreCase(expectedStatus);
+    } catch (Exception error) {
+      return false;
+    }
+  }
+
+  private void submitPost(String path) {
+    String script =
+        "const form = document.createElement('form');" +
+            "form.method = 'POST';" +
+            "form.action = arguments[0];" +
+            "document.body.appendChild(form);" +
+            "form.submit();";
+    ((JavascriptExecutor) driver).executeScript(script, baseUrl + path);
   }
 
   private TestUser buildUniqueUser(String suffix) {

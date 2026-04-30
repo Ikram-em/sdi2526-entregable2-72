@@ -6,7 +6,7 @@
   <section class="section-header">
     <div>
       <span class="eyebrow">Espacios disponibles</span>
-      <h1>Encuentra un espacio</h1>
+      <h1>Listado de espacios disponibles</h1>
       <p>Filtra por tipo o capacidad y reserva en segundos.</p>
     </div>
   </section>
@@ -31,7 +31,7 @@
       </div>
 
       <div class="filter-bar__actions">
-        <button class="button button--primary" type="submit">Buscar</button>
+        <button class="button button--primary" type="submit">Filtrar</button>
         <a class="text-link text-link--subtle" href="/spaces">Limpiar</a>
       </div>
     </form>
@@ -86,8 +86,8 @@
         </div>
         <p class="space-card__description"><%= amenitiesPreview || space.description %></p>
         <div class="space-card__actions">
-          <a class="button button--primary" href="/spaces/<%= space._id %>/availability">Ver disponibilidad</a>
-          <a class="button button--ghost" href="/spaces/<%= space._id %>">Detalles</a>
+          <a class="button button--primary" href="/spaces/<%= space._id %>/availability">Disponibilidad</a>
+          <a class="button button--ghost" href="/spaces/<%= space._id %>">Ver detalle</a>
         </div>
       </article>
     <% }) %>

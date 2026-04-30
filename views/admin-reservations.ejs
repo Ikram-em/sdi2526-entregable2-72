@@ -52,7 +52,7 @@
       </thead>
       <tbody>
         <% reservations.forEach((reservation) => { %>
-          <tr>
+          <tr data-reservation-id="<%= reservation.id %>">
             <td><%= reservation.userName %></td>
             <td><%= reservation.userDni %></td>
             <td><%= reservation.spaceName %></td>

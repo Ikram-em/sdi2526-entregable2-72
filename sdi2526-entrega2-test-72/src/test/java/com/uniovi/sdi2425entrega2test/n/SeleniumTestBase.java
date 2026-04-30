@@ -51,8 +51,16 @@ abstract class SeleniumTestBase {
   }
 
   private WebDriver createDriver() {
-    String browser = System.getProperty("selenium.browser", "chrome").toLowerCase(Locale.ROOT);
-    boolean headless = Boolean.parseBoolean(System.getProperty("selenium.headless", "true"));
+    // Default to Firefox to avoid Chrome/CDP version mismatches on some lab machines.
+    // Note: Maven Surefire may inject an empty system property; treat blank as "not set".
+    String browserRaw = System.getProperty("selenium.browser");
+    String browser = (browserRaw == null || browserRaw.trim().isEmpty())
+        ? "firefox"
+        : browserRaw.trim().toLowerCase(Locale.ROOT);
+    String headlessRaw = System.getProperty("selenium.headless");
+    boolean headless = headlessRaw == null || headlessRaw.trim().isEmpty()
+        ? true
+        : Boolean.parseBoolean(headlessRaw.trim());
 
     return switch (browser) {
       case "edge" -> {
