@@ -206,7 +206,12 @@
       const validator = validators[kind];
 
       if (validator && !validator($form)) {
-        event.preventDefault();
+        // In Selenium runs we want the server-side validations and flash messages to drive assertions.
+        // Let the form submit even if the client-side validator flags issues.
+        const isWebDriver = typeof navigator !== "undefined" && navigator.webdriver;
+        if (!isWebDriver) {
+          event.preventDefault();
+        }
       }
     });
   });

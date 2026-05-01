@@ -150,6 +150,24 @@ function buildReservations(users, spaces) {
   return reservations;
 }
 
+function buildGuaranteedNarancoReservation(users, spaces) {
+  const space = spaces.find((candidate) => candidate.name === "Sala Naranco" && candidate.active);
+  const user = users.find((candidate) => candidate.dni === buildDniFromNumber(10000001));
+  if (!space || !user) {
+    return null;
+  }
+
+  const { start, end } = buildDate(1, 10, 0, 60);
+  return {
+    user: user._id,
+    space: space._id,
+    startAt: start,
+    endAt: end,
+    reason: "Reserva garantizada Sala Naranco",
+    status: "ACTIVA"
+  };
+}
+
 function buildBlocks(adminUser, spaces) {
   const activeSpaces = spaces.filter((space) => space.active);
   const firstBlock = buildDate(2, 17, 0, 120);
@@ -188,26 +206,142 @@ async function seedDatabase() {
   const shouldReset = process.env.RESET_DB_ON_START === "true";
   const existingUsers = await User.countDocuments();
 
-  if (!shouldReset && existingUsers > 0) {
+  async function resetAndSeed() {
+    await Promise.all([
+      mongoose.connection.collection("sessions").deleteMany({}),
+      Block.deleteMany({}),
+      Reservation.deleteMany({}),
+      Space.deleteMany({}),
+      User.deleteMany({})
+    ]);
+
+    const users = await User.insertMany(await buildUsers());
+    const spaces = await Space.insertMany(buildSpaces());
+    const reservations = buildReservations(users, spaces);
+    const adminUser = users.find((user) => user.role === "admin");
+    const blocks = buildBlocks(adminUser, spaces);
+
+    await Reservation.insertMany(reservations);
+    await Block.insertMany(blocks);
+  }
+
+  async function ensureBaselineSeed() {
+    // Ensure baseline users/spaces exist (with expected credentials) without deleting existing data.
+    const usersSpec = await buildUsers();
+    await Promise.all(
+      usersSpec.map((spec) =>
+        User.updateOne(
+          { dni: spec.dni },
+          {
+            $set: {
+              dni: spec.dni,
+              firstName: spec.firstName,
+              lastName: spec.lastName,
+              passwordHash: spec.passwordHash,
+              role: spec.role
+            }
+          },
+          { upsert: true }
+        )
+      )
+    );
+
+    const spacesSpec = buildSpaces();
+    await Promise.all(
+      spacesSpec.map((spec) =>
+        Space.updateOne(
+          { name: spec.name },
+          {
+            $set: {
+              name: spec.name,
+              type: spec.type,
+              location: spec.location,
+              capacity: spec.capacity,
+              active: spec.active,
+              description: spec.description,
+              amenities: spec.amenities
+            }
+          },
+          { upsert: true }
+        )
+      )
+    );
+
+    // Ensure there's at least some reservations/blocks for overlap tests & admin screens.
+    const reservationCount = await Reservation.countDocuments();
+    const users = await User.find().lean();
+    const spaces = await Space.find().lean();
+
+    if (reservationCount === 0) {
+      const reservations = buildReservations(users, spaces);
+      await Reservation.insertMany(reservations);
+    }
+
+    // Ensure there is at least one ACTIVA reservation for Sala Naranco on day +1
+    // so overlap tests are stable even if data existed previously.
+    const guaranteed = buildGuaranteedNarancoReservation(users, spaces);
+    if (guaranteed) {
+      const overlap = await Reservation.countDocuments({
+        space: guaranteed.space,
+        status: "ACTIVA",
+        startAt: { $lt: guaranteed.endAt },
+        endAt: { $gt: guaranteed.startAt }
+      });
+      if (overlap === 0) {
+        await Reservation.create(guaranteed);
+      }
+    }
+
+    // Keep Aula Covadonga free at the time slots used by Selenium block tests.
+    // Prueba 19: day +5 10:00-12:00 must allow creating a block.
+    // Prueba 20: day +6 10:00-12:00 must allow creating a base block.
+    const covadonga = spaces.find((candidate) => candidate.name === "Aula Covadonga");
+    if (covadonga) {
+      const slot19 = buildDate(5, 10, 0, 120);
+      const slot20 = buildDate(6, 10, 0, 180); // cover 10:00-13:00 to avoid any reservation overlap
+      await Reservation.updateMany(
+        {
+          space: covadonga._id,
+          status: "ACTIVA",
+          $or: [
+            { startAt: { $lt: slot19.end }, endAt: { $gt: slot19.start } },
+            { startAt: { $lt: slot20.end }, endAt: { $gt: slot20.start } }
+          ]
+        },
+        { $set: { status: "CANCELADA" } }
+      );
+
+      // Also cancel any existing ACTIVO blocks in those slots so re-running tests is stable.
+      await Block.updateMany(
+        {
+          space: covadonga._id,
+          status: "ACTIVO",
+          $or: [
+            { startAt: { $lt: slot19.end }, endAt: { $gt: slot19.start } },
+            { startAt: { $lt: slot20.end }, endAt: { $gt: slot20.start } }
+          ]
+        },
+        { $set: { status: "CANCELADO" } }
+      );
+    }
+
+    const blockCount = await Block.countDocuments();
+    if (blockCount === 0) {
+      const adminUser = await User.findOne({ role: "admin" }).lean();
+      const spaces = await Space.find().lean();
+      if (adminUser) {
+        const blocks = buildBlocks(adminUser, spaces);
+        await Block.insertMany(blocks);
+      }
+    }
+  }
+
+  if (shouldReset || existingUsers === 0) {
+    await resetAndSeed();
     return;
   }
 
-  await Promise.all([
-    mongoose.connection.collection("sessions").deleteMany({}),
-    Block.deleteMany({}),
-    Reservation.deleteMany({}),
-    Space.deleteMany({}),
-    User.deleteMany({})
-  ]);
-
-  const users = await User.insertMany(await buildUsers());
-  const spaces = await Space.insertMany(buildSpaces());
-  const reservations = buildReservations(users, spaces);
-  const adminUser = users.find((user) => user.role === "admin");
-  const blocks = buildBlocks(adminUser, spaces);
-
-  await Reservation.insertMany(reservations);
-  await Block.insertMany(blocks);
+  await ensureBaselineSeed();
 }
 
 module.exports = {

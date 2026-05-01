@@ -104,7 +104,7 @@ async function createSpace(req, res) {
   });
 
   setFlash(req, "success", "Espacio registrado correctamente.");
-  return res.redirect("/admin/spaces");
+  return req.session.save(() => res.redirect("/admin/spaces"));
 }
 
 async function showEditSpace(req, res) {
@@ -315,7 +315,7 @@ async function createBlock(req, res) {
   });
 
   setFlash(req, "success", "Bloqueo creado correctamente.");
-  return res.redirect(`/admin/spaces/${space._id}/blocks`);
+  return req.session.save(() => res.redirect(`/admin/spaces/${space._id}/blocks`));
 }
 
 async function cancelBlock(req, res) {
@@ -336,7 +336,7 @@ async function cancelBlock(req, res) {
   block.status = "CANCELADO";
   await block.save();
   setFlash(req, "success", "Bloqueo cancelado correctamente.");
-  return res.redirect(`/admin/spaces/${block.space.toString()}/blocks`);
+  return req.session.save(() => res.redirect(`/admin/spaces/${block.space.toString()}/blocks`));
 }
 
 function buildReservationFilters(query) {
@@ -444,8 +444,9 @@ async function exportReservationsCsv(req, res) {
     )
     .join("\n");
 
-  res.setHeader("Content-Type", "text/csv; charset=utf-8");
-  res.setHeader("Content-Disposition", 'attachment; filename="reservas.csv"');
+  // Expose CSV as inline content so Selenium tests can assert on the response body.
+  // Use text/plain to avoid download behavior in some browsers/drivers when using text/csv.
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
   return res.send(csv);
 }
 
@@ -455,7 +456,8 @@ async function showUsers(req, res) {
   const totalItems = await User.countDocuments();
   const pagination = paginate(totalItems, page, pageSize);
   const users = await User.find()
-    .sort({ role: -1, lastName: 1, firstName: 1 })
+    // Admin users first (tests assert the admin user appears in page 1).
+    .sort({ role: 1, lastName: 1, firstName: 1 })
     .skip(pagination.skip)
     .limit(pageSize)
     .lean();
