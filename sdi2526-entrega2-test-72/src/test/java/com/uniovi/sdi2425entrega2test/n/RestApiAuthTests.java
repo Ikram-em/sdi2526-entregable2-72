@@ -5,13 +5,17 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RestApiAuthTests {
   private String apiBaseUrl;
 
@@ -23,6 +27,7 @@ class RestApiAuthTests {
 
   @Test
   @DisplayName("Prueba 36 - Inicio de sesion con datos validos")
+  @Order(36)
   void prueba36_loginValido() {
     Response response = RestAssured.given()
         .contentType(ContentType.JSON)
@@ -46,6 +51,7 @@ class RestApiAuthTests {
 
   @Test
   @DisplayName("Prueba 37 - Inicio de sesion con DNI valido y contrasena incorrecta")
+  @Order(37)
   void prueba37_loginPasswordIncorrecta() {
     Response response = RestAssured.given()
         .contentType(ContentType.JSON)
@@ -66,6 +72,7 @@ class RestApiAuthTests {
 
   @Test
   @DisplayName("Prueba 38 - Inicio de sesion con DNI o contrasena vacios")
+  @Order(38)
   void prueba38_loginCamposVacios() {
     Response response = RestAssured.given()
         .contentType(ContentType.JSON)

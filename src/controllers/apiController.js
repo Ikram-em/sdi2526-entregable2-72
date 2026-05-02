@@ -188,6 +188,38 @@ function addFrequency(date, frequency) {
   return nextDate;
 }
 
+function normalizeRecurrenceEndDate(value) {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) {
+    return null;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) {
+    date.setHours(23, 59, 59, 999);
+  }
+
+  return date;
+}
+
+function calculateRecurrenceCount(baseStartAt, endDate, frequency) {
+  let count = 0;
+  let cursor = baseStartAt;
+
+  while (true) {
+    cursor = addFrequency(cursor, frequency);
+
+    if (cursor > endDate) {
+      return count;
+    }
+
+    count += 1;
+  }
+}
+
 async function health(req, res) {
   return json(res, 200, { status: "ok" });
 }
@@ -202,21 +234,21 @@ async function login(req, res) {
   }
 
   if (!password) {
-    details.password = "La contraseña es obligatoria.";
+    details.password = "La contrasena es obligatoria.";
   }
 
   if (Object.keys(details).length > 0) {
-    return sendError(res, 400, "VALIDATION_ERROR", "Revisa los datos de autenticación.", details);
+    return sendError(res, 400, "VALIDATION_ERROR", "Revisa los datos de autenticacion.", details);
   }
 
   const user = await User.findOne({ dni });
   if (!user) {
-    return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesión no correcto.");
+    return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesion no correcto.");
   }
 
   const isValid = await bcrypt.compare(password, user.passwordHash);
   if (!isValid) {
-    return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesión no correcto.");
+    return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesion no correcto.");
   }
 
   const token = issueToken(user._id);
@@ -228,7 +260,7 @@ async function login(req, res) {
 
 async function listSpaces(req, res) {
   const [spaces, activeBlocks] = await Promise.all([
-    Space.find({}).sort({ name: 1 }).lean(),
+    Space.find({ active: true }).sort({ name: 1 }).lean(),
     Block.find({ status: "ACTIVO" }).lean()
   ]);
 
@@ -381,7 +413,10 @@ async function createRecurrence(req, res) {
   }
 
   const frequency = String(req.body?.frequency || "").trim().toUpperCase();
-  const count = Number.parseInt(req.body?.count, 10);
+  const endDate = normalizeRecurrenceEndDate(req.body?.endDate);
+  const count = endDate
+    ? calculateRecurrenceCount(reservation.startAt, endDate, frequency)
+    : Number.parseInt(req.body?.count, 10);
 
   if (!RECURRENCE_FREQUENCIES.has(frequency)) {
     return sendError(
@@ -397,7 +432,9 @@ async function createRecurrence(req, res) {
       res,
       400,
       "INVALID_COUNT",
-      "El número de recurrencias debe ser un entero mayor que cero."
+      endDate
+        ? "La fecha fin debe permitir al menos una recurrencia."
+        : "El número de recurrencias debe ser un entero mayor que cero."
     );
   }
 

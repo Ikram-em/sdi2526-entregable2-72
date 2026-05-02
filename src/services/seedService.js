@@ -202,6 +202,39 @@ function buildBlocks(adminUser, spaces) {
   ];
 }
 
+async function keepSeleniumSlotsFree(spaces) {
+  // Keep Aula Covadonga free at the time slots used by Selenium block tests.
+  const covadonga = spaces.find((candidate) => candidate.name === "Aula Covadonga");
+  if (!covadonga) {
+    return;
+  }
+
+  const slot19 = buildDate(5, 10, 0, 120);
+  const slot20 = buildDate(6, 10, 0, 180);
+  const overlapSlots = [
+    { startAt: { $lt: slot19.end }, endAt: { $gt: slot19.start } },
+    { startAt: { $lt: slot20.end }, endAt: { $gt: slot20.start } }
+  ];
+
+  await Reservation.updateMany(
+    {
+      space: covadonga._id,
+      status: "ACTIVA",
+      $or: overlapSlots
+    },
+    { $set: { status: "CANCELADA" } }
+  );
+
+  await Block.updateMany(
+    {
+      space: covadonga._id,
+      status: "ACTIVO",
+      $or: overlapSlots
+    },
+    { $set: { status: "CANCELADO" } }
+  );
+}
+
 async function seedDatabase() {
   const shouldReset = process.env.RESET_DB_ON_START === "true";
   const existingUsers = await User.countDocuments();
@@ -223,6 +256,7 @@ async function seedDatabase() {
 
     await Reservation.insertMany(reservations);
     await Block.insertMany(blocks);
+    await keepSeleniumSlotsFree(spaces);
   }
 
   async function ensureBaselineSeed() {
@@ -292,38 +326,7 @@ async function seedDatabase() {
       }
     }
 
-    // Keep Aula Covadonga free at the time slots used by Selenium block tests.
-    // Prueba 19: day +5 10:00-12:00 must allow creating a block.
-    // Prueba 20: day +6 10:00-12:00 must allow creating a base block.
-    const covadonga = spaces.find((candidate) => candidate.name === "Aula Covadonga");
-    if (covadonga) {
-      const slot19 = buildDate(5, 10, 0, 120);
-      const slot20 = buildDate(6, 10, 0, 180); // cover 10:00-13:00 to avoid any reservation overlap
-      await Reservation.updateMany(
-        {
-          space: covadonga._id,
-          status: "ACTIVA",
-          $or: [
-            { startAt: { $lt: slot19.end }, endAt: { $gt: slot19.start } },
-            { startAt: { $lt: slot20.end }, endAt: { $gt: slot20.start } }
-          ]
-        },
-        { $set: { status: "CANCELADA" } }
-      );
-
-      // Also cancel any existing ACTIVO blocks in those slots so re-running tests is stable.
-      await Block.updateMany(
-        {
-          space: covadonga._id,
-          status: "ACTIVO",
-          $or: [
-            { startAt: { $lt: slot19.end }, endAt: { $gt: slot19.start } },
-            { startAt: { $lt: slot20.end }, endAt: { $gt: slot20.start } }
-          ]
-        },
-        { $set: { status: "CANCELADO" } }
-      );
-    }
+    await keepSeleniumSlotsFree(spaces);
 
     const blockCount = await Block.countDocuments();
     if (blockCount === 0) {

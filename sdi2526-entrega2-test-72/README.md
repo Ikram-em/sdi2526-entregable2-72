@@ -1,4 +1,4 @@
-# sdi2526-entrega2-test-n
+# sdi2526-entrega2-test-72
 
 Proyecto de pruebas Selenium + JUnit 5 basado en la plantilla proporcionada por el profesorado.
 

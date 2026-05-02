@@ -1,7 +1,7 @@
 {
-  "name": "sdi2526-entregable2-72",
+  "name": "sdi2526-entrega2-72",
   "version": "1.0.0",
-  "description": "Frontend jQuery de la práctica SDI 25/26 - gestión de reservas de espacios",
+  "description": "Aplicación web de la práctica SDI 25/26 - gestión de reservas de espacios",
   "main": "app.js",
   "scripts": {
     "dev": "node app.js",
@@ -12,16 +12,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Ikram-em/sdi2526-entregable2-72.git"
+    "url": "git+https://github.com/Ikram-em/sdi2526-entrega2-72.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/Ikram-em/sdi2526-entregable2-72/issues"
+    "url": "https://github.com/Ikram-em/sdi2526-entrega2-72/issues"
   },
-  "homepage": "https://github.com/Ikram-em/sdi2526-entregable2-72#readme",
+  "homepage": "https://github.com/Ikram-em/sdi2526-entrega2-72#readme",
   "dependencies": {
     "@vitejs/plugin-react": "^6.0.1",
     "bcryptjs": "^3.0.3",

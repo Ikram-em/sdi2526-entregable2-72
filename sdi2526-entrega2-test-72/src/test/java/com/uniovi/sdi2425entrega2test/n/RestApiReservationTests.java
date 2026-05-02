@@ -6,7 +6,10 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -26,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RestApiReservationTests {
   private static final String STANDARD_DNI = "10000001S";
   private static final String STANDARD_PASSWORD = "Us3r@1-PASSW";
@@ -41,6 +45,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 39 - Registrar una reserva valida")
+  @Order(39)
   void prueba39_registrarReservaValida() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     String spaceId = findSpaceIdByName("Aula Laboral");
@@ -64,6 +69,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 40 - Registrar una reserva invalida con inicio posterior al fin")
+  @Order(40)
   void prueba40_registrarReservaInicioPosteriorAFin() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     String spaceId = findSpaceIdByName("Aula Laboral");
@@ -84,6 +90,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 41 - Intentar crear una reserva solapada en el mismo espacio")
+  @Order(41)
   void prueba41_reservaSolapadaMismoEspacio() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     String spaceId = findSpaceIdByName("Aula Laboral");
@@ -110,6 +117,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 42 - Intentar reservar dentro de un bloqueo")
+  @Order(42)
   void prueba42_reservaDentroDeBloqueo() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     Map<String, Object> block = findFirstActiveFutureBlock();
@@ -138,6 +146,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 43 - Obtener todas las reservas propias realizadas por un usuario")
+  @Order(43)
   void prueba43_listarReservasPropias() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     String spaceId = findSpaceIdByName("Aula Laboral");
@@ -163,6 +172,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 44 - Cancelar una reserva propia y verificar que deja de ocupar espacio")
+  @Order(44)
   void prueba44_cancelarReservaPropia() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     String spaceId = findSpaceIdByName("Aula Laboral");
@@ -183,6 +193,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 45 - Editar una reserva existente con datos validos")
+  @Order(45)
   void prueba45_editarReservaValida() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     String initialSpaceId = findSpaceIdByName("Aula Laboral");
@@ -217,6 +228,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 46 - Editar una reserva existente con datos invalidos por solape")
+  @Order(46)
   void prueba46_editarReservaInvalidaPorSolape() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     String spaceId = findSpaceIdByName("Sala Picos");
@@ -266,6 +278,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 47 - Crear una reserva recurrente semanal valida")
+  @Order(47)
   void prueba47_crearReservaRecurrenteSemanalValida() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     String spaceId = findSpaceIdByName("Aula Laboral");
@@ -293,6 +306,7 @@ class RestApiReservationTests {
 
   @Test
   @DisplayName("Prueba 48 - Intentar crear una reserva recurrente que genere un solape")
+  @Order(48)
   void prueba48_crearReservaRecurrenteConSolape() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
     String spaceId = findSpaceIdByName("Aula Laboral");

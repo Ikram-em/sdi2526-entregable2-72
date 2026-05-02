@@ -5,37 +5,8 @@ export function normalizeCredentials(credentials) {
   };
 }
 
-export function validateLoginForm(credentials) {
-  const values = normalizeCredentials(credentials);
-  const errors = {};
-
-  if (!values.dni) {
-    errors.dni = "El DNI es obligatorio.";
-  }
-
-  if (!values.password) {
-    errors.password = "La contraseña es obligatoria.";
-  }
-
-  return {
-    errors,
-    isValid: Object.keys(errors).length === 0,
-    values
-  };
-}
-
 export async function loginWithApi(credentials, options = {}) {
-  const validation = validateLoginForm(credentials);
-
-  if (!validation.isValid) {
-    return {
-      ok: false,
-      status: 400,
-      errors: validation.errors,
-      message: "Revisa los datos de autenticación."
-    };
-  }
-
+  const values = normalizeCredentials(credentials);
   const fetchImpl = options.fetchImpl || fetch;
   const endpoint = options.endpoint || "/api/auth/login";
   const response = await fetchImpl(endpoint, {
@@ -43,7 +14,7 @@ export async function loginWithApi(credentials, options = {}) {
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(validation.values)
+    body: JSON.stringify(values)
   });
 
   const payload = await response.json().catch(() => ({}));

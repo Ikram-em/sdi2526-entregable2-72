@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.uniovi</groupId>
-    <artifactId>sdi2526-entrega2-test-n</artifactId>
+    <artifactId>sdi2526-entrega2-test-72</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>sdi2526-entrega2-test-n</name>
-    <description>sdi2526-entrega2-test-n</description>
+    <name>sdi2526-entrega2-test-72</name>
+    <description>sdi2526-entrega2-test-72</description>
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -35,14 +35,6 @@
         <a class="text-link text-link--subtle" href="/spaces">Limpiar</a>
       </div>
     </form>
-
-    <% if (types.length) { %>
-      <div class="quick-filters" aria-label="Filtros rápidos por tipo">
-        <% types.forEach((type) => { %>
-          <a class="quick-filters__chip <%= filters.type === type ? 'is-active' : '' %>" href="/spaces?<%= new URLSearchParams({ type }).toString() %>"><%= type %></a>
-        <% }) %>
-      </div>
-    <% } %>
   </section>
 
   <section class="space-grid">

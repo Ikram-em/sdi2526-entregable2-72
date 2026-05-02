@@ -1,4 +1,4 @@
-# sdi2526-entregable2-72
+# sdi2526-entrega2-72
 
 Aplicación web de gestión de reservas de espacios para SDI 2025/2026.
 

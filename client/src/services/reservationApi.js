@@ -7,46 +7,6 @@ export function normalizeReservationForm(values) {
   };
 }
 
-export function validateReservationForm(values) {
-  const normalized = normalizeReservationForm(values);
-  const errors = {};
-
-  if (!normalized.spaceId) {
-    errors.spaceId = "El espacio es obligatorio.";
-  }
-
-  if (!normalized.startDateTime) {
-    errors.startDateTime = "La fecha/hora de inicio es obligatoria.";
-  }
-
-  if (!normalized.endDateTime) {
-    errors.endDateTime = "La fecha/hora de fin es obligatoria.";
-  }
-
-  if (normalized.startDateTime && normalized.endDateTime) {
-    const start = new Date(normalized.startDateTime);
-    const end = new Date(normalized.endDateTime);
-
-    if (Number.isNaN(start.valueOf())) {
-      errors.startDateTime = "La fecha/hora de inicio no es válida.";
-    }
-
-    if (Number.isNaN(end.valueOf())) {
-      errors.endDateTime = "La fecha/hora de fin no es válida.";
-    }
-
-    if (!errors.startDateTime && !errors.endDateTime && start >= end) {
-      errors.endDateTime = "La fecha/hora de fin debe ser posterior al inicio.";
-    }
-  }
-
-  return {
-    errors,
-    isValid: Object.keys(errors).length === 0,
-    values: normalized
-  };
-}
-
 export async function fetchSpaces(options = {}) {
   const fetchImpl = options.fetchImpl || fetch;
   const endpoint = options.endpoint || "/api/spaces";
@@ -65,22 +25,12 @@ export async function fetchSpaces(options = {}) {
   return {
     ok: true,
     status: response.status,
-    spaces: (payload.spaces || []).filter((space) => space.active)
+    spaces: payload.spaces || []
   };
 }
 
 export async function createReservationWithApi(values, options = {}) {
-  const validation = validateReservationForm(values);
-
-  if (!validation.isValid) {
-    return {
-      ok: false,
-      status: 400,
-      errors: validation.errors,
-      message: "Revisa los datos de la reserva."
-    };
-  }
-
+  const normalizedValues = normalizeReservationForm(values);
   const token = options.token || "";
   if (!token) {
     return {
@@ -99,7 +49,7 @@ export async function createReservationWithApi(values, options = {}) {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(validation.values)
+    body: JSON.stringify(normalizedValues)
   });
 
   const payload = await response.json().catch(() => ({}));
@@ -109,7 +59,9 @@ export async function createReservationWithApi(values, options = {}) {
       ok: false,
       status: response.status,
       errors: payload.error?.details || {},
-      message: payload.error?.message || "No se ha podido registrar la reserva."
+      message: payload.error?.code === "VALIDATION_ERROR" || payload.error?.code === "INVALID_DATE_RANGE"
+        ? "Revisa los datos de la reserva."
+        : payload.error?.message || "No se ha podido registrar la reserva."
     };
   }
 
@@ -122,17 +74,7 @@ export async function createReservationWithApi(values, options = {}) {
 }
 
 export async function editReservationWithApi(reservationId, values, options = {}) {
-  const validation = validateReservationForm(values);
-
-  if (!validation.isValid) {
-    return {
-      ok: false,
-      status: 400,
-      errors: validation.errors,
-      message: "Revisa los datos de la reserva."
-    };
-  }
-
+  const normalizedValues = normalizeReservationForm(values);
   const token = options.token || "";
   if (!token) {
     return {
@@ -161,7 +103,7 @@ export async function editReservationWithApi(reservationId, values, options = {}
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(validation.values)
+    body: JSON.stringify(normalizedValues)
   });
 
   const payload = await response.json().catch(() => ({}));
@@ -171,7 +113,9 @@ export async function editReservationWithApi(reservationId, values, options = {}
       ok: false,
       status: response.status,
       errors: payload.error?.details || {},
-      message: payload.error?.message || "No se ha podido actualizar la reserva."
+      message: payload.error?.code === "VALIDATION_ERROR" || payload.error?.code === "INVALID_DATE_RANGE"
+        ? "Revisa los datos de la reserva."
+        : payload.error?.message || "No se ha podido actualizar la reserva."
     };
   }
 
@@ -280,55 +224,6 @@ export async function cancelReservationWithApi(reservationId, options = {}) {
   };
 }
 
-export function addFrequency(date, frequency) {
-  const nextDate = new Date(date);
-
-  if (frequency === "DAILY") {
-    nextDate.setDate(nextDate.getDate() + 1);
-  } else if (frequency === "WEEKLY") {
-    nextDate.setDate(nextDate.getDate() + 7);
-  } else if (frequency === "MONTHLY") {
-    nextDate.setMonth(nextDate.getMonth() + 1);
-  } else if (frequency === "YEARLY") {
-    nextDate.setFullYear(nextDate.getFullYear() + 1);
-  }
-
-  return nextDate;
-}
-
-export function calculateRecurrenceCount(baseStartDateTime, endDate, frequency) {
-  const start = new Date(baseStartDateTime);
-  const end = new Date(endDate);
-  const normalizedFrequency = String(frequency || "").trim().toUpperCase();
-  const validFrequencies = new Set(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]);
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(String(endDate || ""))) {
-    end.setHours(23, 59, 59, 999);
-  }
-
-  if (
-    Number.isNaN(start.valueOf()) ||
-    Number.isNaN(end.valueOf()) ||
-    !validFrequencies.has(normalizedFrequency) ||
-    end <= start
-  ) {
-    return 0;
-  }
-
-  let count = 0;
-  let cursor = start;
-
-  while (true) {
-    cursor = addFrequency(cursor, normalizedFrequency);
-
-    if (cursor > end) {
-      return count;
-    }
-
-    count += 1;
-  }
-}
-
 export function validateRecurrenceForm(values, baseReservation) {
   const frequency = String(values?.frequency || "").trim().toUpperCase();
   const endDate = String(values?.endDate || "").trim();
@@ -338,23 +233,7 @@ export function validateRecurrenceForm(values, baseReservation) {
     errors.baseReservationId = "Selecciona una reserva base.";
   }
 
-  if (!frequency) {
-    errors.frequency = "Selecciona una frecuencia.";
-  } else if (!["DAILY", "WEEKLY", "MONTHLY", "YEARLY"].includes(frequency)) {
-    errors.frequency = "La frecuencia indicada no es válida.";
-  }
-
-  if (!endDate) {
-    errors.endDate = "La fecha fin de recurrencia es obligatoria.";
-  }
-
-  const count = calculateRecurrenceCount(baseReservation?.startDateTime, endDate, frequency);
-  if (!errors.endDate && count < 1) {
-    errors.endDate = "La fecha fin debe permitir al menos una recurrencia.";
-  }
-
   return {
-    count,
     errors,
     isValid: Object.keys(errors).length === 0,
     values: {
@@ -396,7 +275,7 @@ export async function createRecurrenceWithApi(baseReservation, values, options =
     },
     body: JSON.stringify({
       frequency: validation.values.frequency,
-      count: validation.count
+      endDate: validation.values.endDate
     })
   });
 
