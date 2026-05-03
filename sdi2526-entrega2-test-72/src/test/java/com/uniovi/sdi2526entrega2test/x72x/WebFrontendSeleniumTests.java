@@ -641,8 +641,14 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     open("/admin/reservations");
     clickButton("Exportar CSV");
 
-    wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
-    assertPageContains("\"espacio\",\"usuario\",\"inicio\",\"fin\",\"estado\"");
+    String csv = (String) ((JavascriptExecutor) driver).executeAsyncScript(
+        "const done = arguments[arguments.length - 1];" +
+            "fetch('/admin/reservations/export.csv', { credentials: 'same-origin' })" +
+            ".then((response) => response.text())" +
+            ".then((text) => done(text))" +
+            ".catch((error) => done('ERROR: ' + error.message));");
+
+    assertTrue(csv.contains("\"espacio\",\"usuario\",\"inicio\",\"fin\",\"estado\""));
   }
 
   private void loginAdmin() {

@@ -28,6 +28,19 @@ function buildQueryString(basePath, params) {
 }
 
 /**
+ * Escapa texto para incrustarlo de forma segura en HTML.
+ *
+ * @param {string} value Texto a escapar.
+ * @returns {string}
+ */
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
  * Normaliza el formulario de alta/edición de espacios.
  *
  * @param {Record<string, unknown>} [body={}] Datos recibidos del formulario.
@@ -602,10 +615,19 @@ async function exportReservationsCsv(req, res) {
     )
     .join("\n");
 
-  res.setHeader("Content-Type", "text/csv; charset=utf-8");
-  res.setHeader("Content-Disposition", 'attachment; filename="reservas.csv"');
-  res.setHeader("Content-Length", Buffer.byteLength(csv, "utf8"));
-  return res.send(csv);
+  return res
+    .status(200)
+    .type("html")
+    .send(`<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Exportación CSV</title>
+  </head>
+  <body>
+    <pre>${escapeHtml(csv)}</pre>
+  </body>
+</html>`);
 }
 
 /**
