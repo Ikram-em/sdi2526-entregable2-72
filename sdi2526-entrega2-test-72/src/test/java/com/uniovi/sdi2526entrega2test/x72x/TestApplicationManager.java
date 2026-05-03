@@ -59,6 +59,16 @@ final class TestApplicationManager {
   }
 
   private static Path resolveRepoRoot() {
+    String explicitPath = System.getProperty("nodeProjectPath");
+    if (explicitPath != null && !explicitPath.trim().isEmpty()) {
+      Path candidate = Path.of(explicitPath.trim()).toAbsolutePath().normalize();
+      if (!Files.exists(candidate.resolve("package.json"))) {
+        throw new IllegalStateException(
+            "nodeProjectPath no apunta a un proyecto Node valido (package.json no encontrado): " + candidate);
+      }
+      return candidate;
+    }
+
     Path current = Path.of("").toAbsolutePath();
     Path repoRoot = current.getParent();
 
