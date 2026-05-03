@@ -8,12 +8,16 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
+@TestMethodOrder(OrderAnnotation.class)
 public class WebFrontendSeleniumTests extends SeleniumTestBase {
   private static final String ADMIN_DNI = "12345678Z";
   private static final String ADMIN_PASSWORD = "@Dm1n1str@D0r";
@@ -21,6 +25,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   private static final String UPDATED_PASSWORD = "N3w-Passw0rd!!";
 
   @Test
+  @Order(1)
   @DisplayName("Prueba 1 - Registro de usuario estándar con datos válidos")
   void prueba1_registroUsuarioValido() {
     TestUser user = buildUniqueUser("registro");
@@ -35,6 +40,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(2)
   @DisplayName("Prueba 2 - Registro de usuario estándar con nombre, apellidos y DNI en blanco")
   void prueba2_registroConCamposObligatoriosVacios() {
     open("/register");
@@ -47,6 +53,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(3)
   @DisplayName("Prueba 3 - Registro de usuario estándar con DNI ya registrado")
   void prueba3_registroConDniDuplicado() {
     open("/register");
@@ -62,6 +69,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(4)
   @DisplayName("Prueba 4 - Registro con contraseña que no cumple requisitos")
   void prueba4_registroConContrasenaInvalida() {
     TestUser user = buildUniqueUser("weak");
@@ -79,6 +87,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(5)
   @DisplayName("Prueba 5 - Inicio de sesión con datos válidos de administrador")
   void prueba5_loginAdminValido() {
     loginAdmin();
@@ -88,6 +97,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(6)
   @DisplayName("Prueba 6 - Inicio de sesión con datos válidos de usuario estándar")
   void prueba6_loginUsuarioValido() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -97,6 +107,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(7)
   @DisplayName("Prueba 7 - Inicio de sesión con DNI inexistente")
   void prueba7_loginConDniInexistente() {
     open("/login");
@@ -109,6 +120,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(8)
   @DisplayName("Prueba 8 - Inicio de sesión con contraseña incorrecta")
   void prueba8_loginConContrasenaIncorrecta() {
     open("/login");
@@ -121,6 +133,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(9)
   @DisplayName("Prueba 9 - Cerrar sesión y volver al login")
   void prueba9_logout() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -135,6 +148,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(10)
   @DisplayName("Prueba 10 - El botón cerrar sesión no está visible sin autenticar")
   void prueba10_logoutNoVisibleSinAutenticar() {
     open("/login");
@@ -143,6 +157,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(26)
   @DisplayName("Prueba 26 - Consultar el listado de espacios disponibles")
   void prueba26_listadoEspaciosDisponibles() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -156,6 +171,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(27)
   @DisplayName("Prueba 27 - Aplicar un filtro en el listado de espacios")
   void prueba27_filtrarEspacios() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -170,6 +186,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(28)
   @DisplayName("Prueba 28 - Acceder al detalle de un espacio desde el listado")
   void prueba28_detalleEspacio() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -183,6 +200,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(29)
   @DisplayName("Prueba 29 - Consultar disponibilidad mostrando bloqueos y ocupación")
   void prueba29_consultarDisponibilidad() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -199,6 +217,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(32)
   @DisplayName("Prueba 32 - Modificar la contraseña con datos válidos")
   void prueba32_cambiarContrasenaValida() {
     TestUser user = buildUniqueUser("password");
@@ -226,6 +245,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(33)
   @DisplayName("Prueba 33 - Modificar la contraseña con datos inválidos")
   void prueba33_cambiarContrasenaInvalida() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -237,6 +257,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(11)
   @DisplayName("Prueba 11 - Registrar un nuevo espacio con datos válidos (administrador).")
   void prueba11_registrarEspacioValidoAdmin() {
     loginAdmin();
@@ -251,6 +272,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(12)
   @DisplayName("Prueba 12 - Registrar un nuevo espacio con datos inválidos (nombre vacío).")
   void prueba12_registrarEspacioNombreVacio() {
     loginAdmin();
@@ -267,6 +289,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(13)
   @DisplayName("Prueba 13 - Registrar un nuevo espacio con datos inválidos (capacidad menor que 1).")
   void prueba13_registrarEspacioCapacidadInvalida() {
     loginAdmin();
@@ -283,6 +306,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(14)
   @DisplayName("Prueba 14 - Registrar un nuevo espacio con datos inválidos (nombre duplicado).")
   void prueba14_registrarEspacioNombreDuplicado() {
     loginAdmin();
@@ -300,6 +324,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(15)
   @DisplayName("Prueba 15 - Editar un espacio existente con datos válidos. Hay que confirmar que los datos se modifican.")
   void prueba15_editarEspacioValido() {
     loginAdmin();
@@ -321,6 +346,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(16)
   @DisplayName("Prueba 16 - Editar un espacio existente con datos inválidos (capacidad menor que 1). Hay que confirmar que los datos NO se modifican y se devuelven los mensajes de errores correspondientes.")
   void prueba16_editarEspacioCapacidadInvalidaNoModifica() {
     loginAdmin();
@@ -343,6 +369,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(17)
   @DisplayName("Prueba 17 - Desactivar un espacio y verificar que no se puede reservar.")
   void prueba17_desactivarEspacioNoReservable() {
     loginAdmin();
@@ -374,6 +401,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(18)
   @DisplayName("Prueba 18 - Activar un espacio y verificar que si se puede reservar.")
   void prueba18_activarEspacioReservable() {
     loginAdmin();
@@ -403,6 +431,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(19)
   @DisplayName("Prueba 19 - Crear un bloqueo de mantenimiento válido.")
   void prueba19_crearBloqueoValido() {
     loginAdmin();
@@ -424,6 +453,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(20)
   @DisplayName("Prueba 20 - Crear un bloqueo solapado con otro bloqueo (debe fallar).")
   void prueba20_crearBloqueoSolapadoConBloqueoDebeFallar() {
     loginAdmin();
@@ -452,6 +482,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(21)
   @DisplayName("Prueba 21 - Crear un bloqueo solapado con una reserva activa (debe fallar).")
   void prueba21_crearBloqueoSolapadoConReservaDebeFallar() {
     loginAdmin();
@@ -471,6 +502,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(22)
   @DisplayName("Prueba 22 - Cancelar un bloqueo de mantenimiento y verificar que deja de impedir reservas.")
   void prueba22_cancelarBloqueo() {
     loginAdmin();
@@ -504,6 +536,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(23)
   @DisplayName("Prueba 23 - Consultar listado global de reservas. Probar con paginación.")
   void prueba23_listadoGlobalReservasPaginacion() {
     loginAdmin();
@@ -518,6 +551,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(24)
   @DisplayName("Prueba 24 - Filtrar listado global de reservas por espacio (desplegable). Probar con paginación.")
   void prueba24_filtrarListadoGlobalPorEspacio() {
     loginAdmin();
@@ -536,6 +570,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(25)
   @DisplayName("Prueba 25 - Filtrar listado global de reservas por rango de fechas (calendario popup). Probar con Paginación.")
   void prueba25_filtrarListadoGlobalPorRangoFechas() {
     loginAdmin();
@@ -555,6 +590,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(30)
   @DisplayName("Prueba 30 - Acceso denegado de usuario estándar a recursos de administración.")
   void prueba30_accesoDenegadoStandardAdmin() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -565,6 +601,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(31)
   @DisplayName("Prueba 31 - Intento de cancelar reserva ajena (debe fallar).")
   void prueba31_cancelarReservaAjenaDebeFallar() {
     loginAdmin();
@@ -592,6 +629,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(34)
   @DisplayName("Prueba 34 - Mostrar el listado de usuarios y comprobar que se muestran todos los que existen en el sistema, incluyendo el usuario actual y los usuarios administradores.")
   void prueba34_listadoUsuariosConPaginacion() {
     loginAdmin();
@@ -613,6 +651,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(35)
   @DisplayName("Prueba 35 - El usuario administrador dispondrá de una acción para exportar a CSV el listado global de reservas (o el resultado de un filtro). El CSV deberá incluir, al menos: espacio, usuario, inicio, fin y estado.")
   void prueba35_exportarReservasCsv() {
     loginAdmin();
@@ -635,8 +674,11 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     open("/login");
     type(By.id("dni"), dni);
     type(By.id("password"), password);
-    clickButton("Entrar");
-    wait.until(ExpectedConditions.urlContains("/spaces"));
+    WebElement form = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("form[action='/login']")));
+    ((JavascriptExecutor) driver).executeScript("arguments[0].requestSubmit();", form);
+    wait.until(ExpectedConditions.or(
+        ExpectedConditions.urlContains("/spaces"),
+        ExpectedConditions.presenceOfElementLocated(By.cssSelector(".space-grid"))));
   }
 
   private void registerUser(TestUser user) {

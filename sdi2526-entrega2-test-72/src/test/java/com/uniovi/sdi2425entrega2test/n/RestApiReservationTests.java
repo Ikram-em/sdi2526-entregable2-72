@@ -6,6 +6,9 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
@@ -26,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestMethodOrder(OrderAnnotation.class)
 public class RestApiReservationTests extends AppTestBase {
   private static final String STANDARD_DNI = "10000001S";
   private static final String STANDARD_PASSWORD = "Us3r@1-PASSW";
@@ -40,6 +44,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(39)
   @DisplayName("Prueba 39 - Registrar una reserva valida")
   void prueba39_registrarReservaValida() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
@@ -63,6 +68,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(40)
   @DisplayName("Prueba 40 - Registrar una reserva invalida con inicio posterior al fin")
   void prueba40_registrarReservaInicioPosteriorAFin() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
@@ -83,6 +89,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(41)
   @DisplayName("Prueba 41 - Intentar crear una reserva solapada en el mismo espacio")
   void prueba41_reservaSolapadaMismoEspacio() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
@@ -109,6 +116,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(42)
   @DisplayName("Prueba 42 - Intentar reservar dentro de un bloqueo")
   void prueba42_reservaDentroDeBloqueo() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
@@ -137,6 +145,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(43)
   @DisplayName("Prueba 43 - Obtener todas las reservas propias realizadas por un usuario")
   void prueba43_listarReservasPropias() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
@@ -162,6 +171,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(44)
   @DisplayName("Prueba 44 - Cancelar una reserva propia y verificar que deja de ocupar espacio")
   void prueba44_cancelarReservaPropia() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
@@ -182,6 +192,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(45)
   @DisplayName("Prueba 45 - Editar una reserva existente con datos validos")
   void prueba45_editarReservaValida() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
@@ -216,6 +227,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(46)
   @DisplayName("Prueba 46 - Editar una reserva existente con datos invalidos por solape")
   void prueba46_editarReservaInvalidaPorSolape() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
@@ -265,6 +277,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(47)
   @DisplayName("Prueba 47 - Crear una reserva recurrente semanal valida")
   void prueba47_crearReservaRecurrenteSemanalValida() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);
@@ -292,6 +305,7 @@ public class RestApiReservationTests extends AppTestBase {
   }
 
   @Test
+  @Order(48)
   @DisplayName("Prueba 48 - Intentar crear una reserva recurrente que genere un solape")
   void prueba48_crearReservaRecurrenteConSolape() {
     String token = loginAndGetToken(STANDARD_DNI, STANDARD_PASSWORD);

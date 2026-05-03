@@ -9,6 +9,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -16,9 +19,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
+@TestMethodOrder(OrderAnnotation.class)
 public class ReactSeleniumTests extends SeleniumTestBase {
 
   @Test
+  @Order(49)
   @DisplayName("Prueba 49 - Inicio de sesión React con datos válidos")
   void prueba49_inicioSesionConDatosValidos() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
@@ -28,6 +33,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(50)
   @DisplayName("Prueba 50 - Inicio de sesión React con contraseña incorrecta")
   void prueba50_inicioSesionConContrasenaIncorrecta() {
     openReactClean();
@@ -40,6 +46,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(51)
   @DisplayName("Prueba 51 - Inicio de sesión React con campos vacíos")
   void prueba51_inicioSesionConCamposVacios() {
     openReactClean();
@@ -50,6 +57,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(52)
   @DisplayName("Prueba 52 - Registrar una reserva válida desde React")
   void prueba52_registrarReservaValida() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
@@ -60,6 +68,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(53)
   @DisplayName("Prueba 53 - Registrar una reserva inválida desde React")
   void prueba53_registrarReservaInvalidaInicioPosteriorAlFin() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
@@ -75,6 +84,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(54)
   @DisplayName("Prueba 54 - Consultar listado de reservas propias en React")
   void prueba54_consultarListadoReservasPropias() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
@@ -85,6 +95,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(55)
   @DisplayName("Prueba 55 - Filtrar reservas propias por estado cancelada en React")
   void prueba55_filtrarReservasPropiasPorEstadoCancelada() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
@@ -95,6 +106,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(56)
   @DisplayName("Prueba 56 - Cancelar una reserva propia desde React")
   void prueba56_cancelarReservaPropia() {
     loginReact(SECOND_STANDARD_DNI, SECOND_STANDARD_PASSWORD);
@@ -105,6 +117,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(57)
   @DisplayName("Prueba 57 - Editar una reserva existente con datos válidos en React")
   void prueba57_editarReservaConDatosValidos() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
@@ -120,6 +133,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(58)
   @DisplayName("Prueba 58 - Editar una reserva existente con datos inválidos en React")
   void prueba58_editarReservaConSolape() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
@@ -136,6 +150,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(59)
   @DisplayName("Prueba 59 - Crear una reserva recurrente semanal válida en React")
   void prueba59_crearReservaRecurrenteSemanalValida() {
     loginReact(SECOND_STANDARD_DNI, SECOND_STANDARD_PASSWORD);
@@ -152,6 +167,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
+  @Order(60)
   @DisplayName("Prueba 60 - Crear una reserva recurrente con solape en React")
   void prueba60_crearReservaRecurrenteConSolape() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
@@ -159,12 +175,14 @@ public class ReactSeleniumTests extends SeleniumTestBase {
     createReactReservation(baseStart, "Reserva base recurrente solapada Selenium React");
     createReactReservation(baseStart.plusDays(7), "Reserva que provoca solape Selenium React");
     clickButton("Recurrentes");
-    selectLastRealOption(By.id("baseReservationId"));
+    selectRealOptionByOrdinal(By.id("baseReservationId"), 2);
     selectByVisibleText(By.id("frequency"), "Semanal");
     setDate(By.id("endDate"), baseStart.toLocalDate().plusDays(8));
     clickButton("Crear recurrencias");
 
-    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".react-login__message.is-error")));
+    wait.until(ExpectedConditions.textToBePresentInElementLocated(
+        By.cssSelector(".react-login__message"),
+        "solape"));
   }
 
   private void openReactClean() {
