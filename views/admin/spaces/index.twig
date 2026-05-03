@@ -1,6 +1,6 @@
-<%- include("../../partials/head", { title }) %>
-<%- include("../../partials/header") %>
-<%- include("../../partials/flash", { flash, error: null, errors }) %>
+{% include "../../partials/head.twig" with { title: title } %}
+{% include "../../partials/header.twig" %}
+{% include "../../partials/flash.twig" with { flash: flash, error: null, errors: errors } %}
 
 <main class="shell page">
   <section class="section-header">
@@ -17,32 +17,32 @@
       <div class="form__grid form__grid--triple">
         <div class="form__group">
           <label for="name">Nombre</label>
-          <input id="name" name="name" type="text" value="<%= formData.name || '' %>" />
+          <input id="name" name="name" type="text" value="{{ formData.name|default('') }}" />
         </div>
         <div class="form__group">
           <label for="type">Tipo</label>
           <select id="type" name="type">
             <option value="">Selecciona</option>
-            <option value="Sala de reuniones" <%= formData.type === 'Sala de reuniones' ? 'selected' : '' %>>Sala de reuniones</option>
-            <option value="Aula" <%= formData.type === 'Aula' ? 'selected' : '' %>>Aula</option>
-            <option value="Coworking" <%= formData.type === 'Coworking' ? 'selected' : '' %>>Coworking</option>
+            <option value="Sala de reuniones" {% if formData.type == 'Sala de reuniones' %}selected{% endif %}>Sala de reuniones</option>
+            <option value="Aula" {% if formData.type == 'Aula' %}selected{% endif %}>Aula</option>
+            <option value="Coworking" {% if formData.type == 'Coworking' %}selected{% endif %}>Coworking</option>
           </select>
         </div>
         <div class="form__group">
           <label for="capacity">Capacidad</label>
-          <input id="capacity" name="capacity" type="number" min="1" step="1" value="<%= formData.capacity || '' %>" />
+          <input id="capacity" name="capacity" type="number" min="1" step="1" value="{{ formData.capacity|default('') }}" />
         </div>
         <div class="form__group">
           <label for="location">Ubicación</label>
-          <input id="location" name="location" type="text" value="<%= formData.location || '' %>" />
+          <input id="location" name="location" type="text" value="{{ formData.location|default('') }}" />
         </div>
         <div class="form__group form__group--wide">
           <label for="amenitiesText">Equipamiento</label>
-          <input id="amenitiesText" name="amenitiesText" type="text" value="<%= formData.amenitiesText || '' %>" placeholder="Pizarra, Pantalla, Wifi" />
+          <input id="amenitiesText" name="amenitiesText" type="text" value="{{ formData.amenitiesText|default('') }}" placeholder="Pizarra, Pantalla, Wifi" />
         </div>
         <div class="form__group form__group--wide">
           <label for="description">Descripción</label>
-          <textarea id="description" name="description" rows="4"><%= formData.description || '' %></textarea>
+          <textarea id="description" name="description" rows="4">{{ formData.description|default('') }}</textarea>
         </div>
       </div>
 
@@ -67,31 +67,31 @@
         </tr>
       </thead>
       <tbody>
-        <% spaces.forEach((space) => { %>
+        {% for space in spaces %}
           <tr>
-            <td><%= space.name %></td>
-            <td><%= space.type %></td>
-            <td><%= space.location %></td>
-            <td><%= space.capacity %></td>
+            <td>{{ space.name }}</td>
+            <td>{{ space.type }}</td>
+            <td>{{ space.location }}</td>
+            <td>{{ space.capacity }}</td>
             <td>
-              <span class="badge <%= space.active ? '' : 'badge--neutral' %>">
-                <%= space.active ? 'Activo' : 'Desactivado' %>
+              <span class="badge {% if not space.active %}badge--neutral{% endif %}">
+                {% if space.active %}Activo{% else %}Desactivado{% endif %}
               </span>
             </td>
             <td>
               <div class="table-actions">
-                <a class="button button--ghost button--small" href="/admin/spaces/<%= space._id %>/edit">Editar</a>
-                <a class="button button--ghost button--small" href="/admin/spaces/<%= space._id %>/blocks">Bloqueos</a>
-                <form action="/admin/spaces/<%= space._id %>/toggle" method="post">
-                  <button class="button button--primary button--small" type="submit"><%= space.active ? 'Desactivar' : 'Activar' %></button>
+                <a class="button button--ghost button--small" href="/admin/spaces/{{ space._id }}/edit">Editar</a>
+                <a class="button button--ghost button--small" href="/admin/spaces/{{ space._id }}/blocks">Bloqueos</a>
+                <form action="/admin/spaces/{{ space._id }}/toggle" method="post">
+                  <button class="button button--primary button--small" type="submit">{% if space.active %}Desactivar{% else %}Activar{% endif %}</button>
                 </form>
               </div>
             </td>
           </tr>
-        <% }) %>
+        {% endfor %}
       </tbody>
     </table>
   </section>
 </main>
 
-<%- include("../../partials/footer") %>
+{% include "../../partials/footer.twig" %}

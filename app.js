@@ -5,23 +5,21 @@ const fs = require("fs");
 const path = require("path");
 const session = require("express-session");
 const { MongoStore } = require("connect-mongo");
+const swaggerUi = require("swagger-ui-express");
 const apiRoutes = require("./src/routes/api");
 const webRoutes = require("./src/routes/web");
 const { connectDatabase, defaultUri } = require("./src/config/database");
+const { swaggerSpec } = require("./src/config/swagger");
+const { configureTwig } = require("./src/config/twig");
 const { seedDatabase } = require("./src/services/seedService");
 const { syncSessionUser } = require("./src/middleware/auth");
-const {
-  formatDateInput,
-  formatDateTime,
-  formatDateTimeLocalInput
-} = require("./src/utils/viewHelpers");
 
 const app = express();
 const port = process.env.PORT || 3000;
 const reactBuildPath = path.join(__dirname, "client", "dist");
 
-app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+configureTwig(app);
 
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", express.json());
@@ -43,6 +41,12 @@ if (fs.existsSync(reactBuildPath)) {
     res.sendFile(path.join(reactBuildPath, "index.html"));
   });
 }
+app.get("/api/openapi.json", (req, res) => {
+  res.json(swaggerSpec);
+});
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true
+}));
 app.use("/api", apiRoutes);
 app.use("/api", (err, req, res, next) => {
   if (err instanceof SyntaxError && "body" in err) {
@@ -62,9 +66,6 @@ app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   res.locals.currentPath = req.path;
   res.locals.flash = req.session.flash || null;
-  res.locals.formatDateTime = formatDateTime;
-  res.locals.formatDateInput = formatDateInput;
-  res.locals.formatDateTimeLocalInput = formatDateTimeLocalInput;
   delete req.session.flash;
   next();
 });

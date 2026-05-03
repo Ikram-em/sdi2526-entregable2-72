@@ -8,6 +8,13 @@ const { findBlockConflicts, findReservationConflicts } = require("../services/av
 const { paginate } = require("../utils/pagination");
 const { parseAmenities } = require("../utils/validation");
 
+/**
+ * Construye una URL con query string conservando únicamente parámetros no vacíos.
+ *
+ * @param {string} basePath Ruta base.
+ * @param {Record<string, string|number|null|undefined>} params Parámetros a serializar.
+ * @returns {string}
+ */
 function buildQueryString(basePath, params) {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -20,6 +27,19 @@ function buildQueryString(basePath, params) {
   return serialized ? `${basePath}?${serialized}` : basePath;
 }
 
+/**
+ * Normaliza el formulario de alta/edición de espacios.
+ *
+ * @param {Record<string, unknown>} [body={}] Datos recibidos del formulario.
+ * @returns {{
+ *   name: string,
+ *   type: string,
+ *   location: string,
+ *   capacity: number,
+ *   description: string,
+ *   amenitiesText: string
+ * }}
+ */
 function normalizeSpaceForm(body = {}) {
   return {
     name: String(body.name || "").trim(),
@@ -31,6 +51,12 @@ function normalizeSpaceForm(body = {}) {
   };
 }
 
+/**
+ * Valida los datos mínimos exigidos para un espacio.
+ *
+ * @param {{name: string, type: string, location: string, capacity: number}} formData Datos ya normalizados.
+ * @returns {string[]}
+ */
 function validateSpaceForm(formData) {
   const errors = [];
 
@@ -53,6 +79,13 @@ function validateSpaceForm(formData) {
   return errors;
 }
 
+/**
+ * Busca un espacio activo con el mismo nombre, opcionalmente excluyendo uno concreto.
+ *
+ * @param {string} name Nombre del espacio.
+ * @param {string|import("mongoose").Types.ObjectId|null} [excludeId=null] Espacio a excluir.
+ * @returns {Promise<import("../models/Space")|null>}
+ */
 async function ensureUniqueActiveSpaceName(name, excludeId = null) {
   const query = { name, active: true };
 
@@ -63,17 +96,34 @@ async function ensureUniqueActiveSpaceName(name, excludeId = null) {
   return Space.findOne(query);
 }
 
+/**
+ * Muestra el listado de espacios para administración.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showSpaceManagement(req, res) {
   const spaces = await Space.find().sort({ active: -1, name: 1 }).lean();
 
   return res.render("admin/spaces/index", {
     title: "Gestión de espacios",
-    spaces,
+    spaces: spaces.map((space) => ({
+      ...space,
+      _id: space._id.toString()
+    })),
     errors: [],
     formData: {}
   });
 }
 
+/**
+ * Crea un nuevo espacio tras validar los datos y la unicidad del nombre activo.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el formulario.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function createSpace(req, res) {
   const formData = normalizeSpaceForm(req.body);
   const errors = validateSpaceForm(formData);
@@ -87,7 +137,10 @@ async function createSpace(req, res) {
     const spaces = await Space.find().sort({ active: -1, name: 1 }).lean();
     return res.status(400).render("admin/spaces/index", {
       title: "Gestión de espacios",
-      spaces,
+      spaces: spaces.map((space) => ({
+        ...space,
+        _id: space._id.toString()
+      })),
       errors,
       formData
     });
@@ -107,6 +160,13 @@ async function createSpace(req, res) {
   return req.session.save(() => res.redirect("/admin/spaces"));
 }
 
+/**
+ * Renderiza la vista de edición de un espacio existente.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showEditSpace(req, res) {
   if (!mongoose.isValidObjectId(req.params.spaceId)) {
     return res.status(404).render("not-found", {
@@ -124,7 +184,10 @@ async function showEditSpace(req, res) {
 
   return res.render("admin/spaces/edit", {
     title: `Editar - ${space.name}`,
-    space,
+    space: {
+      ...space,
+      _id: space._id.toString()
+    },
     errors: [],
     formData: {
       name: space.name,
@@ -137,6 +200,13 @@ async function showEditSpace(req, res) {
   });
 }
 
+/**
+ * Actualiza un espacio existente manteniendo las reglas de validación y unicidad.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el formulario.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function updateSpace(req, res) {
   if (!mongoose.isValidObjectId(req.params.spaceId)) {
     return res.status(404).render("not-found", {
@@ -165,7 +235,10 @@ async function updateSpace(req, res) {
   if (errors.length > 0) {
     return res.status(400).render("admin/spaces/edit", {
       title: `Editar - ${space.name}`,
-      space: space.toObject(),
+      space: {
+        ...space.toObject(),
+        _id: space._id.toString()
+      },
       errors,
       formData
     });
@@ -183,6 +256,13 @@ async function updateSpace(req, res) {
   return res.redirect("/admin/spaces");
 }
 
+/**
+ * Activa o desactiva lógicamente un espacio.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el id del espacio.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function toggleSpace(req, res) {
   if (!mongoose.isValidObjectId(req.params.spaceId)) {
     return res.status(404).render("not-found", {
@@ -212,6 +292,13 @@ async function toggleSpace(req, res) {
   return res.redirect("/admin/spaces");
 }
 
+/**
+ * Muestra los bloqueos de mantenimiento de un espacio.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showBlocks(req, res) {
   if (!mongoose.isValidObjectId(req.params.spaceId)) {
     return res.status(404).render("not-found", {
@@ -234,13 +321,26 @@ async function showBlocks(req, res) {
 
   return res.render("admin/spaces/blocks", {
     title: `Bloqueos - ${space.name}`,
-    space,
-    blocks,
+    space: {
+      ...space,
+      _id: space._id.toString()
+    },
+    blocks: blocks.map((block) => ({
+      ...block,
+      _id: block._id.toString()
+    })),
     errors: [],
     formData: {}
   });
 }
 
+/**
+ * Crea un bloqueo de mantenimiento asegurando que no solapa con reservas ni con otros bloqueos activos.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el formulario.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function createBlock(req, res) {
   if (!mongoose.isValidObjectId(req.params.spaceId)) {
     return res.status(404).render("not-found", {
@@ -298,8 +398,14 @@ async function createBlock(req, res) {
 
     return res.status(400).render("admin/spaces/blocks", {
       title: `Bloqueos - ${space.name}`,
-      space,
-      blocks,
+      space: {
+        ...space,
+        _id: space._id.toString()
+      },
+      blocks: blocks.map((block) => ({
+        ...block,
+        _id: block._id.toString()
+      })),
       errors,
       formData
     });
@@ -318,6 +424,13 @@ async function createBlock(req, res) {
   return req.session.save(() => res.redirect(`/admin/spaces/${space._id}/blocks`));
 }
 
+/**
+ * Cancela un bloqueo manteniéndolo en histórico.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function cancelBlock(req, res) {
   if (!mongoose.isValidObjectId(req.params.blockId)) {
     return res.status(404).render("not-found", {
@@ -339,6 +452,12 @@ async function cancelBlock(req, res) {
   return req.session.save(() => res.redirect(`/admin/spaces/${block.space.toString()}/blocks`));
 }
 
+/**
+ * Extrae los filtros del listado global de reservas.
+ *
+ * @param {Record<string, string>} query Query string de la petición.
+ * @returns {{space: string, from: string, to: string}}
+ */
 function buildReservationFilters(query) {
   return {
     space: query.space || "",
@@ -347,6 +466,12 @@ function buildReservationFilters(query) {
   };
 }
 
+/**
+ * Construye la consulta Mongo del listado global de reservas.
+ *
+ * @param {{space: string, from: string, to: string}} filters Filtros aplicados en la vista.
+ * @returns {Record<string, unknown>}
+ */
 function buildReservationQuery(filters) {
   const query = {};
 
@@ -375,6 +500,13 @@ function buildReservationQuery(filters) {
   return query;
 }
 
+/**
+ * Muestra el listado global de reservas con filtros y paginación.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showReservations(req, res) {
   const filters = buildReservationFilters(req.query);
   const page = Number.parseInt(req.query.page, 10) || 1;
@@ -406,7 +538,10 @@ async function showReservations(req, res) {
   return res.render("admin-reservations", {
     title: "Listado global de reservas",
     reservations: rows,
-    spaces,
+    spaces: spaces.map((space) => ({
+      id: space._id.toString(),
+      name: space.name
+    })),
     filters,
     pagination,
     buildPageLink: (targetPage) =>
@@ -418,6 +553,13 @@ async function showReservations(req, res) {
   });
 }
 
+/**
+ * Exporta a CSV el listado global de reservas o el resultado filtrado.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function exportReservationsCsv(req, res) {
   const filters = buildReservationFilters(req.query);
   const query = buildReservationQuery(filters);
@@ -450,6 +592,13 @@ async function exportReservationsCsv(req, res) {
   return res.send(csv);
 }
 
+/**
+ * Muestra el listado paginado de usuarios del sistema.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showUsers(req, res) {
   const page = Number.parseInt(req.query.page, 10) || 1;
   const pageSize = 5;

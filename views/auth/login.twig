@@ -1,6 +1,6 @@
-<%- include("../partials/head", { title }) %>
-<%- include("../partials/header") %>
-<%- include("../partials/flash", { flash, error, errors: [] }) %>
+{% include "../partials/head.twig" with { title: title } %}
+{% include "../partials/header.twig" %}
+{% include "../partials/flash.twig" with { flash: flash, error: error, errors: [] } %}
 
 <main class="shell page page--auth">
   <section class="auth-panel auth-panel--wide">
@@ -23,7 +23,7 @@
     <form class="surface form" action="/login" method="post" data-validate="login" novalidate>
       <div class="form__group">
         <label for="dni">DNI</label>
-        <input id="dni" name="dni" type="text" maxlength="9" value="<%= formData?.dni || '' %>" placeholder="Ej. 12345678Z" autocomplete="username" />
+        <input id="dni" name="dni" type="text" maxlength="9" value="{{ formData.dni|default('') }}" placeholder="Ej. 12345678Z" autocomplete="username" />
         <small class="field-error" data-error-for="dni"></small>
       </div>
 
@@ -49,4 +49,4 @@
   </section>
 </main>
 
-<%- include("../partials/footer") %>
+{% include "../partials/footer.twig" %}

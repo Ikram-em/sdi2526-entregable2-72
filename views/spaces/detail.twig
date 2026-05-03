@@ -1,30 +1,30 @@
-<%- include("../partials/head", { title }) %>
-<%- include("../partials/header") %>
-<%- include("../partials/flash", { flash, error: null, errors: [] }) %>
+{% include "../partials/head.twig" with { title: title } %}
+{% include "../partials/header.twig" %}
+{% include "../partials/flash.twig" with { flash: flash, error: null, errors: [] } %}
 
 <main class="shell page">
   <section class="detail-hero">
     <div class="detail-hero__content">
       <span class="eyebrow">Ficha del espacio</span>
-      <h1><%= space.name %></h1>
-      <p><%= space.description %></p>
+      <h1>{{ space.name }}</h1>
+      <p>{{ space.description }}</p>
       <div class="detail-hero__actions">
         <a class="button button--ghost" href="/spaces">Volver al listado</a>
-        <a class="button button--primary" href="/spaces/<%= space._id %>/availability">Consultar disponibilidad</a>
+        <a class="button button--primary" href="/spaces/{{ space._id }}/availability">Consultar disponibilidad</a>
       </div>
     </div>
     <div class="surface metrics-card">
       <div class="metric">
         <span class="metric__label">Tipo</span>
-        <strong><%= space.type %></strong>
+        <strong>{{ space.type }}</strong>
       </div>
       <div class="metric">
         <span class="metric__label">Ubicación</span>
-        <strong><%= space.location %></strong>
+        <strong>{{ space.location }}</strong>
       </div>
       <div class="metric">
         <span class="metric__label">Capacidad</span>
-        <strong><%= space.capacity %> personas</strong>
+        <strong>{{ space.capacity }} personas</strong>
       </div>
       <div class="metric">
         <span class="metric__label">Estado</span>
@@ -36,11 +36,11 @@
   <section class="surface">
     <h2>Equipamiento</h2>
     <div class="amenity-list">
-      <% space.amenities.forEach((item) => { %>
-        <span class="chip"><%= item %></span>
-      <% }) %>
+      {% for item in space.amenities %}
+        <span class="chip">{{ item }}</span>
+      {% endfor %}
     </div>
   </section>
 </main>
 
-<%- include("../partials/footer") %>
+{% include "../partials/footer.twig" %}

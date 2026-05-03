@@ -5,6 +5,13 @@ const Space = require("../models/Space");
 const { buildSessionUser, setFlash } = require("../middleware/auth");
 const { isValidDni, isValidPassword, normalizeDni } = require("../utils/validation");
 
+/**
+ * Renderiza el formulario de registro para usuarios no autenticados.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showRegister(req, res) {
   res.render("auth/register", {
     title: "Registro de usuario",
@@ -13,6 +20,13 @@ async function showRegister(req, res) {
   });
 }
 
+/**
+ * Registra un nuevo usuario estándar, valida el formulario y crea la sesión.
+ *
+ * @param {import("express").Request} req Peticion HTTP con los datos del formulario.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function register(req, res) {
   const body = req.body || {};
   const formData = {
@@ -64,9 +78,16 @@ async function register(req, res) {
 
   req.session.user = buildSessionUser(user);
   setFlash(req, "success", "Registro completado correctamente.");
-  return res.redirect("/spaces");
+  return req.session.save(() => res.redirect("/spaces"));
 }
 
+/**
+ * Renderiza el formulario de inicio de sesión.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showLogin(req, res) {
   if (req.query.loggedOut === "1") {
     res.locals.flash = {
@@ -82,6 +103,13 @@ async function showLogin(req, res) {
   });
 }
 
+/**
+ * Autentica a un usuario por DNI y contraseña y redirige según su rol.
+ *
+ * @param {import("express").Request} req Peticion HTTP con credenciales.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function login(req, res) {
   const body = req.body || {};
   const dni = normalizeDni(body.dni);
@@ -115,15 +143,29 @@ async function login(req, res) {
 
   req.session.user = buildSessionUser(user);
   setFlash(req, "success", `Bienvenido/a, ${user.firstName}.`);
-  return res.redirect(user.role === "admin" ? "/admin/reservations" : "/spaces");
+  return req.session.save(() => res.redirect(user.role === "admin" ? "/admin/reservations" : "/spaces"));
 }
 
+/**
+ * Cierra la sesión actual y redirige al login.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function logout(req, res) {
   req.session.destroy(() => {
     res.redirect("/login?loggedOut=1");
   });
 }
 
+/**
+ * Renderiza la vista para cambiar la contraseña del usuario estándar.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showChangePassword(req, res) {
   res.render("auth/change-password", {
     title: "Cambiar contraseña",
@@ -131,6 +173,13 @@ async function showChangePassword(req, res) {
   });
 }
 
+/**
+ * Muestra el perfil del usuario autenticado con métricas básicas.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showProfile(req, res) {
   const user = await User.findById(req.session.user.id).lean();
 
@@ -160,6 +209,13 @@ async function showProfile(req, res) {
   });
 }
 
+/**
+ * Actualiza la contraseña del usuario autenticado tras validar la política de seguridad.
+ *
+ * @param {import("express").Request} req Peticion HTTP con la contraseña actual y la nueva.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function changePassword(req, res) {
   const body = req.body || {};
   const currentPassword = body.currentPassword || "";
@@ -194,7 +250,7 @@ async function changePassword(req, res) {
   user.passwordHash = await bcrypt.hash(newPassword, 10);
   await user.save();
   setFlash(req, "success", "Contraseña actualizada correctamente.");
-  return res.redirect("/spaces");
+  return req.session.save(() => res.redirect("/spaces"));
 }
 
 module.exports = {

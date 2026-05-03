@@ -1,47 +1,47 @@
-<%- include("../../partials/head", { title }) %>
-<%- include("../../partials/header") %>
-<%- include("../../partials/flash", { flash, error: null, errors }) %>
+{% include "../../partials/head.twig" with { title: title } %}
+{% include "../../partials/header.twig" %}
+{% include "../../partials/flash.twig" with { flash: flash, error: null, errors: errors } %}
 
 <main class="shell page">
   <section class="section-header">
     <div>
       <span class="eyebrow">Editar espacio</span>
-      <h1><%= space.name %></h1>
+      <h1>{{ space.name }}</h1>
       <p>Actualiza ubicación, capacidad, descripción, nombre y equipamiento manteniendo las validaciones del sistema.</p>
     </div>
     <a class="button button--ghost" href="/admin/spaces">Volver</a>
   </section>
 
   <section class="surface">
-    <form class="form" method="post" action="/admin/spaces/<%= space._id %>/edit" novalidate>
+    <form class="form" method="post" action="/admin/spaces/{{ space._id }}/edit" novalidate>
       <div class="form__grid form__grid--triple">
         <div class="form__group">
           <label for="name">Nombre</label>
-          <input id="name" name="name" type="text" value="<%= formData.name %>" />
+          <input id="name" name="name" type="text" value="{{ formData.name }}" />
         </div>
         <div class="form__group">
           <label for="type">Tipo</label>
           <select id="type" name="type">
-            <option value="Sala de reuniones" <%= formData.type === 'Sala de reuniones' ? 'selected' : '' %>>Sala de reuniones</option>
-            <option value="Aula" <%= formData.type === 'Aula' ? 'selected' : '' %>>Aula</option>
-            <option value="Coworking" <%= formData.type === 'Coworking' ? 'selected' : '' %>>Coworking</option>
+            <option value="Sala de reuniones" {% if formData.type == 'Sala de reuniones' %}selected{% endif %}>Sala de reuniones</option>
+            <option value="Aula" {% if formData.type == 'Aula' %}selected{% endif %}>Aula</option>
+            <option value="Coworking" {% if formData.type == 'Coworking' %}selected{% endif %}>Coworking</option>
           </select>
         </div>
         <div class="form__group">
           <label for="capacity">Capacidad</label>
-          <input id="capacity" name="capacity" type="number" min="1" step="1" value="<%= formData.capacity %>" />
+          <input id="capacity" name="capacity" type="number" min="1" step="1" value="{{ formData.capacity }}" />
         </div>
         <div class="form__group">
           <label for="location">Ubicación</label>
-          <input id="location" name="location" type="text" value="<%= formData.location %>" />
+          <input id="location" name="location" type="text" value="{{ formData.location }}" />
         </div>
         <div class="form__group form__group--wide">
           <label for="amenitiesText">Equipamiento</label>
-          <input id="amenitiesText" name="amenitiesText" type="text" value="<%= formData.amenitiesText %>" />
+          <input id="amenitiesText" name="amenitiesText" type="text" value="{{ formData.amenitiesText }}" />
         </div>
         <div class="form__group form__group--wide">
           <label for="description">Descripción</label>
-          <textarea id="description" name="description" rows="5"><%= formData.description %></textarea>
+          <textarea id="description" name="description" rows="5">{{ formData.description }}</textarea>
         </div>
       </div>
 
@@ -53,4 +53,4 @@
   </section>
 </main>
 
-<%- include("../../partials/footer") %>
+{% include "../../partials/footer.twig" %}

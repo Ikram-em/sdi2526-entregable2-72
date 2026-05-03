@@ -1,0 +1,79 @@
+{% include "partials/head.twig" with { title: title } %}
+{% include "partials/header.twig" %}
+{% include "partials/flash.twig" with { flash: flash, error: null, errors: [] } %}
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">Reservas globales</span>
+      <h1>Listado global de reservas</h1>
+      <p>Consulta reservas activas y canceladas, filtra por espacio o rango de fechas, pagina el resultado y exporta a CSV.</p>
+    </div>
+  </section>
+
+  <section class="surface surface--filter">
+    <form class="filter-bar filter-bar--wide" method="get" action="/admin/reservations">
+      <div class="form__group">
+        <label for="space">Espacio</label>
+        <select id="space" name="space">
+          <option value="">Todos</option>
+          {% for space in spaces %}
+            <option value="{{ space.id }}" {% if filters.space == space.id %}selected{% endif %}>{{ space.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form__group">
+        <label for="from">Desde</label>
+        <input id="from" name="from" type="date" value="{{ filters.from }}" />
+      </div>
+      <div class="form__group">
+        <label for="to">Hasta</label>
+        <input id="to" name="to" type="date" value="{{ filters.to }}" />
+      </div>
+      <div class="filter-bar__actions">
+        <button class="button button--primary" type="submit">Filtrar</button>
+        <a class="button button--ghost" href="/admin/reservations">Limpiar</a>
+        <a class="button button--ghost" href="{{ exportLink }}">Exportar CSV</a>
+      </div>
+    </form>
+  </section>
+
+  <section class="surface">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>DNI</th>
+          <th>Espacio</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reservation in reservations %}
+          <tr data-reservation-id="{{ reservation.id }}">
+            <td>{{ reservation.userName }}</td>
+            <td>{{ reservation.userDni }}</td>
+            <td>{{ reservation.spaceName }}</td>
+            <td>{{ format_date_time(reservation.startAt) }}</td>
+            <td>{{ format_date_time(reservation.endAt) }}</td>
+            <td><span class="badge badge--neutral">{{ reservation.status }}</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      {% if pagination.hasPrevious %}
+        <a class="button button--ghost button--small" href="{{ buildPageLink(pagination.page - 1) }}">Anterior</a>
+      {% endif %}
+      <span class="pagination__status">Página {{ pagination.page }} de {{ pagination.totalPages }}</span>
+      {% if pagination.hasNext %}
+        <a class="button button--ghost button--small" href="{{ buildPageLink(pagination.page + 1) }}">Siguiente</a>
+      {% endif %}
+    </div>
+  </section>
+</main>
+
+{% include "partials/footer.twig" %}

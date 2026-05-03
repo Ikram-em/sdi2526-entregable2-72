@@ -1,12 +1,12 @@
-<%- include("../../partials/head", { title }) %>
-<%- include("../../partials/header") %>
-<%- include("../../partials/flash", { flash, error: null, errors }) %>
+{% include "../../partials/head.twig" with { title: title } %}
+{% include "../../partials/header.twig" %}
+{% include "../../partials/flash.twig" with { flash: flash, error: null, errors: errors } %}
 
 <main class="shell page">
   <section class="section-header">
     <div>
       <span class="eyebrow">Mantenimiento</span>
-      <h1>Bloqueos de <%= space.name %></h1>
+      <h1>Bloqueos de {{ space.name }}</h1>
       <p>Crea bloqueos de mantenimiento y cancela bloqueos activos conservando el histórico.</p>
     </div>
     <a class="button button--ghost" href="/admin/spaces">Volver a espacios</a>
@@ -14,19 +14,19 @@
 
   <section class="surface">
     <h2>Nuevo bloqueo</h2>
-    <form class="form" method="post" action="/admin/spaces/<%= space._id %>/blocks">
+    <form class="form" method="post" action="/admin/spaces/{{ space._id }}/blocks">
       <div class="form__grid">
         <div class="form__group">
           <label for="startAt">Inicio</label>
-          <input id="startAt" name="startAt" type="datetime-local" value="<%= formData.startAt || '' %>" />
+          <input id="startAt" name="startAt" type="datetime-local" value="{{ formData.startAt|default('') }}" />
         </div>
         <div class="form__group">
           <label for="endAt">Fin</label>
-          <input id="endAt" name="endAt" type="datetime-local" value="<%= formData.endAt || '' %>" />
+          <input id="endAt" name="endAt" type="datetime-local" value="{{ formData.endAt|default('') }}" />
         </div>
         <div class="form__group form__group--wide">
           <label for="reason">Motivo</label>
-          <textarea id="reason" name="reason" rows="4"><%= formData.reason || '' %></textarea>
+          <textarea id="reason" name="reason" rows="4">{{ formData.reason|default('') }}</textarea>
         </div>
       </div>
       <div class="form__actions">
@@ -50,27 +50,27 @@
         </tr>
       </thead>
       <tbody>
-        <% blocks.forEach((block) => { %>
+        {% for block in blocks %}
           <tr>
-            <td><%= formatDateTime(block.startAt) %></td>
-            <td><%= formatDateTime(block.endAt) %></td>
-            <td><%= block.reason %></td>
-            <td><span class="badge <%= block.status === 'ACTIVO' ? '' : 'badge--neutral' %>"><%= block.status %></span></td>
-            <td><%= block.createdBy.firstName %> <%= block.createdBy.lastName %></td>
+            <td>{{ format_date_time(block.startAt) }}</td>
+            <td>{{ format_date_time(block.endAt) }}</td>
+            <td>{{ block.reason }}</td>
+            <td><span class="badge {% if block.status != 'ACTIVO' %}badge--neutral{% endif %}">{{ block.status }}</span></td>
+            <td>{{ block.createdBy.firstName }} {{ block.createdBy.lastName }}</td>
             <td>
-              <% if (block.status === 'ACTIVO') { %>
-                <form action="/admin/blocks/<%= block._id %>/cancel" method="post">
+              {% if block.status == 'ACTIVO' %}
+                <form action="/admin/blocks/{{ block._id }}/cancel" method="post">
                   <button class="button button--ghost button--small" type="submit">Cancelar</button>
                 </form>
-              <% } else { %>
+              {% else %}
                 <span class="muted">Sin acción</span>
-              <% } %>
+              {% endif %}
             </td>
           </tr>
-        <% }) %>
+        {% endfor %}
       </tbody>
     </table>
   </section>
 </main>
 
-<%- include("../../partials/footer") %>
+{% include "../../partials/footer.twig" %}

@@ -25,7 +25,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-abstract class SeleniumTestBase {
+abstract class SeleniumTestBase extends AppTestBase {
   protected static final String STANDARD_DNI = "10000001S";
   protected static final String STANDARD_PASSWORD = "Us3r@1-PASSW";
   protected static final String SECOND_STANDARD_DNI = "10000002Q";

@@ -1,6 +1,6 @@
-<%- include("../partials/head", { title }) %>
-<%- include("../partials/header") %>
-<%- include("../partials/flash", { flash, error: null, errors: [] }) %>
+{% include "../partials/head.twig" with { title: title } %}
+{% include "../partials/header.twig" %}
+{% include "../partials/flash.twig" with { flash: flash, error: null, errors: [] } %}
 
 <main class="shell page">
   <section class="page-hero">
@@ -11,12 +11,12 @@
     </div>
     <div class="hero-kpis">
       <article class="kpi-card">
-        <span><%= metrics.primaryLabel %></span>
-        <strong><%= metrics.primaryValue %></strong>
+        <span>{{ metrics.primaryLabel }}</span>
+        <strong>{{ metrics.primaryValue }}</strong>
       </article>
       <article class="kpi-card">
-        <span><%= metrics.secondaryLabel %></span>
-        <strong><%= metrics.secondaryValue %></strong>
+        <span>{{ metrics.secondaryLabel }}</span>
+        <strong>{{ metrics.secondaryValue }}</strong>
       </article>
     </div>
   </section>
@@ -25,30 +25,30 @@
     <article class="surface profile-card profile-card--main">
       <div class="profile-card__header">
         <div class="profile-avatar profile-avatar--large">
-          <%= `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}` %>
+          {{ avatar_initials(profile.firstName ~ ' ' ~ profile.lastName) }}
         </div>
         <div>
-          <h2><%= `${profile.firstName} ${profile.lastName}` %></h2>
-          <p class="muted">Perfil <%= profile.role === "admin" ? "administrador" : "de usuario estándar" %></p>
+          <h2>{{ profile.firstName }} {{ profile.lastName }}</h2>
+          <p class="muted">Perfil {% if profile.role == 'admin' %}administrador{% else %}de usuario estándar{% endif %}</p>
         </div>
       </div>
 
       <dl class="profile-list">
         <div>
           <dt>DNI</dt>
-          <dd><%= profile.dni %></dd>
+          <dd>{{ profile.dni }}</dd>
         </div>
         <div>
           <dt>Nombre</dt>
-          <dd><%= profile.firstName %></dd>
+          <dd>{{ profile.firstName }}</dd>
         </div>
         <div>
           <dt>Apellidos</dt>
-          <dd><%= profile.lastName %></dd>
+          <dd>{{ profile.lastName }}</dd>
         </div>
         <div>
           <dt>Rol</dt>
-          <dd><%= profile.role === "admin" ? "Administrador" : "Usuario estándar" %></dd>
+          <dd>{{ role_label(profile.role) }}</dd>
         </div>
       </dl>
     </article>
@@ -58,29 +58,29 @@
       <dl class="profile-list">
         <div>
           <dt>Alta en el sistema</dt>
-          <dd><%= formatDateTime(profile.createdAt) %></dd>
+          <dd>{{ format_date_time(profile.createdAt) }}</dd>
         </div>
         <div>
           <dt>Última actualización</dt>
-          <dd><%= formatDateTime(profile.updatedAt) %></dd>
+          <dd>{{ format_date_time(profile.updatedAt) }}</dd>
         </div>
         <div>
           <dt>Área principal</dt>
-          <dd><%= profile.role === "admin" ? "Administración y control global" : "Consulta y gestión de espacios" %></dd>
+          <dd>{% if profile.role == 'admin' %}Administración y control global{% else %}Consulta y gestión de espacios{% endif %}</dd>
         </div>
       </dl>
 
       <div class="profile-actions">
-        <% if (profile.role === "standard") { %>
+        {% if profile.role == 'standard' %}
           <a class="button button--primary" href="/account/password">Actualizar contraseña</a>
           <a class="button button--ghost" href="/spaces">Ver espacios</a>
-        <% } else { %>
+        {% else %}
           <a class="button button--primary" href="/admin/reservations">Ver reservas</a>
           <a class="button button--ghost" href="/admin/spaces">Gestionar espacios</a>
-        <% } %>
+        {% endif %}
       </div>
     </article>
   </section>
 </main>
 
-<%- include("../partials/footer") %>
+{% include "../partials/footer.twig" %}

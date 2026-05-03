@@ -1,6 +1,6 @@
-<%- include("../partials/head", { title }) %>
-<%- include("../partials/header") %>
-<%- include("../partials/flash", { flash, error: null, errors: [] }) %>
+{% include "../partials/head.twig" with { title: title } %}
+{% include "../partials/header.twig" %}
+{% include "../partials/flash.twig" with { flash: flash, error: null, errors: [] } %}
 
 <main class="shell page">
   <section class="section-header">
@@ -17,8 +17,8 @@
         <label for="status">Estado</label>
         <select id="status" name="status">
           <option value="">Todos</option>
-          <option value="ACTIVA" <%= statusFilter === 'ACTIVA' ? 'selected' : '' %>>ACTIVA</option>
-          <option value="CANCELADA" <%= statusFilter === 'CANCELADA' ? 'selected' : '' %>>CANCELADA</option>
+          <option value="ACTIVA" {% if statusFilter == 'ACTIVA' %}selected{% endif %}>ACTIVA</option>
+          <option value="CANCELADA" {% if statusFilter == 'CANCELADA' %}selected{% endif %}>CANCELADA</option>
         </select>
       </div>
       <div class="filter-bar__actions">
@@ -40,26 +40,26 @@
         </tr>
       </thead>
       <tbody>
-        <% reservations.forEach((reservation) => { %>
+        {% for reservation in reservations %}
           <tr>
-            <td><%= reservation.space.name %></td>
-            <td><%= formatDateTime(reservation.startAt) %></td>
-            <td><%= formatDateTime(reservation.endAt) %></td>
-            <td><span class="badge <%= reservation.status === 'ACTIVA' ? '' : 'badge--neutral' %>"><%= reservation.status %></span></td>
+            <td>{{ reservation.space.name }}</td>
+            <td>{{ format_date_time(reservation.startAt) }}</td>
+            <td>{{ format_date_time(reservation.endAt) }}</td>
+            <td><span class="badge {% if reservation.status != 'ACTIVA' %}badge--neutral{% endif %}">{{ reservation.status }}</span></td>
             <td>
-              <% if (reservation.status === 'ACTIVA') { %>
-                <form action="/reservations/<%= reservation._id %>/cancel" method="post">
+              {% if reservation.status == 'ACTIVA' %}
+                <form action="/reservations/{{ reservation._id }}/cancel" method="post">
                   <button class="button button--ghost button--small" type="submit">Cancelar</button>
                 </form>
-              <% } else { %>
+              {% else %}
                 <span class="muted">Sin acción</span>
-              <% } %>
+              {% endif %}
             </td>
           </tr>
-        <% }) %>
+        {% endfor %}
       </tbody>
     </table>
   </section>
 </main>
 
-<%- include("../partials/footer") %>
+{% include "../partials/footer.twig" %}

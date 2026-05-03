@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class RestApiReservationTests {
+public class RestApiReservationTests extends AppTestBase {
   private static final String STANDARD_DNI = "10000001S";
   private static final String STANDARD_PASSWORD = "Us3r@1-PASSW";
   private static final int RUN_DAY_OFFSET = Math.floorMod((int) System.nanoTime(), 1000);

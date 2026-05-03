@@ -1,9 +1,22 @@
 const User = require("../models/User");
 
+/**
+ * Guarda un mensaje flash en la sesión para mostrarlo en la siguiente respuesta.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {"success"|"error"} type Tipo de mensaje.
+ * @param {string} message Texto del mensaje.
+ */
 function setFlash(req, type, message) {
   req.session.flash = { type, message };
 }
 
+/**
+ * Proyecta un usuario persistido a la forma mínima almacenada en sesión.
+ *
+ * @param {import("../models/User")} user Documento de usuario.
+ * @returns {{id: string, dni: string, fullName: string, role: string}}
+ */
 function buildSessionUser(user) {
   return {
     id: user._id.toString(),
@@ -13,6 +26,14 @@ function buildSessionUser(user) {
   };
 }
 
+/**
+ * Sincroniza el usuario guardado en sesión con la base de datos.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @param {import("express").NextFunction} next Siguiente middleware.
+ * @returns {Promise<void>}
+ */
 async function syncSessionUser(req, res, next) {
   if (!req.session.user?.id) {
     return next();
@@ -30,6 +51,14 @@ async function syncSessionUser(req, res, next) {
   return next();
 }
 
+/**
+ * Restringe el acceso a visitantes anónimos.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @param {import("express").NextFunction} next Siguiente middleware.
+ * @returns {void}
+ */
 function requireGuest(req, res, next) {
   if (req.session.user) {
     return res.redirect(req.session.user.role === "admin" ? "/admin/reservations" : "/spaces");
@@ -38,6 +67,14 @@ function requireGuest(req, res, next) {
   return next();
 }
 
+/**
+ * Obliga a que exista una sesión autenticada.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @param {import("express").NextFunction} next Siguiente middleware.
+ * @returns {void}
+ */
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     setFlash(req, "error", "Debes iniciar sesión para acceder a esta zona.");
@@ -47,6 +84,14 @@ function requireAuth(req, res, next) {
   return next();
 }
 
+/**
+ * Permite acceso solo a usuarios estándar autenticados.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @param {import("express").NextFunction} next Siguiente middleware.
+ * @returns {void}
+ */
 function requireStandard(req, res, next) {
   if (!req.session.user) {
     setFlash(req, "error", "Debes iniciar sesión para acceder a esta zona.");
@@ -61,6 +106,14 @@ function requireStandard(req, res, next) {
   return next();
 }
 
+/**
+ * Permite acceso solo a usuarios administradores autenticados.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @param {import("express").NextFunction} next Siguiente middleware.
+ * @returns {void}
+ */
 function requireAdmin(req, res, next) {
   if (!req.session.user) {
     setFlash(req, "error", "Debes iniciar sesión para acceder a esta zona.");

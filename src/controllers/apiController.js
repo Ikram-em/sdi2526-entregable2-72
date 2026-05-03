@@ -11,6 +11,12 @@ const { normalizeDni } = require("../utils/validation");
 
 const RECURRENCE_FREQUENCIES = new Set(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]);
 
+/**
+ * Proyecta un documento de usuario a la forma expuesta por la API.
+ *
+ * @param {import("../models/User")} user Documento de usuario.
+ * @returns {{id: string, dni: string, name: string, role: string}}
+ */
 function serializeUser(user) {
   return {
     id: user._id.toString(),
@@ -20,6 +26,12 @@ function serializeUser(user) {
   };
 }
 
+/**
+ * Proyecta un documento de espacio a la forma expuesta por la API.
+ *
+ * @param {import("../models/Space")} space Documento de espacio.
+ * @returns {{id: string, name: string, active: boolean}}
+ */
 function serializeSpace(space) {
   return {
     id: space._id.toString(),
@@ -28,6 +40,12 @@ function serializeSpace(space) {
   };
 }
 
+/**
+ * Proyecta un bloqueo de mantenimiento a la forma expuesta por la API.
+ *
+ * @param {import("../models/Block")} block Documento de bloqueo.
+ * @returns {{id: string, spaceId: string, startDateTime: string, endDateTime: string, status: string, reason: string}}
+ */
 function serializeBlock(block) {
   return {
     id: block._id.toString(),
@@ -39,6 +57,21 @@ function serializeBlock(block) {
   };
 }
 
+/**
+ * Proyecta una reserva a la forma expuesta por la API.
+ *
+ * @param {import("../models/Reservation")} reservation Documento de reserva.
+ * @returns {{
+ *   id: string,
+ *   spaceId: string,
+ *   spaceName: string,
+ *   startDateTime: string,
+ *   endDateTime: string,
+ *   purpose: string,
+ *   status: string,
+ *   createdAt: string
+ * }}
+ */
 function serializeReservation(reservation) {
   const spaceId = reservation.space?._id ? reservation.space._id.toString() : reservation.space.toString();
   const spaceName = reservation.space?.name || spaceId;
@@ -55,11 +88,29 @@ function serializeReservation(reservation) {
   };
 }
 
+/**
+ * Convierte una fecha textual a `Date` o devuelve `null` si no es válida.
+ *
+ * @param {string} value Fecha en texto.
+ * @returns {Date|null}
+ */
 function parseDate(value) {
   const date = new Date(value);
   return Number.isNaN(date.valueOf()) ? null : date;
 }
 
+/**
+ * Valida y normaliza el payload de creación/edición de reservas.
+ *
+ * @param {Record<string, unknown>} body Cuerpo JSON recibido.
+ * @returns {{
+ *   details: Record<string, string>,
+ *   endAt: Date|null,
+ *   purpose: string,
+ *   spaceId: string,
+ *   startAt: Date|null
+ * }}
+ */
 function validateReservationInput(body) {
   const details = {};
   const spaceId = String(body.spaceId || "").trim();
@@ -92,6 +143,17 @@ function validateReservationInput(body) {
   };
 }
 
+/**
+ * Verifica las restricciones de negocio aplicables a una reserva.
+ *
+ * @param {{
+ *   spaceId: string,
+ *   startAt: Date,
+ *   endAt: Date,
+ *   excludeReservationId?: string|import("mongoose").Types.ObjectId|null
+ * }} input Datos de la reserva a validar.
+ * @returns {Promise<{space?: import("../models/Space"), error?: {statusCode: number, code: string, message: string}}>}
+ */
 async function ensureReservationConstraints({ spaceId, startAt, endAt, excludeReservationId = null }) {
   if (!mongoose.isValidObjectId(spaceId)) {
     return {
@@ -172,6 +234,13 @@ async function ensureReservationConstraints({ spaceId, startAt, endAt, excludeRe
   return { space };
 }
 
+/**
+ * Calcula la siguiente fecha de recurrencia a partir de una frecuencia dada.
+ *
+ * @param {Date} date Fecha base.
+ * @param {"DAILY"|"WEEKLY"|"MONTHLY"|"YEARLY"} frequency Frecuencia.
+ * @returns {Date}
+ */
 function addFrequency(date, frequency) {
   const nextDate = new Date(date);
 
@@ -188,6 +257,12 @@ function addFrequency(date, frequency) {
   return nextDate;
 }
 
+/**
+ * Normaliza la fecha final de una recurrencia.
+ *
+ * @param {string} value Fecha recibida en la petición.
+ * @returns {Date|null}
+ */
 function normalizeRecurrenceEndDate(value) {
   if (!value) {
     return null;
@@ -205,6 +280,14 @@ function normalizeRecurrenceEndDate(value) {
   return date;
 }
 
+/**
+ * Calcula cuántas recurrencias caben entre la reserva base y una fecha límite.
+ *
+ * @param {Date} baseStartAt Fecha inicial de la reserva base.
+ * @param {Date} endDate Fecha máxima de la recurrencia.
+ * @param {"DAILY"|"WEEKLY"|"MONTHLY"|"YEARLY"} frequency Frecuencia.
+ * @returns {number}
+ */
 function calculateRecurrenceCount(baseStartAt, endDate, frequency) {
   let count = 0;
   let cursor = baseStartAt;
@@ -220,10 +303,24 @@ function calculateRecurrenceCount(baseStartAt, endDate, frequency) {
   }
 }
 
+/**
+ * Endpoint de salud de la API.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function health(req, res) {
   return json(res, 200, { status: "ok" });
 }
 
+/**
+ * Autentica a un usuario y devuelve un token Bearer.
+ *
+ * @param {import("express").Request} req Peticion HTTP con credenciales.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function login(req, res) {
   const dni = normalizeDni(req.body?.dni);
   const password = req.body?.password || "";
@@ -258,6 +355,13 @@ async function login(req, res) {
   });
 }
 
+/**
+ * Lista espacios activos y bloqueos activos visibles para el cliente REST.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function listSpaces(req, res) {
   const [spaces, activeBlocks] = await Promise.all([
     Space.find({ active: true }).sort({ name: 1 }).lean(),
@@ -270,6 +374,13 @@ async function listSpaces(req, res) {
   });
 }
 
+/**
+ * Registra una nueva reserva para el usuario autenticado.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el payload de reserva.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function createReservation(req, res) {
   const { details, endAt, purpose, spaceId, startAt } = validateReservationInput(req.body || {});
 
@@ -303,6 +414,13 @@ async function createReservation(req, res) {
   });
 }
 
+/**
+ * Devuelve el listado de reservas del usuario autenticado.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function listOwnReservations(req, res) {
   const reservations = await Reservation.find({ user: req.apiUser._id })
     .populate("space", "name")
@@ -313,6 +431,13 @@ async function listOwnReservations(req, res) {
   });
 }
 
+/**
+ * Cancela una reserva propia.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el id de la reserva.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function cancelReservation(req, res) {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return sendError(res, 404, "RESERVATION_NOT_FOUND", "La reserva indicada no existe.");
@@ -339,6 +464,13 @@ async function cancelReservation(req, res) {
   });
 }
 
+/**
+ * Edita una reserva propia manteniendo las mismas validaciones que en el alta.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el id y el payload.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function updateReservation(req, res) {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return sendError(res, 404, "RESERVATION_NOT_FOUND", "La reserva indicada no existe.");
@@ -389,6 +521,13 @@ async function updateReservation(req, res) {
   });
 }
 
+/**
+ * Genera reservas recurrentes a partir de una reserva base propia.
+ *
+ * @param {import("express").Request} req Peticion HTTP con la frecuencia y el número de recurrencias.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function createRecurrence(req, res) {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return sendError(res, 404, "RESERVATION_NOT_FOUND", "La reserva indicada no existe.");

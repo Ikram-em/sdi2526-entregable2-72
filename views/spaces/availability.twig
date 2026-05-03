@@ -1,0 +1,64 @@
+{% include "../partials/head.twig" with { title: title } %}
+{% include "../partials/header.twig" %}
+{% include "../partials/flash.twig" with { flash: flash, error: null, errors: errors } %}
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">Disponibilidad</span>
+      <h1>{{ space.name }}</h1>
+      <p>Consulta un rango de fechas para ver reservas activas y bloqueos de mantenimiento que afectan a este espacio.</p>
+    </div>
+    <a class="button button--ghost" href="/spaces/{{ space._id }}">Volver al detalle</a>
+  </section>
+
+  <section class="surface">
+    <form class="form form--inline" method="get" action="/spaces/{{ space._id }}/availability" data-validate="availability" novalidate>
+      <div class="form__group">
+        <label for="from">Inicio</label>
+        <input id="from" name="from" type="datetime-local" value="{{ range.from }}" />
+        <small class="field-error" data-error-for="from"></small>
+      </div>
+
+      <div class="form__group">
+        <label for="to">Fin</label>
+        <input id="to" name="to" type="datetime-local" value="{{ range.to }}" />
+        <small class="field-error" data-error-for="to"></small>
+      </div>
+
+      <button class="button button--primary" type="submit">Consultar</button>
+    </form>
+  </section>
+
+  <section class="availability-grid">
+    <article class="surface availability-summary">
+      <h2>Datos del espacio</h2>
+      <dl class="summary-list">
+        <div><dt>Tipo</dt><dd>{{ space.type }}</dd></div>
+        <div><dt>Ubicación</dt><dd>{{ space.location }}</dd></div>
+        <div><dt>Capacidad</dt><dd>{{ space.capacity }} plazas</dd></div>
+      </dl>
+    </article>
+
+    <article class="surface">
+      <h2>Franjas ocupadas</h2>
+      {% if not range.from and not range.to %}
+        <p class="muted">Selecciona un rango para cargar la disponibilidad.</p>
+      {% elseif items|length == 0 and errors|length == 0 %}
+        <p class="availability-free">No hay reservas ni bloqueos activos en el rango consultado.</p>
+      {% endif %}
+
+      <div class="timeline">
+        {% for item in items %}
+          <div class="timeline__item {% if item.type == 'Bloqueo' %}timeline__item--block{% endif %}">
+            <span class="timeline__type">{{ item.type }}</span>
+            <strong>{{ item.label }}</strong>
+            <span>{{ format_date_time(item.startAt) }} - {{ format_date_time(item.endAt) }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+</main>
+
+{% include "../partials/footer.twig" %}

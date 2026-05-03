@@ -1,0 +1,66 @@
+<header class="topbar">
+  <div class="shell topbar__content">
+    <a href="{{ home_path(currentUser) }}" class="brand">
+      <span class="brand__badge">SDI</span>
+      <span class="brand__text">
+        <strong>Gestión de espacios</strong>
+        <small>Reservas internas</small>
+      </span>
+    </a>
+
+    <nav class="nav {% if currentUser %}nav--authenticated{% else %}nav--guest{% endif %}">
+      {% if not currentUser %}
+        <div class="nav__group">
+          <a class="nav__link {% if currentPath == '/login' %}is-active{% endif %}" href="/login">Login</a>
+          <a class="nav__link {% if currentPath == '/register' %}is-active{% endif %}" href="/register">Registro</a>
+        </div>
+      {% endif %}
+
+      {% if currentUser and currentUser.role == 'standard' %}
+        <div class="nav__group">
+          <a class="nav__link {% if currentPath == '/spaces' %}is-active{% endif %}" href="/spaces">Espacios</a>
+          <a class="nav__link {% if path_starts_with(currentPath, '/reservations') %}is-active{% endif %}" href="/reservations/mine">Mis reservas</a>
+        </div>
+      {% endif %}
+
+      {% if currentUser and currentUser.role == 'admin' %}
+        <div class="nav__group">
+          <a class="nav__link {% if path_starts_with(currentPath, '/admin/reservations') %}is-active{% endif %}" href="/admin/reservations">Reservas</a>
+          <a class="nav__link {% if path_starts_with(currentPath, '/admin/spaces') or path_starts_with(currentPath, '/admin/blocks') %}is-active{% endif %}" href="/admin/spaces">Espacios</a>
+          <a class="nav__link {% if path_starts_with(currentPath, '/admin/users') %}is-active{% endif %}" href="/admin/users">Usuarios</a>
+        </div>
+      {% endif %}
+    </nav>
+
+    <div class="session-box">
+      {% if currentUser %}
+        <details class="account-menu">
+          <summary class="account-menu__summary">
+            <span class="session-box__avatar">
+              {{ avatar_initials(currentUser.fullName) }}
+            </span>
+            <span class="session-box__meta">
+              <span class="session-box__name">{{ currentUser.fullName }}</span>
+              <small>{{ role_label(currentUser.role) }}</small>
+            </span>
+            <span class="account-menu__chevron" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </span>
+          </summary>
+
+          <div class="account-menu__dropdown">
+            <a class="account-menu__item {% if currentPath == '/account/profile' %}is-active{% endif %}" href="/account/profile">Mi perfil</a>
+            {% if currentUser.role == 'standard' %}
+              <a class="account-menu__item {% if currentPath == '/account/password' %}is-active{% endif %}" href="/account/password">Cambiar contraseña</a>
+            {% endif %}
+          </div>
+        </details>
+        <form action="/logout" method="post">
+          <button class="button button--ghost" type="submit">Cerrar sesión</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</header>

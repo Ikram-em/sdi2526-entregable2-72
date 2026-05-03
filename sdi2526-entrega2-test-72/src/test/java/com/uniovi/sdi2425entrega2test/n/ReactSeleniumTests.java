@@ -20,7 +20,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ReactSeleniumTests extends SeleniumTestBase {
+public class ReactSeleniumTests extends SeleniumTestBase {
 
   @Test
   @DisplayName("Prueba 49 - Inicio de sesión React con datos válidos")

@@ -8,6 +8,7 @@
     "start": "node app.js",
     "react:dev": "vite --config client/vite.config.mjs",
     "react:build": "vite build --config client/vite.config.mjs",
+    "delivery:check": "node scripts/check-delivery.js",
     "test": "echo \"Los tests Node se han eliminado. Ejecuta los Selenium/JUnit desde sdi2526-entrega2-test-72.\""
   },
   "repository": {
@@ -27,12 +28,14 @@
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
     "dotenv": "^17.4.2",
-    "ejs": "^5.0.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "mongoose": "^9.5.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "twig": "^3.0.0",
     "vite": "^8.0.10"
   }
 }

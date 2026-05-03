@@ -1,6 +1,6 @@
-<%- include("../partials/head", { title }) %>
-<%- include("../partials/header") %>
-<%- include("../partials/flash", { flash, error: null, errors }) %>
+{% include "../partials/head.twig" with { title: title } %}
+{% include "../partials/header.twig" %}
+{% include "../partials/flash.twig" with { flash: flash, error: null, errors: errors } %}
 
 <main class="shell page page--auth">
   <section class="auth-panel">
@@ -24,19 +24,19 @@
       <div class="form__grid">
         <div class="form__group">
           <label for="dni">DNI</label>
-          <input id="dni" name="dni" type="text" maxlength="9" value="<%= formData?.dni || '' %>" placeholder="Ej. 12345678Z" autocomplete="username" />
+          <input id="dni" name="dni" type="text" maxlength="9" value="{{ formData.dni|default('') }}" placeholder="Ej. 12345678Z" autocomplete="username" />
           <small class="field-error" data-error-for="dni"></small>
         </div>
 
         <div class="form__group">
           <label for="firstName">Nombre</label>
-          <input id="firstName" name="firstName" type="text" value="<%= formData?.firstName || '' %>" placeholder="Ej. Lucía" autocomplete="given-name" />
+          <input id="firstName" name="firstName" type="text" value="{{ formData.firstName|default('') }}" placeholder="Ej. Lucía" autocomplete="given-name" />
           <small class="field-error" data-error-for="firstName"></small>
         </div>
 
         <div class="form__group">
           <label for="lastName">Apellidos</label>
-          <input id="lastName" name="lastName" type="text" value="<%= formData?.lastName || '' %>" placeholder="Ej. Fernández Suárez" autocomplete="family-name" />
+          <input id="lastName" name="lastName" type="text" value="{{ formData.lastName|default('') }}" placeholder="Ej. Fernández Suárez" autocomplete="family-name" />
           <small class="field-error" data-error-for="lastName"></small>
         </div>
 
@@ -85,4 +85,4 @@
   </section>
 </main>
 
-<%- include("../partials/footer") %>
+{% include "../partials/footer.twig" %}

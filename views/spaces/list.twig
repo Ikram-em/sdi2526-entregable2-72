@@ -1,6 +1,6 @@
-<%- include("../partials/head", { title }) %>
-<%- include("../partials/header") %>
-<%- include("../partials/flash", { flash, error: null, errors: [] }) %>
+{% include "../partials/head.twig" with { title: title } %}
+{% include "../partials/header.twig" %}
+{% include "../partials/flash.twig" with { flash: flash, error: null, errors: [] } %}
 
 <main class="shell page">
   <section class="section-header">
@@ -17,16 +17,16 @@
         <label for="type">Tipo</label>
         <select id="type" name="type">
           <option value="">Todos</option>
-          <% types.forEach((type) => { %>
-            <option value="<%= type %>" <%= filters.type === type ? 'selected' : '' %>><%= type %></option>
-          <% }) %>
+          {% for type in types %}
+            <option value="{{ type }}" {% if filters.type == type %}selected{% endif %}>{{ type }}</option>
+          {% endfor %}
         </select>
         <small class="field-error" data-error-for="type"></small>
       </div>
 
       <div class="form__group">
         <label for="minCapacity">Capacidad mínima</label>
-        <input id="minCapacity" name="minCapacity" type="number" min="1" step="1" value="<%= filters.minCapacity %>" placeholder="Ej. 10" />
+        <input id="minCapacity" name="minCapacity" type="number" min="1" step="1" value="{{ filters.minCapacity }}" placeholder="Ej. 10" />
         <small class="field-error" data-error-for="minCapacity"></small>
       </div>
 
@@ -38,22 +38,20 @@
   </section>
 
   <section class="space-grid">
-    <% if (!spaces.length) { %>
+    {% if spaces|length == 0 %}
       <article class="surface empty-state">
         <h2>No hay espacios para los filtros actuales</h2>
         <p>Ajusta el tipo o la capacidad mínima para ampliar los resultados.</p>
       </article>
-    <% } %>
+    {% endif %}
 
-    <% spaces.forEach((space) => { %>
-      <% const compactLocation = String(space.location || "").replace(/,\s*/g, " · "); %>
-      <% const amenitiesPreview = (space.amenities || []).slice(0, 3).join(" · "); %>
+    {% for space in spaces %}
       <article class="surface space-card">
         <div class="space-card__top">
-          <span class="badge"><%= space.type %></span>
-          <span class="capacity"><%= space.capacity %> plazas</span>
+          <span class="badge">{{ space.type }}</span>
+          <span class="capacity">{{ space.capacity }} plazas</span>
         </div>
-        <h2><%= space.name %></h2>
+        <h2>{{ space.name }}</h2>
         <div class="space-card__meta">
           <span class="space-card__meta-item">
             <span class="icon icon--muted" aria-hidden="true">
@@ -62,7 +60,7 @@
                 <circle cx="12" cy="10" r="3"></circle>
               </svg>
             </span>
-            <span><%= compactLocation %></span>
+            <span>{{ compact_location(space.location) }}</span>
           </span>
           <span class="space-card__meta-item">
             <span class="icon icon--muted" aria-hidden="true">
@@ -73,17 +71,17 @@
                 <path d="M23 11h-6"></path>
               </svg>
             </span>
-            <span><%= space.capacity %> plazas</span>
+            <span>{{ space.capacity }} plazas</span>
           </span>
         </div>
-        <p class="space-card__description"><%= amenitiesPreview || space.description %></p>
+        <p class="space-card__description">{{ amenities_preview(space.amenities, space.description) }}</p>
         <div class="space-card__actions">
-          <a class="button button--primary" href="/spaces/<%= space._id %>/availability">Disponibilidad</a>
-          <a class="button button--ghost" href="/spaces/<%= space._id %>">Ver detalle</a>
+          <a class="button button--primary" href="/spaces/{{ space._id }}/availability">Disponibilidad</a>
+          <a class="button button--ghost" href="/spaces/{{ space._id }}">Ver detalle</a>
         </div>
       </article>
-    <% }) %>
+    {% endfor %}
   </section>
 </main>
 
-<%- include("../partials/footer") %>
+{% include "../partials/footer.twig" %}

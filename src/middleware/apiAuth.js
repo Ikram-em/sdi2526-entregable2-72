@@ -2,6 +2,12 @@ const User = require("../models/User");
 const { getUserIdByToken } = require("../services/apiTokenService");
 const { sendError } = require("../utils/apiResponses");
 
+/**
+ * Extrae el token Bearer del encabezado Authorization.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @returns {string|null}
+ */
 function getTokenFromHeader(req) {
   const header = req.headers.authorization;
 
@@ -12,6 +18,14 @@ function getTokenFromHeader(req) {
   return header.slice("Bearer ".length).trim();
 }
 
+/**
+ * Autentica la petición REST usando un token Bearer válido.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @param {import("express").NextFunction} next Siguiente middleware.
+ * @returns {Promise<void>}
+ */
 async function requireApiAuth(req, res, next) {
   const token = getTokenFromHeader(req);
 
@@ -33,6 +47,14 @@ async function requireApiAuth(req, res, next) {
   return next();
 }
 
+/**
+ * Restringe una operación REST a usuarios estándar autenticados.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @param {import("express").NextFunction} next Siguiente middleware.
+ * @returns {void}
+ */
 function requireApiStandard(req, res, next) {
   if (!req.apiUser) {
     return sendError(res, 401, "UNAUTHORIZED", "Debes autenticarte con un token Bearer.");

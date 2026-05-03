@@ -1,0 +1,21 @@
+{% if flash or error or (errors is defined and errors|length > 0) %}
+  <section class="shell notice-stack">
+    {% if flash %}
+      <div class="notice notice--{{ flash.type }}">{{ flash.message }}</div>
+    {% endif %}
+
+    {% if error %}
+      <div class="notice notice--error">{{ error }}</div>
+    {% endif %}
+
+    {% if errors is defined and errors|length > 0 %}
+      <div class="notice notice--error">
+        <ul>
+          {% for item in errors %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </section>
+{% endif %}

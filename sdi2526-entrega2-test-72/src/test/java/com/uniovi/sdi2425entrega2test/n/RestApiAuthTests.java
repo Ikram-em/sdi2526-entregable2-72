@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class RestApiAuthTests {
+public class RestApiAuthTests extends AppTestBase {
   private String apiBaseUrl;
 
   @BeforeEach

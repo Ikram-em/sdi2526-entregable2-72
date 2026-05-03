@@ -41,8 +41,49 @@ function formatDateTimeLocalInput(value) {
   return local.toISOString().slice(0, 16);
 }
 
+function homePath(currentUser) {
+  if (!currentUser) {
+    return "/login";
+  }
+
+  return currentUser.role === "admin" ? "/admin/reservations" : "/spaces";
+}
+
+function avatarInitials(fullName) {
+  return String(fullName || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0))
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function compactLocation(location) {
+  return String(location || "").replace(/,\s*/g, " · ");
+}
+
+function amenitiesPreview(amenities, description) {
+  const preview = Array.isArray(amenities) ? amenities.slice(0, 3).join(" · ") : "";
+  return preview || String(description || "");
+}
+
+function pathStartsWith(value, prefix) {
+  return String(value || "").startsWith(String(prefix || ""));
+}
+
+function roleLabel(role) {
+  return role === "admin" ? "Administrador" : "Usuario estándar";
+}
+
 module.exports = {
+  amenitiesPreview,
+  avatarInitials,
+  compactLocation,
   formatDateInput,
   formatDateTime,
-  formatDateTimeLocalInput
+  formatDateTimeLocalInput,
+  homePath,
+  pathStartsWith,
+  roleLabel
 };

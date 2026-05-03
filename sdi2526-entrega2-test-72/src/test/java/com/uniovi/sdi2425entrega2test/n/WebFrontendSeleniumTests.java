@@ -18,7 +18,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class WebFrontendSeleniumTests extends SeleniumTestBase {
+public class WebFrontendSeleniumTests extends SeleniumTestBase {
   private static final String ADMIN_DNI = "12345678Z";
   private static final String ADMIN_PASSWORD = "@Dm1n1str@D0r";
   private static final String PASSWORD = "Val1d-Passw0rd";
@@ -827,5 +827,4 @@ class WebFrontendSeleniumTests extends SeleniumTestBase {
   private record TestUser(String dni, String firstName, String lastName, String password) {
   }
 }
-
 

@@ -4,6 +4,20 @@ const Space = require("../models/Space");
 const { setFlash } = require("../middleware/auth");
 const { getAvailabilityItems } = require("../services/availabilityService");
 
+function serializeSpaceView(space) {
+  return {
+    ...space,
+    _id: space._id.toString()
+  };
+}
+
+/**
+ * Lista los espacios activos aplicando filtros de tipo y capacidad mínima.
+ *
+ * @param {import("express").Request} req Peticion HTTP con filtros opcionales.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function listSpaces(req, res) {
   const filters = {
     type: req.query.type || "",
@@ -27,12 +41,19 @@ async function listSpaces(req, res) {
 
   return res.render("spaces/list", {
     title: "Listado de espacios",
-    spaces,
+    spaces: spaces.map(serializeSpaceView),
     filters,
     types
   });
 }
 
+/**
+ * Muestra el detalle de un espacio activo.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el id del espacio.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showSpace(req, res) {
   if (!mongoose.isValidObjectId(req.params.spaceId)) {
     return res.status(404).render("not-found", {
@@ -50,10 +71,17 @@ async function showSpace(req, res) {
 
   return res.render("spaces/detail", {
     title: `Detalle - ${space.name}`,
-    space
+    space: serializeSpaceView(space)
   });
 }
 
+/**
+ * Consulta la disponibilidad de un espacio para un rango de fechas.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el id del espacio y el rango.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showAvailability(req, res) {
   if (!mongoose.isValidObjectId(req.params.spaceId)) {
     return res.status(404).render("not-found", {
@@ -93,13 +121,20 @@ async function showAvailability(req, res) {
 
   return res.render("spaces/availability", {
     title: `Disponibilidad - ${space.name}`,
-    space,
+    space: serializeSpaceView(space),
     range,
     items,
     errors
   });
 }
 
+/**
+ * Muestra las reservas del usuario autenticado, opcionalmente filtradas por estado.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function showMyReservations(req, res) {
   const statusFilter = req.query.status || "";
   const query = { user: req.session.user.id };
@@ -115,11 +150,27 @@ async function showMyReservations(req, res) {
 
   return res.render("standard/my-reservations", {
     title: "Mis reservas",
-    reservations,
+    reservations: reservations.map((reservation) => ({
+      ...reservation,
+      _id: reservation._id.toString(),
+      space: reservation.space
+        ? {
+            ...reservation.space,
+            _id: reservation.space._id.toString()
+          }
+        : null
+    })),
     statusFilter
   });
 }
 
+/**
+ * Cancela una reserva propia y mantiene el histórico con estado CANCELADA.
+ *
+ * @param {import("express").Request} req Peticion HTTP con el id de la reserva.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
 async function cancelOwnReservation(req, res) {
   if (!mongoose.isValidObjectId(req.params.reservationId)) {
     setFlash(req, "error", "No puedes cancelar una reserva ajena o inexistente.");
