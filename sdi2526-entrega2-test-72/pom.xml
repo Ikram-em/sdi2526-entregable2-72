@@ -14,6 +14,7 @@
         <junit.jupiter.version>5.13.2</junit.jupiter.version>
         <selenium.version>4.37.0</selenium.version>
         <baseUrl>http://localhost:3000</baseUrl>
+        <nodeProjectPath>${project.basedir}/../sdi2526-entrega2-72</nodeProjectPath>
         <selenium.browser>firefox</selenium.browser>
         <selenium.headless>true</selenium.headless>
     </properties>
@@ -86,6 +87,7 @@
                     <useModulePath>false</useModulePath>
                     <systemPropertyVariables>
                         <baseUrl>${baseUrl}</baseUrl>
+                        <nodeProjectPath>${nodeProjectPath}</nodeProjectPath>
                         <selenium.browser>${selenium.browser}</selenium.browser>
                         <selenium.headless>${selenium.headless}</selenium.headless>
                     </systemPropertyVariables>
