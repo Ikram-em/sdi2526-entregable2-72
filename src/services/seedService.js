@@ -235,29 +235,29 @@ async function keepSeleniumSlotsFree(spaces) {
   );
 }
 
-async function seedDatabase() {
-  const shouldReset = process.env.RESET_DB_ON_START === "true";
+async function resetDatabase() {
+  await Promise.all([
+    mongoose.connection.collection("sessions").deleteMany({}),
+    Block.deleteMany({}),
+    Reservation.deleteMany({}),
+    Space.deleteMany({}),
+    User.deleteMany({})
+  ]);
+
+  const users = await User.insertMany(await buildUsers());
+  const spaces = await Space.insertMany(buildSpaces());
+  const reservations = buildReservations(users, spaces);
+  const adminUser = users.find((user) => user.role === "admin");
+  const blocks = buildBlocks(adminUser, spaces);
+
+  await Reservation.insertMany(reservations);
+  await Block.insertMany(blocks);
+  await keepSeleniumSlotsFree(spaces);
+}
+
+async function seedDatabase(options = {}) {
+  const shouldReset = options.forceReset === true || process.env.RESET_DB_ON_START === "true";
   const existingUsers = await User.countDocuments();
-
-  async function resetAndSeed() {
-    await Promise.all([
-      mongoose.connection.collection("sessions").deleteMany({}),
-      Block.deleteMany({}),
-      Reservation.deleteMany({}),
-      Space.deleteMany({}),
-      User.deleteMany({})
-    ]);
-
-    const users = await User.insertMany(await buildUsers());
-    const spaces = await Space.insertMany(buildSpaces());
-    const reservations = buildReservations(users, spaces);
-    const adminUser = users.find((user) => user.role === "admin");
-    const blocks = buildBlocks(adminUser, spaces);
-
-    await Reservation.insertMany(reservations);
-    await Block.insertMany(blocks);
-    await keepSeleniumSlotsFree(spaces);
-  }
 
   async function ensureBaselineSeed() {
     // Ensure baseline users/spaces exist (with expected credentials) without deleting existing data.
@@ -340,7 +340,7 @@ async function seedDatabase() {
   }
 
   if (shouldReset || existingUsers === 0) {
-    await resetAndSeed();
+    await resetDatabase();
     return;
   }
 
@@ -348,5 +348,6 @@ async function seedDatabase() {
 }
 
 module.exports = {
+  resetDatabase,
   seedDatabase
 };

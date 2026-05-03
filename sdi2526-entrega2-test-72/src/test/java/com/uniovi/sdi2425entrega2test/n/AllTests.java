@@ -5,10 +5,11 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @SelectClasses({
-    WebFrontendSeleniumTests.class,
+
     RestApiAuthTests.class,
     RestApiReservationTests.class,
-    ReactSeleniumTests.class
+    ReactSeleniumTests.class,
+        WebFrontendSeleniumTests.class,
 })
 public class AllTests {
 }

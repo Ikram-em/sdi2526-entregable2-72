@@ -335,16 +335,19 @@ async function login(req, res) {
   }
 
   if (Object.keys(details).length > 0) {
+    // Los tests comparan el mensaje literalmente (sin tildes).
     return sendError(res, 400, "VALIDATION_ERROR", "Revisa los datos de autenticacion.", details);
   }
 
   const user = await User.findOne({ dni });
   if (!user) {
+    // Los tests comparan el mensaje literalmente (sin tildes).
     return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesion no correcto.");
   }
 
   const isValid = await bcrypt.compare(password, user.passwordHash);
   if (!isValid) {
+    // Los tests comparan el mensaje literalmente (sin tildes).
     return sendError(res, 401, "INVALID_CREDENTIALS", "Inicio de sesion no correcto.");
   }
 

@@ -27,6 +27,10 @@ final class TestApplicationManager {
     String baseUrl = System.getProperty("baseUrl", "http://localhost:3000");
 
     if (isServerUp(baseUrl)) {
+      // La app ya esta levantada (por ejemplo el usuario la tiene ejecutando).
+      // Para que los tests sean deterministas, reseteamos/sembramos la BD igualmente.
+      Path repoRoot = resolveRepoRoot();
+      runCommand(repoRoot, List.of(npmCommand(), "run", "db:reset"), Map.of(), "No se pudo resetear la base de datos.");
       return;
     }
 
@@ -60,17 +64,14 @@ final class TestApplicationManager {
   }
 
   private static void buildReactClient(Path repoRoot) {
-    Path reactDist = repoRoot.resolve("client").resolve("dist");
-    if (Files.exists(reactDist)) {
-      return;
-    }
-
-    runCommand(repoRoot, List.of("npm", "run", "react:build"), Map.of(), "No se pudo compilar el cliente React.");
+    // En Windows/CI es frecuente que quede un `client/dist` de ejecuciones previas.
+    // Los tests Selenium dependen del markup actual, asi que recompilamos siempre.
+    runCommand(repoRoot, List.of(npmCommand(), "run", "react:build"), Map.of(), "No se pudo compilar el cliente React.");
   }
 
   private static void startNodeApplication(Path repoRoot) {
     try {
-      ProcessBuilder builder = new ProcessBuilder("npm", "start");
+      ProcessBuilder builder = new ProcessBuilder(npmCommand(), "start");
       builder.directory(repoRoot.toFile());
       builder.environment().put("RESET_DB_ON_START", "true");
       builder.environment().putIfAbsent("PORT", "3000");
@@ -127,6 +128,11 @@ final class TestApplicationManager {
     }
   }
 
+  private static String npmCommand() {
+    String os = System.getProperty("os.name", "").toLowerCase();
+    return os.contains("win") ? "npm.cmd" : "npm";
+  }
+
   private static void waitUntilAvailable(String baseUrl, Duration timeout) {
     Instant deadline = Instant.now().plus(timeout);
 
@@ -152,7 +158,11 @@ final class TestApplicationManager {
 
   private static boolean isServerUp(String baseUrl) {
     try {
-      URL url = URI.create(baseUrl + "/api/health").toURL();
+      String normalizedBaseUrl = baseUrl == null ? "" : baseUrl.trim();
+      if (!normalizedBaseUrl.contains("://")) {
+        normalizedBaseUrl = "http://" + normalizedBaseUrl;
+      }
+      URL url = URI.create(normalizedBaseUrl + "/api/health").toURL();
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setConnectTimeout(1500);
       connection.setReadTimeout(1500);
