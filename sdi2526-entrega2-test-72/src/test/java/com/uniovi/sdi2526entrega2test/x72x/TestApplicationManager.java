@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 final class TestApplicationManager {
   private static final AtomicBoolean START_ATTEMPTED = new AtomicBoolean(false);
   private static volatile Process appProcess;
+  @SuppressWarnings("unused")
   private static volatile Thread logThread;
 
   private TestApplicationManager() {
@@ -50,6 +51,11 @@ final class TestApplicationManager {
       waitUntilAvailable(baseUrl, Duration.ofSeconds(40));
       Runtime.getRuntime().addShutdownHook(new Thread(TestApplicationManager::stopIfOwned));
     }
+  }
+
+  static void resetDatabase() {
+    Path repoRoot = resolveRepoRoot();
+    runCommand(repoRoot, List.of(npmCommand(), "run", "db:reset"), Map.of(), "No se pudo resetear la base de datos.");
   }
 
   private static Path resolveRepoRoot() {

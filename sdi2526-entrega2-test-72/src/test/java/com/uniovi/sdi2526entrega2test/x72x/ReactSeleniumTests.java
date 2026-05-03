@@ -19,7 +19,7 @@ import org.openqa.selenium.support.ui.Select;
 public class ReactSeleniumTests extends SeleniumTestBase {
 
   @Test
-  @DisplayName("Prueba 49 - Inicio de sesiÃ³n React con datos vÃ¡lidos")
+  @DisplayName("Prueba 49 - Inicio de sesión React con datos válidos")
   void prueba49_inicioSesionConDatosValidos() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
 
@@ -28,7 +28,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 50 - Inicio de sesiÃ³n React con contraseÃ±a incorrecta")
+  @DisplayName("Prueba 50 - Inicio de sesión React con contraseña incorrecta")
   void prueba50_inicioSesionConContrasenaIncorrecta() {
     openReactClean();
     type(By.id("react-dni"), STANDARD_DNI);
@@ -40,7 +40,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 51 - Inicio de sesiÃ³n React con campos vacÃ­os")
+  @DisplayName("Prueba 51 - Inicio de sesión React con campos vacíos")
   void prueba51_inicioSesionConCamposVacios() {
     openReactClean();
     clickButton("Entrar");
@@ -50,17 +50,17 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 52 - Registrar una reserva vÃ¡lida desde React")
+  @DisplayName("Prueba 52 - Registrar una reserva válida desde React")
   void prueba52_registrarReservaValida() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
-    createReactReservation(futureStart(420, 9), "Reserva vÃ¡lida Selenium React");
+    createReactReservation(futureStart(420, 9), "Reserva válida Selenium React");
 
     assertPageContains("Listado de reservas propias");
     assertTrue(tableRowCount() > 0);
   }
 
   @Test
-  @DisplayName("Prueba 53 - Registrar una reserva invÃ¡lida desde React")
+  @DisplayName("Prueba 53 - Registrar una reserva inválida desde React")
   void prueba53_registrarReservaInvalidaInicioPosteriorAlFin() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
     clickButton("Nueva reserva");
@@ -68,7 +68,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
     LocalDateTime start = futureStart(421, 12);
     setDateTime(By.id("startDateTime"), start);
     setDateTime(By.id("endDateTime"), start.minusHours(1));
-    type(By.id("purpose"), "Reserva invÃ¡lida Selenium React");
+    type(By.id("purpose"), "Reserva inválida Selenium React");
     clickButton("Registrar reserva");
 
     assertPageContains("Revisa los datos");
@@ -105,7 +105,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 57 - Editar una reserva existente con datos vÃ¡lidos en React")
+  @DisplayName("Prueba 57 - Editar una reserva existente con datos válidos en React")
   void prueba57_editarReservaConDatosValidos() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
     createReactReservation(futureStart(423, 9), "Reserva para editar Selenium React");
@@ -120,7 +120,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 58 - Editar una reserva existente con datos invÃ¡lidos en React")
+  @DisplayName("Prueba 58 - Editar una reserva existente con datos inválidos en React")
   void prueba58_editarReservaConSolape() {
     loginReact(STANDARD_DNI, STANDARD_PASSWORD);
     LocalDateTime firstStart = futureStart(425, 9);
@@ -129,14 +129,14 @@ public class ReactSeleniumTests extends SeleniumTestBase {
     clickFirstButtonInActiveReservation("Editar");
     setDateTime(By.id("startDateTime"), firstStart);
     setDateTime(By.id("endDateTime"), firstStart.plusHours(1));
-    type(By.id("purpose"), "EdiciÃ³n solapada Selenium React");
+    type(By.id("purpose"), "Edición solapada Selenium React");
     clickButton("Actualizar reserva");
 
     assertPageContains("solap");
   }
 
   @Test
-  @DisplayName("Prueba 59 - Crear una reserva recurrente semanal vÃ¡lida en React")
+  @DisplayName("Prueba 59 - Crear una reserva recurrente semanal válida en React")
   void prueba59_crearReservaRecurrenteSemanalValida() {
     loginReact(SECOND_STANDARD_DNI, SECOND_STANDARD_PASSWORD);
     LocalDateTime baseStart = futureStart(427, 10);
@@ -202,6 +202,7 @@ public class ReactSeleniumTests extends SeleniumTestBase {
     selectRealOptionByOrdinal(locator, 1);
   }
 
+  @SuppressWarnings("unused")
   private void selectLastRealOption(By locator) {
     Select select = new Select(wait.until(ExpectedConditions.elementToBeClickable(locator)));
     List<WebElement> options = select.getOptions();
