@@ -602,9 +602,9 @@ async function exportReservationsCsv(req, res) {
     )
     .join("\n");
 
-  // Expose CSV as inline content so Selenium tests can assert on the response body.
-  // Use text/plain to avoid download behavior in some browsers/drivers when using text/csv.
-  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", 'attachment; filename="reservas.csv"');
+  res.setHeader("Content-Length", Buffer.byteLength(csv, "utf8"));
   return res.send(csv);
 }
 

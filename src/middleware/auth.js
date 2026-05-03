@@ -39,15 +39,15 @@ async function syncSessionUser(req, res, next) {
     return next();
   }
 
-  const user = await User.findById(req.session.user.id);
-
-  if (!user) {
-    delete req.session.user;
-    setFlash(req, "error", "Tu sesion ya no es valida. Inicia sesion de nuevo.");
-    return req.session.save(next);
+  try {
+    const user = await User.findById(req.session.user.id);
+    if (user) {
+      req.session.user = buildSessionUser(user);
+    }
+  } catch (error) {
+    // Keep the current session if the database lookup fails transiently.
   }
 
-  req.session.user = buildSessionUser(user);
   return next();
 }
 

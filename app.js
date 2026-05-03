@@ -28,6 +28,12 @@ app.use(
     secret: process.env.SESSION_SECRET || "sdi2526-session-secret",
     resave: false,
     saveUninitialized: false,
+    rolling: true,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 8
+    },
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI || defaultUri,
       collectionName: "sessions"

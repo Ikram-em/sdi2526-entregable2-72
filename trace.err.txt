@@ -1,0 +1,11 @@
+(node:23488) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+    at urlParse (node:url:136:13)
+    at Object.urlResolve [as resolve] (node:url:725:10)
+    at SwaggerParser.parse (C:\Users\Usuario\GitHub\prueba\sdi2526-entrega2-72\node_modules\@apidevtools\json-schema-ref-parser\lib\index.js:103:19)
+    at SwaggerParser.parse (C:\Users\Usuario\GitHub\prueba\sdi2526-entrega2-72\node_modules\@apidevtools\swagger-parser\lib\index.js:60:51)
+    at SwaggerParser.parse (C:\Users\Usuario\GitHub\prueba\sdi2526-entrega2-72\node_modules\@apidevtools\json-schema-ref-parser\lib\index.js:63:25)
+    at finalize (C:\Users\Usuario\GitHub\prueba\sdi2526-entrega2-72\node_modules\swagger-jsdoc\src\specification.js:109:10)
+    at build (C:\Users\Usuario\GitHub\prueba\sdi2526-entrega2-72\node_modules\swagger-jsdoc\src\specification.js:324:10)
+    at module.exports (C:\Users\Usuario\GitHub\prueba\sdi2526-entrega2-72\node_modules\swagger-jsdoc\src\lib.js:32:10)
+    at Object.<anonymous> (C:\Users\Usuario\GitHub\prueba\sdi2526-entrega2-72\src\config\swagger.js:19:21)
+    at Module._compile (node:internal/modules/cjs/loader:1812:14)
