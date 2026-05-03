@@ -12,7 +12,7 @@ const { isValidDni, isValidPassword, normalizeDni } = require("../utils/validati
  * @param {import("express").Response} res Respuesta HTTP.
  * @returns {Promise<void>}
  */
-async function showRegister(req, res) {
+function showRegister(req, res) {
   res.render("auth/register", {
     title: "Registro de usuario",
     formData: {},
@@ -88,7 +88,7 @@ async function register(req, res) {
  * @param {import("express").Response} res Respuesta HTTP.
  * @returns {Promise<void>}
  */
-async function showLogin(req, res) {
+function showLogin(req, res) {
   if (req.query.loggedOut === "1") {
     res.locals.flash = {
       type: "success",
@@ -153,7 +153,7 @@ async function login(req, res) {
  * @param {import("express").Response} res Respuesta HTTP.
  * @returns {Promise<void>}
  */
-async function logout(req, res) {
+function logout(req, res) {
   req.session.destroy(() => {
     res.redirect("/login?loggedOut=1");
   });
@@ -166,7 +166,7 @@ async function logout(req, res) {
  * @param {import("express").Response} res Respuesta HTTP.
  * @returns {Promise<void>}
  */
-async function showChangePassword(req, res) {
+function showChangePassword(req, res) {
   res.render("auth/change-password", {
     title: "Cambiar contraseña",
     errors: []

@@ -310,7 +310,7 @@ function calculateRecurrenceCount(baseStartAt, endDate, frequency) {
  * @param {import("express").Response} res Respuesta HTTP.
  * @returns {Promise<void>}
  */
-async function health(req, res) {
+function health(req, res) {
   return json(res, 200, { status: "ok" });
 }
 

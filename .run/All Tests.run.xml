@@ -2,7 +2,7 @@
   <configuration default="false" name="All Tests" type="JUnit" factoryName="JUnit">
     <module name="sdi2526-entrega2-test-72" />
     <option name="PACKAGE_NAME" value="com.uniovi.sdi2425entrega2test.n" />
-    <option name="MAIN_CLASS_NAME" value="com.uniovi.sdi2425entrega2test.n.AllTests" />
+    <option name="MAIN_CLASS_NAME" value="com.uniovi.sdi2526entrega2test.x72x.AllTests" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
     <option name="VM_PARAMETERS" value="-DbaseUrl=http://localhost:3000" />

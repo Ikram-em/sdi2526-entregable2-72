@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+﻿const mongoose = require("mongoose");
 const Block = require("../models/Block");
 const Reservation = require("../models/Reservation");
 const Space = require("../models/Space");
@@ -96,6 +96,13 @@ async function ensureUniqueActiveSpaceName(name, excludeId = null) {
   return Space.findOne(query);
 }
 
+function serializeSpaceList(spaces) {
+  return spaces.map((space) => ({
+    ...space,
+    _id: space._id.toString()
+  }));
+}
+
 /**
  * Muestra el listado de espacios para administración.
  *
@@ -108,10 +115,22 @@ async function showSpaceManagement(req, res) {
 
   return res.render("admin/spaces/index", {
     title: "Gestión de espacios",
-    spaces: spaces.map((space) => ({
-      ...space,
-      _id: space._id.toString()
-    })),
+    spaces: serializeSpaceList(spaces),
+    errors: [],
+    formData: {}
+  });
+}
+
+/**
+ * Muestra el formulario para registrar un nuevo espacio.
+ *
+ * @param {import("express").Request} req Peticion HTTP.
+ * @param {import("express").Response} res Respuesta HTTP.
+ * @returns {Promise<void>}
+ */
+function showCreateSpace(req, res) {
+  return res.render("admin/spaces/new", {
+    title: "Registrar espacio",
     errors: [],
     formData: {}
   });
@@ -135,12 +154,9 @@ async function createSpace(req, res) {
 
   if (errors.length > 0) {
     const spaces = await Space.find().sort({ active: -1, name: 1 }).lean();
-    return res.status(400).render("admin/spaces/index", {
-      title: "Gestión de espacios",
-      spaces: spaces.map((space) => ({
-        ...space,
-        _id: space._id.toString()
-      })),
+    return res.status(400).render("admin/spaces/new", {
+      title: "Registrar espacio",
+      spaces: serializeSpaceList(spaces),
       errors,
       formData
     });
@@ -627,8 +643,13 @@ module.exports = {
   showBlocks,
   showEditSpace,
   showReservations,
+  showCreateSpace,
   showSpaceManagement,
   showUsers,
   toggleSpace,
   updateSpace
 };
+
+
+
+

@@ -1,0 +1,58 @@
+﻿{% include "../../partials/head.twig" with { title: title } %}
+{% include "../../partials/header.twig" %}
+{% include "../../partials/flash.twig" with { flash: flash, error: null, errors: errors } %}
+
+<main class="shell page">
+  <section class="section-header">
+    <div>
+      <span class="eyebrow">Administración de espacios</span>
+      <h1>Registrar nuevo espacio</h1>
+      <p>Crea un espacio nuevo y vuelve después al listado principal.</p>
+    </div>
+    <a class="button button--ghost" href="/admin/spaces">Volver al listado</a>
+  </section>
+
+  <section class="surface">
+    <form class="form" method="post" action="/admin/spaces" novalidate>
+      <div class="form__grid form__grid--triple">
+        <div class="form__group">
+          <label for="name">Nombre</label>
+          <input id="name" name="name" type="text" value="{{ formData.name|default('') }}" />
+        </div>
+        <div class="form__group">
+          <label for="type">Tipo</label>
+          <select id="type" name="type">
+            <option value="">Selecciona</option>
+            <option value="Sala de reuniones" {% if formData.type == 'Sala de reuniones' %}selected{% endif %}>Sala de reuniones</option>
+            <option value="Aula" {% if formData.type == 'Aula' %}selected{% endif %}>Aula</option>
+            <option value="Coworking" {% if formData.type == 'Coworking' %}selected{% endif %}>Coworking</option>
+          </select>
+        </div>
+        <div class="form__group">
+          <label for="capacity">Capacidad</label>
+          <input id="capacity" name="capacity" type="number" min="1" step="1" value="{{ formData.capacity|default('') }}" />
+        </div>
+        <div class="form__group">
+          <label for="location">Ubicación</label>
+          <input id="location" name="location" type="text" value="{{ formData.location|default('') }}" />
+        </div>
+        <div class="form__group form__group--wide">
+          <label for="amenitiesText">Equipamiento</label>
+          <input id="amenitiesText" name="amenitiesText" type="text" value="{{ formData.amenitiesText|default('') }}" placeholder="Pizarra, Pantalla, Wifi" />
+        </div>
+        <div class="form__group form__group--wide">
+          <label for="description">Descripción</label>
+          <textarea id="description" name="description" rows="4">{{ formData.description|default('') }}</textarea>
+        </div>
+      </div>
+
+      <div class="form__actions">
+        <button class="button button--primary" type="submit">Registrar espacio</button>
+        <a class="button button--ghost" href="/admin/spaces">Cancelar</a>
+      </div>
+    </form>
+  </section>
+</main>
+
+{% include "../../partials/footer.twig" %}
+

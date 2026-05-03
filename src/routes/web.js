@@ -33,6 +33,7 @@ router.get("/admin", requireAdmin, (req, res) => res.redirect("/admin/reservatio
 router.get("/admin/reservations", requireAdmin, adminController.showReservations);
 router.get("/admin/reservations/export.csv", requireAdmin, adminController.exportReservationsCsv);
 router.get("/admin/spaces", requireAdmin, adminController.showSpaceManagement);
+router.get("/admin/spaces/new", requireAdmin, adminController.showCreateSpace);
 router.post("/admin/spaces", requireAdmin, adminController.createSpace);
 router.get("/admin/spaces/:spaceId/edit", requireAdmin, adminController.showEditSpace);
 router.post("/admin/spaces/:spaceId/edit", requireAdmin, adminController.updateSpace);

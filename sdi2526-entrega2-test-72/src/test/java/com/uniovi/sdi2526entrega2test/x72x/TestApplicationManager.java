@@ -1,4 +1,4 @@
-package com.uniovi.sdi2425entrega2test.n;
+package com.uniovi.sdi2526entrega2test.x72x;
 
 import java.io.BufferedReader;
 import java.io.IOException;

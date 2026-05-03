@@ -1,4 +1,4 @@
-package com.uniovi.sdi2425entrega2test.n.pageobjects;
+package com.uniovi.sdi2526entrega2test.x72x.pageobjects;
 
 import java.util.List;
 import com.uniovi.sdi2425entrega2test.n.util.SeleniumUtils;

@@ -1,4 +1,4 @@
-package com.uniovi.sdi2425entrega2test.n.util;
+package com.uniovi.sdi2526entrega2test.x72x.util;
 
 import java.time.Duration;
 import java.util.List;
@@ -111,9 +111,8 @@ public class SeleniumUtils {
 		synchronized(driver){
 			try {
 				driver.wait(seconds * 1000L);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (InterruptedException ignored) {
+
 			}
 		}
 	}

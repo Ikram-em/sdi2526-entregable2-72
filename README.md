@@ -50,7 +50,7 @@ Tras generar el build, el cliente queda servido por Express en `http://localhost
 El seeding genera automáticamente:
 
 - 1 administrador: `12345678Z` / `@Dm1n1str@D0r`
-- 15 usuarios estándar con DNIs `10000001S`, `10000002Q`, ... y contraseñas `Us3r@1-PASSW`, `Us3r@2-PASSW`, ...
+- 15 usuarios estándar con DNI `10000001S`, `10000002Q`, ... y contraseñas `Us3r@1-PASSW`, `Us3r@2-PASSW`, ...
 - 6 espacios con tipos variados y 1 desactivado
 - Reservas y bloqueos suficientes para pruebas de listado, solapes, disponibilidad e histórico
 
@@ -85,16 +85,16 @@ Respuesta esperada:
 
 ### Endpoints
 
-| Método | Ruta | Auth | Descripción |
-| --- | --- | --- | --- |
-| `GET` | `/api/health` | No | Estado de la API |
-| `POST` | `/api/auth/login` | No | Login y obtención de token |
-| `GET` | `/api/spaces` | No | Espacios activos y bloqueos activos |
-| `POST` | `/api/reservations` | Sí | Crear reserva propia |
-| `GET` | `/api/reservations/me` | Sí | Listar reservas propias |
-| `PATCH` | `/api/reservations/:id/cancel` | Sí | Cancelar reserva propia |
-| `PUT` | `/api/reservations/:id` | Sí | Editar reserva propia |
-| `POST` | `/api/reservations/:id/recurrence` | Sí | Crear recurrencias |
+| Método  | Ruta                               | Auth | Descripción                         |
+|---------|------------------------------------|------|-------------------------------------|
+| `GET`   | `/api/health`                      | No   | Estado de la API                    |
+| `POST`  | `/api/auth/login`                  | No   | Login y obtención de token          |
+| `GET`   | `/api/spaces`                      | No   | Espacios activos y bloqueos activos |
+| `POST`  | `/api/reservations`                | Sí   | Crear reserva propia                |
+| `GET`   | `/api/reservations/me`             | Sí   | Listar reservas propias             |
+| `PATCH` | `/api/reservations/:id/cancel`     | Sí   | Cancelar reserva propia             |
+| `PUT`   | `/api/reservations/:id`            | Sí   | Editar reserva propia               |
+| `POST`  | `/api/reservations/:id/recurrence` | Sí   | Crear recurrencias                  |
 
 ### Ejemplos rápidos
 
@@ -143,24 +143,5 @@ Los errores REST siguen este formato:
 ```
 
 ## Proyecto de pruebas automáticas
-
 Las pruebas Selenium/JUnit están en `sdi2526-entrega2-test-72/`.
 
-Si abres la raíz del repositorio en IntelliJ IDEA, el archivo [pom.xml](/Users/ikramelmabroukmorhnane/Desktop/sdi2526-entrega2-72/pom.xml) actúa como agregador Maven para que IntelliJ importe también el módulo `sdi2526-entrega2-test-72` y reconozca sus tests como ejecutables.
-
-## Entrega final
-
-El ZIP de entrega debe llamarse `sdi2526-entrega2-72.zip` y contener en su raíz:
-
-- `sdi2526-entrega2-72.pdf`
-- `sdi2526-entrega2-72.xlsx`
-- carpeta `sdi2526-entrega2-72`
-- carpeta `sdi2526-entrega2-test-72`
-
-Este repositorio contiene el proyecto Node.js y el proyecto de pruebas. El PDF y el XLSX siguen siendo entregables obligatorios que deben prepararse aparte con esos nombres exactos.
-
-Para validar la estructura una vez montada la carpeta raíz de entrega:
-
-```bash
-npm run delivery:check -- /ruta/a/la/carpeta-que-sera-la-raiz-del-zip
-```
