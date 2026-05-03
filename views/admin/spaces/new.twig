@@ -1,15 +1,15 @@
-﻿{% include "../../partials/head.twig" with { title: title } %}
+{% include "../../partials/head.twig" with { title: title } %}
 {% include "../../partials/header.twig" %}
 {% include "../../partials/flash.twig" with { flash: flash, error: null, errors: errors } %}
 
 <main class="shell page">
   <section class="section-header">
     <div>
-      <span class="eyebrow">Administración de espacios</span>
-      <h1>Registrar nuevo espacio</h1>
-      <p>Crea un espacio nuevo y vuelve después al listado principal.</p>
+      <span class="eyebrow">Registrar espacio</span>
+      <h1>Nuevo espacio</h1>
+      <p>Da de alta un nuevo espacio en el sistema. El nombre debe ser único entre los espacios activos.</p>
     </div>
-    <a class="button button--ghost" href="/admin/spaces">Volver al listado</a>
+    <a class="button button--ghost" href="/admin/spaces">Volver</a>
   </section>
 
   <section class="surface">
@@ -22,7 +22,6 @@
         <div class="form__group">
           <label for="type">Tipo</label>
           <select id="type" name="type">
-            <option value="">Selecciona</option>
             <option value="Sala de reuniones" {% if formData.type == 'Sala de reuniones' %}selected{% endif %}>Sala de reuniones</option>
             <option value="Aula" {% if formData.type == 'Aula' %}selected{% endif %}>Aula</option>
             <option value="Coworking" {% if formData.type == 'Coworking' %}selected{% endif %}>Coworking</option>
@@ -38,16 +37,16 @@
         </div>
         <div class="form__group form__group--wide">
           <label for="amenitiesText">Equipamiento</label>
-          <input id="amenitiesText" name="amenitiesText" type="text" value="{{ formData.amenitiesText|default('') }}" placeholder="Pizarra, Pantalla, Wifi" />
+          <input id="amenitiesText" name="amenitiesText" type="text" value="{{ formData.amenitiesText|default('') }}" />
         </div>
         <div class="form__group form__group--wide">
           <label for="description">Descripción</label>
-          <textarea id="description" name="description" rows="4">{{ formData.description|default('') }}</textarea>
+          <textarea id="description" name="description" rows="5">{{ formData.description|default('') }}</textarea>
         </div>
       </div>
 
       <div class="form__actions">
-        <button class="button button--primary" type="submit">Registrar espacio</button>
+        <button class="button button--primary" type="submit">Crear espacio</button>
         <a class="button button--ghost" href="/admin/spaces">Cancelar</a>
       </div>
     </form>

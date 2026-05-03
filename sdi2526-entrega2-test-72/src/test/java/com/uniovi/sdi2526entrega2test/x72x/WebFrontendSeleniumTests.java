@@ -21,7 +21,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   private static final String UPDATED_PASSWORD = "N3w-Passw0rd!!";
 
   @Test
-  @DisplayName("Prueba 1 - Registro de usuario estÃ¡ndar con datos vÃ¡lidos")
+  @DisplayName("Prueba 1 - Registro de usuario estándar con datos válidos")
   void prueba1_registroUsuarioValido() {
     TestUser user = buildUniqueUser("registro");
 
@@ -35,7 +35,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 2 - Registro de usuario estÃ¡ndar con nombre, apellidos y DNI en blanco")
+  @DisplayName("Prueba 2 - Registro de usuario estándar con nombre, apellidos y DNI en blanco")
   void prueba2_registroConCamposObligatoriosVacios() {
     open("/register");
     type(By.id("password"), PASSWORD);
@@ -47,7 +47,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 3 - Registro de usuario estÃ¡ndar con DNI ya registrado")
+  @DisplayName("Prueba 3 - Registro de usuario estándar con DNI ya registrado")
   void prueba3_registroConDniDuplicado() {
     open("/register");
     type(By.id("dni"), STANDARD_DNI);
@@ -62,7 +62,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 4 - Registro con contraseÃ±a que no cumple requisitos")
+  @DisplayName("Prueba 4 - Registro con contraseña que no cumple requisitos")
   void prueba4_registroConContrasenaInvalida() {
     TestUser user = buildUniqueUser("weak");
 
@@ -75,11 +75,11 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     clickButton("Registrarme");
 
     wait.until(ExpectedConditions.urlContains("/register"));
-    assertPageContains("La contraseÃ±a debe tener entre 12 y 20 caracteres");
+    assertPageContains("La contraseña debe tener entre 12 y 20 caracteres");
   }
 
   @Test
-  @DisplayName("Prueba 5 - Inicio de sesiÃ³n con datos vÃ¡lidos de administrador")
+  @DisplayName("Prueba 5 - Inicio de sesión con datos válidos de administrador")
   void prueba5_loginAdminValido() {
     loginAdmin();
 
@@ -88,7 +88,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 6 - Inicio de sesiÃ³n con datos vÃ¡lidos de usuario estÃ¡ndar")
+  @DisplayName("Prueba 6 - Inicio de sesión con datos válidos de usuario estándar")
   void prueba6_loginUsuarioValido() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
 
@@ -97,7 +97,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 7 - Inicio de sesiÃ³n con DNI inexistente")
+  @DisplayName("Prueba 7 - Inicio de sesión con DNI inexistente")
   void prueba7_loginConDniInexistente() {
     open("/login");
     type(By.id("dni"), "99999999R");
@@ -105,11 +105,11 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     clickButton("Entrar");
 
     wait.until(ExpectedConditions.urlContains("/login"));
-    assertPageContains("No existe ningÃºn usuario registrado con ese DNI.");
+    assertPageContains("No existe ningún usuario registrado con ese DNI.");
   }
 
   @Test
-  @DisplayName("Prueba 8 - Inicio de sesiÃ³n con contraseÃ±a incorrecta")
+  @DisplayName("Prueba 8 - Inicio de sesión con contraseña incorrecta")
   void prueba8_loginConContrasenaIncorrecta() {
     open("/login");
     type(By.id("dni"), STANDARD_DNI);
@@ -117,29 +117,29 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     clickButton("Entrar");
 
     wait.until(ExpectedConditions.urlContains("/login"));
-    assertPageContains("La contraseÃ±a no es correcta.");
+    assertPageContains("La contraseña no es correcta.");
   }
 
   @Test
-  @DisplayName("Prueba 9 - Cerrar sesiÃ³n y volver al login")
+  @DisplayName("Prueba 9 - Cerrar sesión y volver al login")
   void prueba9_logout() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
 
-    clickButton("Cerrar sesiÃ³n");
+    clickButton("Cerrar sesión");
 
     wait.until(ExpectedConditions.urlContains("/login"));
-    assertPageContains("Has cerrado sesiÃ³n correctamente.");
+    assertPageContains("Has cerrado sesión correctamente.");
     open("/spaces");
     wait.until(ExpectedConditions.urlContains("/login"));
-    assertPageContains("Debes iniciar sesiÃ³n para acceder a esta zona.");
+    assertPageContains("Debes iniciar sesión para acceder a esta zona.");
   }
 
   @Test
-  @DisplayName("Prueba 10 - El botÃ³n cerrar sesiÃ³n no estÃ¡ visible sin autenticar")
+  @DisplayName("Prueba 10 - El botón cerrar sesión no está visible sin autenticar")
   void prueba10_logoutNoVisibleSinAutenticar() {
     open("/login");
 
-    assertFalse(isPresent(By.xpath("//button[contains(normalize-space(.),'Cerrar sesiÃ³n')]")));
+    assertFalse(isPresent(By.xpath("//button[contains(normalize-space(.),'Cerrar sesión')]")));
   }
 
   @Test
@@ -183,7 +183,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 29 - Consultar disponibilidad mostrando bloqueos y ocupaciÃ³n")
+  @DisplayName("Prueba 29 - Consultar disponibilidad mostrando bloqueos y ocupación")
   void prueba29_consultarDisponibilidad() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
     clickSpaceCardAction("Sala Naranco", "Disponibilidad");
@@ -199,7 +199,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 32 - Modificar la contraseÃ±a con datos vÃ¡lidos")
+  @DisplayName("Prueba 32 - Modificar la contraseña con datos válidos")
   void prueba32_cambiarContrasenaValida() {
     TestUser user = buildUniqueUser("password");
 
@@ -209,11 +209,11 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     type(By.id("currentPassword"), user.password);
     type(By.id("newPassword"), UPDATED_PASSWORD);
     type(By.id("confirmPassword"), UPDATED_PASSWORD);
-    clickButton("Actualizar contraseÃ±a");
+    clickButton("Actualizar contraseña");
 
     wait.until(ExpectedConditions.urlContains("/spaces"));
-    assertPageContains("ContraseÃ±a actualizada correctamente.");
-    clickButton("Cerrar sesiÃ³n");
+    assertPageContains("Contraseña actualizada correctamente.");
+    clickButton("Cerrar sesión");
     wait.until(ExpectedConditions.urlContains("/login"));
 
     open("/login");
@@ -226,18 +226,18 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 33 - Modificar la contraseÃ±a con datos invÃ¡lidos")
+  @DisplayName("Prueba 33 - Modificar la contraseña con datos inválidos")
   void prueba33_cambiarContrasenaInvalida() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
     open("/account/password");
-    clickButton("Actualizar contraseÃ±a");
+    clickButton("Actualizar contraseña");
 
     wait.until(ExpectedConditions.urlContains("/account/password"));
     assertPageContains("Todos los campos son obligatorios.");
   }
 
   @Test
-  @DisplayName("Prueba 11 - Registrar un nuevo espacio con datos vÃ¡lidos (administrador).")
+  @DisplayName("Prueba 11 - Registrar un nuevo espacio con datos válidos (administrador).")
   void prueba11_registrarEspacioValidoAdmin() {
     String spaceName = "Espacio Selenium " + System.nanoTime();
     try {
@@ -255,39 +255,45 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 12 - Registrar un nuevo espacio con datos invÃ¡lidos (nombre vacÃ­o).")
+  @DisplayName("Prueba 12 - Registrar un nuevo espacio con datos inválidos (nombre vacío).")
   void prueba12_registrarEspacioNombreVacio() {
     loginAdmin();
     open("/admin/spaces");
+
+    clickButton("Registrar espacio");
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/new"));
 
     type(By.id("name"), " ");
     selectByVisibleText(By.id("type"), "Sala de reuniones");
     type(By.id("capacity"), "5");
     type(By.id("location"), "Edificio Test, Planta 2");
-    clickButton("Registrar espacio");
+    clickButton("Crear espacio");
 
     wait.until(ExpectedConditions.urlContains("/admin/spaces"));
     assertPageContains("El nombre del espacio es obligatorio.");
   }
 
   @Test
-  @DisplayName("Prueba 13 - Registrar un nuevo espacio con datos invÃ¡lidos (capacidad menor que 1).")
+  @DisplayName("Prueba 13 - Registrar un nuevo espacio con datos inválidos (capacidad menor que 1).")
   void prueba13_registrarEspacioCapacidadInvalida() {
     loginAdmin();
     open("/admin/spaces");
+
+    clickButton("Registrar espacio");
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/new"));
 
     type(By.id("name"), "Espacio Capacidad 0 " + System.nanoTime());
     selectByVisibleText(By.id("type"), "Aula");
     type(By.id("capacity"), "0");
     type(By.id("location"), "Edificio Test, Planta 3");
-    clickButton("Registrar espacio");
+    clickButton("Crear espacio");
 
     wait.until(ExpectedConditions.urlContains("/admin/spaces"));
-    assertPageContains("La capacidad debe ser un nÃºmero entero mayor o igual que 1.");
+    assertPageContains("La capacidad debe ser un número entero mayor o igual que 1.");
   }
 
   @Test
-  @DisplayName("Prueba 14 - Registrar un nuevo espacio con datos invÃ¡lidos (nombre duplicado).")
+  @DisplayName("Prueba 14 - Registrar un nuevo espacio con datos inválidos (nombre duplicado).")
   void prueba14_registrarEspacioNombreDuplicado() {
     String spaceName = "Espacio Duplicado " + System.nanoTime();
     try {
@@ -308,39 +314,39 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 15 - Editar un espacio existente con datos vÃ¡lidos. Hay que confirmar que los datos se modifican.")
+  @DisplayName("Prueba 15 - Editar un espacio existente con datos válidos. Hay que confirmar que los datos se modifican.")
   void prueba15_editarEspacioValido() {
     String spaceName = "Espacio Editar " + System.nanoTime();
     try {
       loginAdmin();
       open("/admin/spaces");
 
-      createSpace(spaceName, "Coworking", 8, "UbicaciÃ³n inicial", "", "");
+      createSpace(spaceName, "Coworking", 8, "Ubicación inicial", "", "");
       String spaceId = findSpaceIdByName(spaceName);
 
       open("/admin/spaces/" + spaceId + "/edit");
-      type(By.id("location"), "UbicaciÃ³n modificada");
+      type(By.id("location"), "Ubicación modificada");
       type(By.id("capacity"), "9");
-      type(By.id("description"), "DescripciÃ³n modificada");
+      type(By.id("description"), "Descripción modificada");
       clickButton("Guardar cambios");
 
       wait.until(ExpectedConditions.urlContains("/admin/spaces"));
       assertPageContains("Espacio actualizado correctamente.");
-      assertPageContains("UbicaciÃ³n modificada");
+      assertPageContains("Ubicación modificada");
     } finally {
       deactivateSpaceIfPresent(spaceName);
     }
   }
 
   @Test
-  @DisplayName("Prueba 16 - Editar un espacio existente con datos invÃ¡lidos (capacidad menor que 1). Hay que confirmar que los datos NO se modifican y se devuelven los mensajes de errores correspondientes.")
+  @DisplayName("Prueba 16 - Editar un espacio existente con datos inválidos (capacidad menor que 1). Hay que confirmar que los datos NO se modifican y se devuelven los mensajes de errores correspondientes.")
   void prueba16_editarEspacioCapacidadInvalidaNoModifica() {
     String spaceName = "Espacio Editar Inv " + System.nanoTime();
     try {
       loginAdmin();
       open("/admin/spaces");
 
-      createSpace(spaceName, "Aula", 10, "UbicaciÃ³n estable", "", "Descripcion estable");
+      createSpace(spaceName, "Aula", 10, "Ubicación estable", "", "Descripcion estable");
       String spaceId = findSpaceIdByName(spaceName);
 
       open("/admin/spaces/" + spaceId + "/edit");
@@ -348,11 +354,11 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
       clickButton("Guardar cambios");
 
       wait.until(ExpectedConditions.urlContains("/admin/spaces/" + spaceId + "/edit"));
-      assertPageContains("La capacidad debe ser un nÃºmero entero mayor o igual que 1.");
+      assertPageContains("La capacidad debe ser un número entero mayor o igual que 1.");
 
       open("/admin/spaces");
       assertPageContains(spaceName);
-      assertPageContains("UbicaciÃ³n estable");
+      assertPageContains("Ubicación estable");
     } finally {
       deactivateSpaceIfPresent(spaceName);
     }
@@ -375,7 +381,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     toggleSpaceByName(targetName);
     assertPageContains("Espacio desactivado correctamente.");
 
-    clickButton("Cerrar sesiÃ³n");
+    clickButton("Cerrar sesión");
     wait.until(ExpectedConditions.urlContains("/login"));
 
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -383,7 +389,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     wait.until(ExpectedConditions.urlContains("/spaces"));
     assertFalse(pageContains(targetName));
 
-    // ValidaciÃ³n server-side: acceso directo por URL debe fallar.
+    // Validación server-side: acceso directo por URL debe fallar.
     open("/spaces/" + spaceId);
     wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
     assertPageContains("Espacio no encontrado");
@@ -405,7 +411,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     toggleSpaceByName(targetName);
     assertPageContains("Espacio activado correctamente.");
 
-    clickButton("Cerrar sesiÃ³n");
+    clickButton("Cerrar sesión");
     wait.until(ExpectedConditions.urlContains("/login"));
 
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -419,7 +425,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 19 - Crear un bloqueo de mantenimiento vÃ¡lido.")
+  @DisplayName("Prueba 19 - Crear un bloqueo de mantenimiento válido.")
   void prueba19_crearBloqueoValido() {
     loginAdmin();
     open("/admin/spaces");
@@ -431,12 +437,12 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     LocalDateTime end = seededDate(5, 12, 0);
     setDateTime(By.id("startAt"), start);
     setDateTime(By.id("endAt"), end);
-    type(By.id("reason"), "Bloqueo Selenium vÃ¡lido");
+    type(By.id("reason"), "Bloqueo Selenium válido");
     clickButton("Crear bloqueo");
 
     wait.until(ExpectedConditions.urlContains("/admin/spaces/" + spaceId + "/blocks"));
     assertPageContains("Bloqueo creado correctamente.");
-    assertPageContains("Bloqueo Selenium vÃ¡lido");
+    assertPageContains("Bloqueo Selenium válido");
   }
 
   @Test
@@ -506,7 +512,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     cancelBlockByReason(reason);
     assertPageContains("Bloqueo cancelado correctamente.");
 
-    clickButton("Cerrar sesiÃ³n");
+    clickButton("Cerrar sesión");
     wait.until(ExpectedConditions.urlContains("/login"));
 
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -520,21 +526,21 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 23 - Consultar listado global de reservas. Probar con paginaciÃ³n.")
+  @DisplayName("Prueba 23 - Consultar listado global de reservas. Probar con paginación.")
   void prueba23_listadoGlobalReservasPaginacion() {
     loginAdmin();
     open("/admin/reservations");
 
     wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
     assertPageContains("Listado global de reservas");
-    assertPageContains("PÃ¡gina 1 de");
+    assertPageContains("Página 1 de");
     clickButton("Siguiente");
     wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
-    assertPageContains("PÃ¡gina 2 de");
+    assertPageContains("Página 2 de");
   }
 
   @Test
-  @DisplayName("Prueba 24 - Filtrar listado global de reservas por espacio (desplegable). Probar con paginaciÃ³n.")
+  @DisplayName("Prueba 24 - Filtrar listado global de reservas por espacio (desplegable). Probar con paginación.")
   void prueba24_filtrarListadoGlobalPorEspacio() {
     loginAdmin();
     open("/admin/reservations");
@@ -552,7 +558,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
   }
 
   @Test
-  @DisplayName("Prueba 25 - Filtrar listado global de reservas por rango de fechas (calendario popup). Probar con PaginaciÃ³n.")
+  @DisplayName("Prueba 25 - Filtrar listado global de reservas por rango de fechas (calendario popup). Probar con Paginación.")
   void prueba25_filtrarListadoGlobalPorRangoFechas() {
     loginAdmin();
     open("/admin/reservations");
@@ -562,22 +568,22 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     clickButton("Filtrar");
 
     wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
-    assertPageContains("PÃ¡gina 1 de");
+    assertPageContains("Página 1 de");
     if (isPresent(By.xpath("//a[contains(normalize-space(.),'Siguiente')]"))) {
       clickButton("Siguiente");
       wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
-      assertPageContains("PÃ¡gina 2 de");
+      assertPageContains("Página 2 de");
     }
   }
 
   @Test
-  @DisplayName("Prueba 30 - Acceso denegado de usuario estÃ¡ndar a recursos de administraciÃ³n.")
+  @DisplayName("Prueba 30 - Acceso denegado de usuario estándar a recursos de administración.")
   void prueba30_accesoDenegadoStandardAdmin() {
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
     open("/admin/spaces");
 
     wait.until(ExpectedConditions.urlContains("/spaces"));
-    assertPageContains("Acceso denegado. No puedes acceder a recursos de administraciÃ³n.");
+    assertPageContains("Acceso denegado. No puedes acceder a recursos de administración.");
   }
 
   @Test
@@ -589,7 +595,7 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
 
     String reservationId = pickFirstReservationIdNotOwnedBy(STANDARD_DNI);
 
-    clickButton("Cerrar sesiÃ³n");
+    clickButton("Cerrar sesión");
     wait.until(ExpectedConditions.urlContains("/login"));
 
     loginStandard(STANDARD_DNI, STANDARD_PASSWORD);
@@ -598,8 +604,8 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     wait.until(ExpectedConditions.urlContains("/reservations/mine"));
     assertPageContains("No puedes cancelar una reserva ajena o inexistente.");
 
-    // VerificaciÃ³n backend: el estado de la reserva debe seguir siendo ACTIVA.
-    clickButton("Cerrar sesiÃ³n");
+    // Verificación backend: el estado de la reserva debe seguir siendo ACTIVA.
+    clickButton("Cerrar sesión");
     wait.until(ExpectedConditions.urlContains("/login"));
     loginAdmin();
     open("/admin/reservations");
@@ -619,17 +625,17 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     assertPageContains("Admin");
     assertPageContains("Sistema");
 
-    assertPageContains("PÃ¡gina 1 de");
+    assertPageContains("Página 1 de");
     clickButton("Siguiente");
     wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
-    assertPageContains("PÃ¡gina 2 de");
+    assertPageContains("Página 2 de");
     clickButton("Siguiente");
     wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table tbody tr")));
-    assertPageContains("PÃ¡gina 3 de");
+    assertPageContains("Página 3 de");
   }
 
   @Test
-  @DisplayName("Prueba 35 - El usuario administrador dispondrÃ¡ de una acciÃ³n para exportar a CSV el listado global de reservas (o el resultado de un filtro). El CSV deberÃ¡ incluir, al menos: espacio, usuario, inicio, fin y estado.")
+  @DisplayName("Prueba 35 - El usuario administrador dispondrá de una acción para exportar a CSV el listado global de reservas (o el resultado de un filtro). El CSV deberá incluir, al menos: espacio, usuario, inicio, fin y estado.")
   void prueba35_exportarReservasCsv() {
     loginAdmin();
     open("/admin/reservations");
@@ -690,6 +696,9 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
       String location,
       String amenitiesText,
       String description) {
+    clickButton("Registrar espacio");
+    wait.until(ExpectedConditions.urlContains("/admin/spaces/new"));
+
     type(By.id("name"), name);
     selectByVisibleText(By.id("type"), typeLabel);
     type(By.id("capacity"), String.valueOf(capacity));
@@ -700,7 +709,8 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     if (description != null && !description.isBlank()) {
       type(By.id("description"), description);
     }
-    clickButton("Registrar espacio");
+    clickButton("Crear espacio");
+    wait.until(ExpectedConditions.urlContains("/admin/spaces"));
   }
 
   private void deactivateSpaceIfPresent(String spaceName) {
@@ -722,6 +732,9 @@ public class WebFrontendSeleniumTests extends SeleniumTestBase {
     WebElement link = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(
         "//tr[.//td[normalize-space(.)='" + spaceName + "']]//a[contains(@href,'/admin/spaces/') and contains(@href,'/edit')]")));
     String href = link.getAttribute("href");
+    if (href == null) {
+      throw new AssertionError("No se pudo extraer el id del espacio para " + spaceName + " (href null)");
+    }
     String marker = "/admin/spaces/";
     int start = href.lastIndexOf(marker);
     int end = href.lastIndexOf("/edit");

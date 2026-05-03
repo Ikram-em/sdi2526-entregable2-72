@@ -1,11 +1,12 @@
 package com.uniovi.sdi2526entrega2test.x72x.pageobjects;
 
-import com.uniovi.sdi2425entrega2test.n.util.SeleniumUtils;
+import com.uniovi.sdi2526entrega2test.x72x.util.SeleniumUtils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class PO_HomeView extends PO_NavView {
     static public void checkWelcomeToPage(WebDriver driver, int language) {
         //Esperamos a que se cargue el saludo de bienvenida en Español

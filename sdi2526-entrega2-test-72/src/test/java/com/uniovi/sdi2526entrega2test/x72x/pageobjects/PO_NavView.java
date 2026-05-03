@@ -1,6 +1,6 @@
 package com.uniovi.sdi2526entrega2test.x72x.pageobjects;
 
-import com.uniovi.sdi2425entrega2test.n.util.SeleniumUtils;
+import com.uniovi.sdi2526entrega2test.x72x.util.SeleniumUtils;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;

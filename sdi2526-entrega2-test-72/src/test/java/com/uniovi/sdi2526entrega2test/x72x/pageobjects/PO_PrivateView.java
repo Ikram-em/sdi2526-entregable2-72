@@ -1,11 +1,12 @@
 package com.uniovi.sdi2526entrega2test.x72x.pageobjects;
 
-import com.uniovi.sdi2425entrega2test.n.util.SeleniumUtils;
+import com.uniovi.sdi2526entrega2test.x72x.util.SeleniumUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
+@SuppressWarnings("unused")
 public class PO_PrivateView extends PO_NavView {
     static public void fillFormAddMark(WebDriver driver, int userOrder, String descriptionp, String scorep) {
         //Esperamos 5 segundo a que carge el DOM porque en algunos equipos falla
